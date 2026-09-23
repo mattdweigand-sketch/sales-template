@@ -23,7 +23,7 @@ Read and execute [references/pipeline-review-collect.md](references/pipeline-rev
 
 ### 3. Propose
 
-Read [references/pipeline-review-report-format.md](references/pipeline-review-report-format.md) for the Current next steps, Recommended next steps, and Evidence layout, evidence checks, and approval boundary. For each flagged deal in `policy.pipeline.in_scope_stages`, show either one numbered, evidence-supported change or a needs-input finding with no proposed write. Format new or revised next-step entries per `policy.pipeline.note_next_line`; handle history and existing entries per `policy.pipeline.note_history_line` and `next_steps_format`. Apply `next_steps_review` before date-based proposals. Every clause traces to CRM, mail, or Calendar evidence. No inferred buyer intent. Deals with no trigger are counted, not listed. S0 and S1 deals are counted with their Amount sum on the header line.
+Read [references/pipeline-review-report-format.md](references/pipeline-review-report-format.md) and fill its fixed template in the final chat answer. Use it unchanged for manual and configured scheduled runs, including its pre-posting checks. For each flagged deal in `policy.pipeline.in_scope_stages`, show either one numbered, evidence-supported change or a needs-input finding with no proposed write. Format new or revised next-step entries per `policy.pipeline.note_next_line`; handle history and existing entries per `policy.pipeline.note_history_line` and `next_steps_format`. Apply `next_steps_review` before date-based proposals. Every clause traces to CRM, mail, or Calendar evidence. No inferred buyer intent. Deals with no trigger are counted, not listed. S0 and S1 deals are counted with their Amount sum on the header line.
 
 Friday, add three sections. Rollup: count and Amount by stage and ForecastCategory, this quarter versus later. Delta since the previous Friday from OpportunityFieldHistory: new, stage moves, CloseDate moves, closed. Per record: CloseDate move per `close_date_basis`; StageName forward when `stage_entry` for the target stage is in evidence, quoted, or a `stage_rules` line applies; backward when the current stage's criterion is not in evidence; Closed Lost only after `closed_lost_silence_days` of silence with no upcoming Event or a stated buyer no; Amount only from a buyer-confirmed or user-supplied figure. A follow-up Task only where `hygiene_check` reports `task_gap`, due the verified action deadline, Not Started, linked to Contact and Opportunity.
 
@@ -35,7 +35,7 @@ Fresh read before each write. Write only the displayed, approved changes to Next
 
 ### 5. Close
 
-Counts: open, in scope, flagged, proposed, written, skipped, not checked. Open must equal the step 2 count.
+Counts: open, in scope, reviewed, flagged, proposed, written, skipped, not checked. Open must equal the step 2 count. Reconcile reviewed, skipped, and not checked to the in-scope count per the report format.
 
 ### Refuse
 
@@ -43,7 +43,7 @@ Drafting or sending email. Closed Won (`close`). Deleting or merging records. Ch
 
 ## Outputs and readiness
 
-Save the deliverable and exact proposals in `output/{run-id}/01_review.md`; show the relevant readout in the conversation. Declare every source receipt and proposed artifact in its `artifacts` list. A read-only run has no effects. Readiness requires the checks above and explicit source gaps; unsupported effects stay withheld. Record the actual conversation review in `review.json`, and applied, pending, failed, or skipped effects in `02_result.json` through the shared run lifecycle.
+Save the deliverable and exact proposals in `output/{run-id}/01_review.md`; show the complete report in the final chat answer. Retain full write payloads under the run's effect IDs and map numbered proposals to those IDs. Declare every source receipt and proposed artifact in its `artifacts` list. A read-only run has no effects. Readiness requires the checks above and explicit source gaps; unsupported effects stay withheld. Record the actual conversation review in `review.json`, and applied, pending, failed, or skipped effects in `02_result.json` through the shared run lifecycle.
 
 ## Human check
 

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "captured_date": "2026-09-23",
-  "baseline": "Downloaded Sales project skill packages and shared files",
+  "baseline": "Captured Sales project skill packages and shared files",
   "scope": "Source hashes identify the private baseline; the public port is intentionally not byte-identical. No private raw files are included.",
   "components": [
     {
@@ -278,33 +278,33 @@
     },
     {
       "source": "pipeline-review/SKILL.md",
-      "source_sha256": "cf43e294f263a90731df69d54847866fa1cf82dab06b2e34440c9ce751df5358",
-      "source_bytes": 3849,
+      "source_sha256": "68d94ef8df633f0fe76874472acf386afcd3456abcd6ca260e00fec6ee118dc9",
+      "source_bytes": 3872,
       "disposition": "adapted",
       "destinations": [
         "workflows/revenue/pipeline-review.md"
       ],
-      "notes": "Procedure retained under canonical workflow; host connector metadata replaced by adapter contract."
+      "notes": "Updated fixed-template and final-answer requirement retained under canonical workflow; host connector metadata replaced by adapter contract."
     },
     {
       "source": "pipeline-review/references/collect.md",
-      "source_sha256": "d853bab5ead36c0dbb1efa67931a5a1c324de65251e6dae3ced2900208f32ef6",
-      "source_bytes": 4241,
+      "source_sha256": "10abf90d274bc4a03dc4dd86e0d0978b37f3236c0716eb3f0a35cdfe18b456b6",
+      "source_bytes": 4327,
       "disposition": "adapted",
       "destinations": [
         "workflows/revenue/references/pipeline-review-collect.md"
       ],
-      "notes": "Reference adapted to portable field names, policy and run artifacts."
+      "notes": "Updated coverage-header routing retained with portable fields and explicit run paths; stronger paired-result coverage checks preserved."
     },
     {
       "source": "pipeline-review/references/report-format.md",
-      "source_sha256": "b3805f4a0ecfe94d64903f481b5b27ea77cc395b6f9224e6b90f69a22f0e87ff",
-      "source_bytes": 7171,
+      "source_sha256": "38ecb2f61c255b1f8074aa8c76290538c853b38ec6ded48fff5925de15a91dff",
+      "source_bytes": 8619,
       "disposition": "adapted",
       "destinations": [
         "workflows/revenue/references/pipeline-review-report-format.md"
       ],
-      "notes": "Reference adapted to portable field names, policy and run artifacts."
+      "notes": "Updated compact final-answer report adapted to portable fields and run artifacts; complete-field history exceptions and distinct review-status counts preserved."
     },
     {
       "source": "sales-call-prep/SKILL.md",

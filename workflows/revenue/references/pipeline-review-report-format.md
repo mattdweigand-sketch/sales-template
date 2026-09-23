@@ -1,6 +1,6 @@
 # Report format
 
-Show the readout once in chat and preserve the same review in the run artifact. Use short bullets with separate lines so fields cannot run together. Record links use `policy.crm.record_url`. Friday sections appear only on Friday.
+Post the complete report once in the final chat answer, not only in commentary, a notification, a file, or a linked thread. Preserve the same review and full write payloads in the run artifact. This is the fixed template for manual and configured scheduled runs. Preserve its heading names, order, numbering, spacing, and plain field text; substitute run data rather than redesigning the layout. Record links use `policy.crm.record_url`. Friday sections appear only on Friday.
 
 ## Approval boundary
 
@@ -19,55 +19,54 @@ Use the checker's Account-and-Opportunity activity scope for last touch, not a s
 The example fences delimit the template only; do not render them in chat.
 
 ```text
-# Pipeline · <Day M/D/YY>
-<coverage_check line>
+# Pipeline review · <M/D/YY>
 
-<N> open · <k> in scope · <f> flagged
-<p> proposed changes · <b> need your input · 0 written
-S0/S1 <n> deals · $<sum> · not reviewed daily
+Only the latest stored entry is shown, with older history omitted and unchanged. Legacy `Next:` entries are reproduced as stored, not rewritten.
 
-## Proposed CRM changes
+<N> open · <k> in scope · <r> reviewed · <f> flagged · **<p> proposed changes** · <b> need input · 0 written
+S0/S1 excluded · <n> deals · $<sum>
+Coverage complete · Inbox, Calendar and contact domains checked
 
-Comparing first next-step entries only. Existing history stays unchanged. Nothing written.
+## Proposed changes
 
-1. <Account link> · <stage> · <Amount or "Amount blank"> · Close <M/D/YY>
+1. <Account link>
 
-   ### Current next steps
+### Current next steps
+<exact current first next-step entry>
 
-   <exact current first next-step entry>
+### Recommended next steps
+<exact short next-step sentence using policy.pipeline.note_next_line>
 
-   ### Recommended next steps
+### Evidence
+- <short dated explanation with supporting source link>
 
-   <exact proposed next-step sentence in the policy format>
-
-   ### Evidence
-   - <reason flagged, activity date, supporting source>
-   - <source link with readable label> · <activity date> · <contact> · <specific fact supporting the change>
-   - <additional evidence needed to support the proposal>
-
-   - **Other fields** <field, old → new, evidence; omit if none>
+- **Other fields** <field, old → new, evidence; omit if none>
 
 ## Needs your input
 
-- <Account link> · <trigger and missing evidence>
+<Account link>
 
-  ### Current next steps
+### Current next steps
+<exact current first next-step entry>
 
-  <exact current first next-step entry>
+### Recommended next steps
+No proposal yet. <one precise question needed to propose a change>
 
-  ### Recommended next steps
-  No proposal. <one precise question needed to propose a change>
+### Evidence
+- <short dated explanation with supporting source link>
 
-  ### Evidence
-  - <dated evidence available and its source>
+<z> reviewed deals had no trigger · <s> skipped · <u> not checked
 
-  No CRM change proposed. Keep this record outside the approval batch.
-
-<k - f> in-scope deals had no trigger.
-
-Reply approve all, approve all except <Accounts>, approve <numbers>, or skip.
-Approval covers only numbered changes. Existing history stays unchanged.
+**Approve <number range>, individual numbers, or skip?**
 ```
+
+Repeat each account block unchanged in structure. Number only supported proposals, consecutively; needs-input accounts remain unnumbered. Omit stage, Amount, and CloseDate from daily account headings. Recommendations are one short action sentence, not a recap; Current remains verbatim even when longer or in legacy format. Use one compact evidence bullet by default, adding another only when necessary to support the change. No extra explanatory paragraphs per account.
+
+For a fresh rerun, prefix the opening paragraph with `Fresh rerun replaces the earlier review.` For a field-only finding, use `No next-step change proposed. <precise field question>` under Recommended next steps. Omit the legacy-format sentence if no displayed entry uses it. When complete fields are required by the approval boundary above, identify those accounts in the opening paragraph and show their full fields instead of claiming all history is omitted and unchanged. If no proposals exist, omit the approval question and state `No CRM changes proposed.` Never number a needs-input record to fill the template.
+
+Count distinct opportunities: `k` is in scope, `r` has all required checks completed, `s` is explicitly skipped within scope, and `u` has unresolved required checks. These three review statuses are disjoint and `k = r + s + u`. Count `z` directly from reviewed deals with no trigger; flags on partially checked deals must not reduce it. Keep flagged deals, needs-input findings, and supported proposed changes separate. Incomplete checks never count as reviewed.
+
+The coverage header summarizes the actual successful coverage check, not an assumption. On incomplete coverage, replace it with `Coverage incomplete · <specific missing checks>` and withhold affected proposals. Keep the full checker receipts in the active run, not the report. Friday uses its actual mail and Calendar coverage instead of the weekday inbox claim.
 
 Use only Current next steps, Recommended next steps, and Evidence as per-deal section headings. Render the field contents as ordinary plain text beneath each heading, keeping every stored line visually separate and preserving its wording and punctuation. Do not use fenced or indented code blocks, inline code, blockquotes, or text boxes in the report. Keep commentary and evidence outside the field text so they cannot be mistaken for part of the write. Use short evidence bullets naming the source, activity date, contact when known, and supported fact. Include last-touch direction and subject when relevant. Prefer readable source links to raw IDs; when no source URL is available, use a readable description with the returned record ID, never an invented link. Include enough evidence to support every changed clause without repeating it.
 
@@ -102,4 +101,5 @@ Approve each letter separately. Approve all covers numbered notes and field fill
 - Confirm the actual difference from current CRM. No difference means no write.
 - Compare Current next steps against the source and Recommended next steps against the intended write payload and current policy formats. Verify retained history is unchanged in the payload even when omitted from the compact comparison. Show complete fields whenever history changes are proposed. Do not add unsupported history merely to fill the template.
 - Count supported proposals separately from flags and needs-input records. A blocked record is not awaiting approval.
-- Close with open, in scope, flagged, proposed, written, skipped, and not checked counts. Retain the original open count.
+- Close with open, in scope, reviewed, flagged, proposed, written, skipped, and not checked counts. Retain the original open count and reconcile review statuses to the in-scope count.
+- Compare the rendered report to the Daily layout before posting. All displayed accounts have the three exact headings in order, Current contains the first stored entry unless complete fields are required by the approval boundary above, and each recommendation matches the intended write. The final answer must contain the report itself, not a completion summary.

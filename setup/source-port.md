@@ -1,11 +1,21 @@
 # Complete Sales source port
 
-Baseline: the seven Sales skill packages and shared files downloaded from the
+Baseline: the seven Sales skill packages and shared files captured from the
 original project on 2026-09-23. [source-manifest.json](source-manifest.json) records
 34 source files, their SHA-256 hashes and destination paths: seven skills, eleven
 references, eleven helpers, three regression files, policy and the helper README.
 Private originals remain outside this public repository. Hashes identify source
 bytes; they do not assert byte equivalence or prove semantic completeness.
+
+The subsequent 2026-09-23 live comparison found changes in pipeline-review's
+procedure, collection reference and report reference; the other 31 source files
+matched the initial baseline. The three updated sources were read in full from
+the platform source editor without saving changes and fingerprinted with SHA-256.
+The manifest records those updated source hashes and byte counts. This port adds
+the fixed compact report, complete final-answer delivery, verified coverage
+summary, rerun labels and no-proposal handling. It retains full-history display
+when required, distinguishes completed reviews from skipped or incomplete checks,
+and preserves the template's run artifacts, adapters and approval controls.
 
 ## Coverage map
 
