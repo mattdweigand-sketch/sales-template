@@ -1,31 +1,50 @@
----
-type: workflow
-command: pipeline-review
-mode: write
----
-# pipeline-review
+# Pipeline Review
 
 Review opportunity hygiene and propose evidence-supported next-step and field updates.
 
 ## Load / Skip
-- Working: output/{run-id}/request.md and only its explicitly named inputs. On resumption, read that run's 01_review.md, review.json and 02_result.json.
-- Reference: _shared/policy.json (identity and the sections named below), _shared/rules.md, _shared/adapters.md.
-- Lifecycle: [workflows/run.md](../run.md). Required adapter capabilities: crm, mail, calendar.
-- Skip: other runs, other workflow families, private example data, and unrelated factory sections. A missing adapter is a named limitation or blocks its dependent effect.
+
+- Load [shared rules](../../_shared/rules.md), [run lifecycle](../run.md), the configured policy and adapters, and this procedure.
+- Read [adapter data contract](../../_shared/adapter-contract.md) only for the sources used in this run. Query sketches use logical field names; map them through the adapter before calling a provider.
+- Load the linked reference only at its named step. Keep raw source receipts and derived artifacts in this run.
+- Skip sibling workflows, other runs, unrelated accounts, and unused adapter sections. Missing capabilities are named gaps or block their dependent effects.
 
 ## Process
-1. Read open Opportunities within the user's scope and retain the total. Use policy.pipeline.in_scope_stages, mapped by the CRM adapter, for hygiene. Read stage-required fields, Tasks and timestamped Events.
-2. Read buyer email and calendar evidence per in-scope deal. Record a coverage row for every deal and source, including missing access, paging limits and tool failures. Never describe an unchecked deal as checked.
-3. Flag overdue next actions, new buyer activity, missing required fields, close-date risk or stale activity using configured rules. Distinguish the note's written date from the next action's due date. An ambiguous due date requires review, never guessed arithmetic.
-4. Propose evidence-supported changes or a needs-input finding per flagged deal. Preserve dated history and the existing next action unless a replacement is proposed. A live next step is not stale merely because its note is old.
-5. In the requested weekly mode, add stage and forecast-category totals, CRM field-history deltas, and separate stage, close-date, amount, loss and follow-up Task proposals. Do not claim a delta when field history is unavailable. A Task gap requires a known action deadline and no matching open Task.
-6. Use configured stage criteria and buyer evidence. A pilot milestone alone cannot set a close date. Apply approved maps through the run contract, re-read results, and re-evaluate next-step validity. Reconcile open, in-scope, checked, flagged, proposed and unresolved counts.
+
+One run, one list. Each weekday the run flags S2+ deals whose CRM record has fallen behind the evidence and proposes the fix. Friday adds the rollup, the delta, and stage and close date proposals. CRM is the record. Writes happen only on an approval in this thread. If the deployment explicitly configures a schedule, each scheduled run prepares the same review and waits for approval. This repository creates no schedules.
+
+### 1. Load policy
+
+Read the configured `_shared/policy.json` and `_shared/adapters.md`. In a hosted project, sync the reusable files first. Record the selected scope in the run request. Record one run-start ISO datetime with the user's local timezone offset for `coverage_check --calls <run>/calls --since` and `hygiene_check --as-of`.
+
+### 2. Collect
+
+Read and execute [references/pipeline-review-collect.md](references/pipeline-review-collect.md). Save the query outputs and retain the original opportunity count.
+
+### 3. Propose
+
+Read [references/pipeline-review-report-format.md](references/pipeline-review-report-format.md) for the Current next steps, Recommended next steps, and Evidence layout, evidence checks, and approval boundary. For each flagged deal in `policy.pipeline.in_scope_stages`, show either one numbered, evidence-supported change or a needs-input finding with no proposed write. Format new or revised next-step entries per `policy.pipeline.note_next_line`; handle history and existing entries per `policy.pipeline.note_history_line` and `next_steps_format`. Apply `next_steps_review` before date-based proposals. Every clause traces to CRM, mail, or Calendar evidence. No inferred buyer intent. Deals with no trigger are counted, not listed. S0 and S1 deals are counted with their Amount sum on the header line.
+
+Friday, add three sections. Rollup: count and Amount by stage and ForecastCategory, this quarter versus later. Delta since the previous Friday from OpportunityFieldHistory: new, stage moves, CloseDate moves, closed. Per record: CloseDate move per `close_date_basis`; StageName forward when `stage_entry` for the target stage is in evidence, quoted, or a `stage_rules` line applies; backward when the current stage's criterion is not in evidence; Closed Lost only after `closed_lost_silence_days` of silence with no upcoming Event or a stated buyer no; Amount only from a buyer-confirmed or user-supplied figure. A follow-up Task only where `hygiene_check` reports `task_gap`, due the verified action deadline, Not Started, linked to Contact and Opportunity.
+
+Then wait. Notes and field fills approve as one batch: `approve all`, `approve all except <Accounts>`, or `skip`. StageName, CloseDate, Amount, Closed Lost, and Task creates are one record per approval. No reply writes nothing; the next run re-proposes from current CRM state.
+
+### 4. Apply
+
+Fresh read before each write. Write only the displayed, approved changes to NextSteps per `next_steps_format`; preserve an unchanged current entry and do not add a history note when none was proposed. Read back each record and rerun `hygiene_check` with a fresh `--as-of` timestamp; MISSING or unresolved REVIEW next-step status fails verification. Report rejections with the CRM message and one corrected proposal.
+
+### 5. Close
+
+Counts: open, in scope, flagged, proposed, written, skipped, not checked. Open must equal the step 2 count.
+
+### Refuse
+
+Drafting or sending email. Closed Won (`close`). Deleting or merging records. Changing OwnerId. Any write without an approval in this thread.
 
 ## Outputs and readiness
-- output/{run-id}/01_review.md contains the requested review and exact numbered effects, source coverage, evidence and unresolved items.
-- Ready when the scope is reconciled, findings have source references, required checks above pass, and gaps cannot be mistaken for checked evidence. Unsupported effects are withheld explicitly.
-- output/{run-id}/review.json records the user's review of this exact revision.
-- output/{run-id}/02_result.json follows the shared run contract. Every approved effect has an outcome and any provider/readback references.
+
+Save the deliverable and exact proposals in `output/{run-id}/01_review.md`; show the relevant readout in the conversation. Declare every source receipt and proposed artifact in its `artifacts` list. A read-only run has no effects. Readiness requires the checks above and explicit source gaps; unsupported effects stay withheld. Record the actual conversation review in `review.json`, and applied, pending, failed, or skipped effects in `02_result.json` through the shared run lifecycle.
 
 ## Human check
-Check coverage and the source behind each proposed clause. Approve exact note/field maps; stage, amount, close-date, loss and Task creation remain explicit record-level effects.
+
+Review the scope, evidence and exact payloads. Approval covers only the listed effects and revision. Fresh reads and independent provider readbacks are required for external effects.

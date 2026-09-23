@@ -1,31 +1,68 @@
----
-type: workflow
-command: forecast-weekly
-mode: write
----
-# forecast-weekly
+# Forecast Weekly
 
 Build an evidence-backed quarterly forecast and propose explicit CRM corrections.
 
 ## Load / Skip
-- Working: output/{run-id}/request.md and only its explicitly named inputs. On resumption, read that run's 01_review.md, review.json and 02_result.json.
-- Reference: _shared/policy.json (identity and the sections named below), _shared/rules.md, _shared/adapters.md.
-- Lifecycle: [workflows/run.md](../run.md). Required adapter capabilities: crm, mail, calendar.
-- Skip: other runs, other workflow families, private example data, and unrelated factory sections. A missing adapter is a named limitation or blocks its dependent effect.
+
+- Load [shared rules](../../_shared/rules.md), [run lifecycle](../run.md), the configured policy and adapters, and this procedure.
+- Read [adapter data contract](../../_shared/adapter-contract.md) only for the sources used in this run. Query sketches use logical field names; map them through the adapter before calling a provider.
+- Load the linked reference only at its named step. Keep raw source receipts and derived artifacts in this run.
+- Skip sibling workflows, other runs, unrelated accounts, and unused adapter sections. Missing capabilities are named gaps or block their dependent effects.
 
 ## Process
-1. Resolve the quarter, configured targets and CRM amount basis. If no target is configured, omit target-gap arithmetic and report it as missing.
-2. Read booked deals, in-quarter open deals and configured next-quarter candidates. Retrieve their Contacts, Tasks and Events. Retain original scope counts.
-3. Read and page buyer email and calendar evidence for each deal in policy.forecast.evidence_scope. Record coverage explicitly. Fresh communication can inform the forecast while producing a separate CRM correction proposal.
-4. Apply the team's documented commit, upside, excluded and pull-in definitions in policy.forecast. Cite why each deal qualifies or the condition it fails. Report missing bucket definitions instead of inventing them. Every in-scope deal appears exactly once in a forecast bucket.
-5. Calculate booked plus commit, upside, target gap when configured, and a ranked path to target. Show pull-ins separately; do not double-count them in the forecast or upside buffer. Reconcile totals to underlying deals.
-6. Present the forecast, blockers, buyer-owned next dates, coverage gaps and exact CRM corrections. Forecast-category synchronization is a separately approved effect. Route stage or amount changes to pipeline-review and signed close work to close.
+
+Answers one question: what will close this quarter, backed by evidence from every source. CRM is the record; when Calendar or mail is fresher, the fresh evidence decides the bucket and the record gets a proposal. Every in-scope deal is accounted for. Nothing is written without an approval in the thread.
+
+### 1. Load policy
+
+Read the configured `_shared/policy.json` and `_shared/adapters.md`. In a hosted project, sync the reusable files first. Record the selected scope in the run request. Record the run start time as an ISO datetime for `coverage_check --calls <run>/calls --since`. Resolve the current quarter and target from `policy.forecast.targets`, falling back to `policy.forecast.target_default`. If neither is set, the report says `target not set` and skips gap math.
+
+### 2. Collect from CRM
+
+- Booked: `SELECT Id, Name, Amount, CloseDate, Account.Name FROM Opportunity WHERE OwnerId = '<userId>' AND StageName = 'Closed Won' AND CloseDate = THIS_QUARTER`.
+- Open in quarter: collect one complete owned-open snapshot for coverage, then derive the in-quarter rows with the following fields. `SELECT Id, Name, StageName, Amount, CloseDate, NextSteps, LastActivityDate, ForecastCategoryName, AccountId, Account.Name FROM Opportunity WHERE OwnerId = '<userId>' AND IsClosed = false AND CloseDate = THIS_QUARTER`.
+- Next quarter: same fields, `CloseDate = NEXT_QUARTER`. S2+ rows with an Amount are pull-in scope; all rows feed the preview when within `policy.forecast.next_quarter_preview_days` of quarter end.
+- Tasks and Events for the open rows, the queries in [pipeline collection](references/pipeline-review-collect.md), scoped to all in-quarter deals and eligible next-quarter deals. Run `policy.tooling.scripts.hygiene_check <opps> --tasks <tasks> --events <events> --today <date>`; its lines are the source for the Next line and the newest note date. Do not re-derive them from the text. Use only those two outputs; the query above omits `policy.pipeline.required_fields`, so its `blank_field` lines are not evidence here.
+- Record counts. Every in-scope row appears once in step 4. A query that errors stops the run; quote the message.
+
+### 3. Collect from Calendar and mail
+
+For each deal in `policy.forecast.evidence_scope`:
+- Contacts on the Account: Name, Email.
+- Calendar: events with any Contact email or the Account name, `policy.tooling.calendar_lookback_days` back to `calendar_lookahead_days` ahead, one query term per search, paged until no `next_cursor`. Record held meetings and accepted upcoming ones.
+- mail: one search per Account, `from:@<account domain> after:<quarter start>`, then by Contact name when empty (`policy.forecast.gmail_lookup`). Page until no `next_cursor`. When the platform saves a result to a file, run `policy.tooling.scripts.gmail_digest` on it and read only its output. Record last buyer message date, timing statements, order form status, blockers.
+- `not checked` per `policy.tooling.not_checked_means`.
+
+### 4. Bucket
+
+Test `policy.forecast.buckets` conditions directly against the combined evidence, first match wins. A passed CloseDate does not exclude a deal; `pipeline-review` owns the date fix. Name the failed condition and its source for excluded deals. Apply `policy.forecast.pull_in` to the window deals. Where Calendar or mail shows activity, a meeting, or a buyer date CRM lacks, record a CRM gap per `policy.forecast.crm_gaps`.
+
+### 5. Compute
+
+Booked = Closed Won Amount sum. Call = booked + commit. Upside = upside sum. Gap = target minus call. Buffer = max(0, call + upside - target). Confirm the configured currency and revenue basis before summing; unknown amounts stay explicit, never silently zero. Pull-ins are separate and never counted twice. Path to target per `policy.forecast.path_to_target`; if upside runs out first, say `Upside does not cover the gap by $<n>.`
+
+### 6. Report
+
+Run `policy.tooling.scripts.coverage_check --calls <run>/calls --scope forecast --since <run start>` first and paste its output as the first line. Exit 1 means the report is not ready; follow the script's instructions. Read [references/forecast-weekly-report-format.md](references/forecast-weekly-report-format.md). Line 2 is `Notes as of <newest history-line date across in-scope deals>`; if that date is before this Friday, append `no notes written this week`. Order: booked and calling with the evidence clause per commit deal; forecast call and gap; path to target; pull-in scope, every deal, candidate or not; not in the call with reasons and sources; next quarter preview when in window; asks from Deal Desk, Legal, Security, or leadership found in any source; CRM gap proposals; ForecastCategory sync proposals per `policy.forecast.crm_sync`.
+
+Then wait. Every proposal is one record per approval. `skip` is an answer.
+
+### 7. Apply
+
+Fresh read before each write. Write `NextSteps` per `policy.pipeline.next_steps_format`. Readback with changed fields and record link. Report rejections with the CRM message and one corrected proposal.
+
+### 8. Close
+
+Counts: booked, per bucket, pull-ins, proposals applied. Scope and source coverage come from the step 6 script line, not from memory.
+
+### Refuse
+
+Changing StageName or Amount (route to `pipeline-review`). Closed Won (route to `close`). Drafting or sending email. Inventing a target. Treating a seller-stated date as buyer-named. Searching Slack.
 
 ## Outputs and readiness
-- output/{run-id}/01_review.md contains the requested review and exact numbered effects, source coverage, evidence and unresolved items.
-- Ready when the scope is reconciled, findings have source references, required checks above pass, and gaps cannot be mistaken for checked evidence. Unsupported effects are withheld explicitly.
-- output/{run-id}/review.json records the user's review of this exact revision.
-- output/{run-id}/02_result.json follows the shared run contract. Every approved effect has an outcome and any provider/readback references.
+
+Save the deliverable and exact proposals in `output/{run-id}/01_review.md`; show the relevant readout in the conversation. Declare every source receipt and proposed artifact in its `artifacts` list. A read-only run has no effects. Readiness requires the checks above and explicit source gaps; unsupported effects stay withheld. Record the actual conversation review in `review.json`, and applied, pending, failed, or skipped effects in `02_result.json` through the shared run lifecycle.
 
 ## Human check
-Check that all deals and sources are accounted for, bucket criteria match evidence, and totals reconcile. Reviewing the forecast does not authorize its CRM proposals.
+
+Review the scope, evidence and exact payloads. Approval covers only the listed effects and revision. Fresh reads and independent provider readbacks are required for external effects.

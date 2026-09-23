@@ -1,96 +1,322 @@
 {
+  "followup": {
+    "next_date_days_active": 1,
+    "next_date_days_cold": 2,
+    "sent_mail_hold_days_cold": 2,
+    "sent_mail_hold_days_active": 1,
+    "recycle_after_unanswered": 7,
+    "cooldown_days": 30,
+    "default_next_date_days": 2
+  },
+  "email_voice": {
+    "greeting": "Hi {FirstName},",
+    "body": "one or two short sentences, one concrete question tied to the open thread or Task",
+    "closing": "Best,\nSeller",
+    "reply_in_thread": true,
+    "bcc": false,
+    "attachments": "suggested_from_call",
+    "collateral_path": null,
+    "banned": [
+      "canned meeting asks",
+      "just checking in",
+      "circling back"
+    ]
+  },
+  "tooling": {
+    "gmail_search_max_addresses": 3,
+    "calendar_lookback_days": 30,
+    "calendar_lookahead_days": 30,
+    "not_checked_means": "A required source was not checked: name the unavailable adapter, scope gap, or exact provider error. Run length alone is not a reason to skip evidence.",
+    "scripts": {
+      "hygiene_check": "scripts/hygiene_check.py",
+      "coverage_check": "scripts/coverage_check.py",
+      "gmail_digest": "scripts/gmail_thread_digest.py",
+      "gmail_contact_stats": "scripts/gmail_contact_stats.py",
+      "pilot_usage_pdf": "scripts/pilot_usage/"
+    }
+  },
+  "call_prep": {
+    "history_days": 90,
+    "call_type": {
+      "customer": "Closed Won or active pilot",
+      "proposal": "a proposal or pilot was sent",
+      "demo": "a demo was promised or scheduled",
+      "discovery": "one or more completed calls, no proposal",
+      "intro": "no completed live call"
+    },
+    "expected_information": {
+      "intro": [
+        "target workflow",
+        "primary users",
+        "current tools",
+        "why now",
+        "decision owner"
+      ],
+      "discovery": [
+        "target workflow",
+        "primary users",
+        "current process",
+        "required data sources",
+        "security constraints",
+        "success measure",
+        "budget owner",
+        "timeline"
+      ],
+      "demo": [
+        "chosen workflow to show",
+        "who evaluates",
+        "evaluation criteria",
+        "data access for the demo",
+        "next step after demo"
+      ],
+      "proposal": [
+        "written feedback on proposal",
+        "security or legal status",
+        "procurement path",
+        "seat count",
+        "start date",
+        "signer"
+      ],
+      "customer": [
+        "adoption by team",
+        "blockers",
+        "expansion owner",
+        "renewal date",
+        "open support items"
+      ]
+    }
+  },
+  "interaction": {
+    "max_buyer_quotes": 8,
+    "amount_source": [
+      "buyer_confirmed",
+      "user_supplied"
+    ]
+  },
+  "pipeline": {
+    "close_warning_days": 14,
+    "stale_days": 14,
+    "closed_lost_silence_days": 30,
+    "activity_days": 30,
+    "triggers": {
+      "next_passed": "the next-step action's due date is before today, not the entry's written date",
+      "new_activity": "inbound buyer email (Task Subject 'Email: <<', or inbox mail from the Account domain) or a held meeting, dated after the newest note",
+      "blank_field": "a required or conditional field is blank, or the current next-step entry is missing, malformed, or has an unresolved due date",
+      "date_at_risk": "CloseDate is past, or within close_warning_days while StageName is below S3",
+      "stale": "no Task or Event within stale_days, no upcoming Event, and the next-step due date has passed or is missing. A live next step is not stale. An unresolved next-step date requires review before a stale-based write."
+    },
+    "task_gap": "a live next step with no open Task whose due date equals the action's due date. Emitted by hygiene_check; not a trigger. Friday proposes the Task only on this flag. An unresolved due date never supports a Task create.",
+    "required_fields": {
+      "S2": [
+        "Amount",
+        "LeadSource",
+        "CustomerType",
+        "DealType",
+        "CustomerPointOfContact",
+        "Competitors"
+      ],
+      "S3": [
+        "SubscriptionType",
+        "ContractStatus"
+      ],
+      "S4": [],
+      "S5": [
+        "ContractSent"
+      ]
+    },
+    "conditional_fields": [
+      {
+        "field": "TrialEndDate",
+        "when": {
+          "DealType": "Paid Trial"
+        }
+      }
+    ],
+    "close_date_basis": "a buyer-named signature or decision date from any source, or a passed CloseDate with no such date (move to the next buyer-owned date). A trial or pilot end date alone is a milestone, never a CloseDate basis.",
+    "stage_entry": {
+      "S2": "BANT confirmed, decision maker identified, demo done or scheduled",
+      "S3": "solution defined, pricing agreed in principle, technical validation underway, buyer verbal commit to proceed",
+      "S4": "Quote presented, legal or procurement engaged, no open technical blockers; or an active pilot when the configured stage rules say so",
+      "S5": "testing complete with positive results, ready for contract; contract sent or in legal review"
+    },
+    "stage_rules": [
+      "An evidenced active pilot may support the configured pilot stage; verify that stage criterion before proposing."
+    ],
+    "note_next_line": "M/D/YY SELLER - <plain sentence with action and explicit on/by M/D/YY due date>. The leading date is the written date. Name another owner only with evidence. No Next: shorthand in new entries.",
+    "note_history_line": "M/D/YY SELLER - <what happened since the last note, each clause traceable to CRM, mail, or Calendar evidence>. Two sentences at most.",
+    "next_steps_format": "plain text; render HTML paragraph and break boundaries as newlines on read. A new or revised next step uses note_next_line at the top. Prepend it to existing dated entries, retaining them unchanged as history; when replacing an undated legacy Next: first line, remove only that legacy first line and retain the dated history below. Add a separate factual history note only when explicitly proposed and supported. If no next-step change was proposed, preserve the current first entry and insert any approved factual history note after it. Existing legacy records remain readable and are not migrated without an exact approved write. Applies to every skill that writes NextSteps.",
+    "next_steps_review": "hygiene_check extracts explicit on/by dates from the first dated entry, using its year for a yearless due date. This is syntax, not proof of an action or owner. Verify both against the sentence and evidence. REVIEW means an invalid, missing, or ambiguous date: resolve it before any date-based recommendation or write. Never use the leading written date as the action deadline or infer an action owner from the note author's initials.",
+    "in_scope_stages": [
+      "S2",
+      "S3",
+      "S4",
+      "S5"
+    ],
+    "stage_order": [
+      "S0",
+      "S1",
+      "S2",
+      "S3",
+      "S4",
+      "S5"
+    ],
+    "close_warning_before_stage": "S3"
+  },
+  "forecast": {
+    "quarters": "calendar",
+    "amount_field": "Amount",
+    "targets": {},
+    "target_default": null,
+    "next_quarter_preview_days": 21,
+    "evidence_scope": "All configured in-scope open deals in the current quarter, plus every next-quarter in-scope deal with an Amount. Include booked deals separately.",
+    "sources": [
+      "crm",
+      "calendar",
+      "mail"
+    ],
+    "gmail_lookup": [
+      "account email domain",
+      "contact name"
+    ],
+    "activity_days": 14,
+    "buckets": {
+      "commit": "S4 or S5, or S3 with a buyer-named signature or decision date inside the quarter from any source; activity within activity_days from any source; no open blocker without a named owner and date. A passed CloseDate does not exclude; it becomes a CRM proposal.",
+      "upside": "S2 or S3 with Amount set; activity within activity_days from any source; no buyer-stated delay past quarter end",
+      "excluded": "everything else; the reason names the failed condition and the source"
+    },
+    "pull_in": "Next-quarter S2+ deal with an Amount where, from any source, either a proposal or order form is out and the buyer confirmed reviewing it, or the buyer named a signature or decision date inside this quarter. No stage gate, no date window. Ranked by Amount. Not counted in the call.",
+    "crm_gaps": "when Calendar or mail shows activity CRM lacks, propose CloseDate, NextSteps update per pipeline.next_steps_format, or Contact Email; one record per approval",
+    "call": "booked plus commit",
+    "path_to_target": "upside deals ranked by Amount, each with one action and the buyer-owned date, until the gap is covered or the list ends; in-quarter upside only, pull-ins are never in the buffer",
+    "amount_basis": "Opportunity.Amount; confirm a single currency and the deployment revenue basis before summing",
+    "crm_sync": "propose ForecastCategoryName to match the bucket, commit -> Commit, upside -> Best Case; excluded keeps its current category with no proposal; one record per approval"
+  },
+  "pilot_usage": {
+    "scope": "one pilot per run, the Account named in the request; an open Opportunity there with DealType = 'Paid Trial' or TrialEndDate set",
+    "warehouse": null,
+    "window_days": 60,
+    "statement_timeout_minutes": null,
+    "top_users": 5,
+    "use_case_sample": 40,
+    "writes": "none",
+    "pdf": {
+      "report_title": "Pilot Usage Report",
+      "week_one_length_days": 7,
+      "task_grain": "context_uuid",
+      "credit_unit": "cent",
+      "credit_display_rule": "round_half_up_per_context_then_sum",
+      "uncategorized_category_id": "uncategorized",
+      "category_palette": [
+        "#20808D",
+        "#A84B2F",
+        "#1B474D",
+        "#BCE2E7",
+        "#944454",
+        "#FFC553"
+      ],
+      "page_count": 2,
+      "page_size": "Letter",
+      "page_width_points": 612,
+      "page_height_points": 792,
+      "metadata_title": "Pilot Usage Report",
+      "metadata_author": "Seller",
+      "chromium_timeout_seconds": 120,
+      "output_dir": "output/{run-id}/pilot-usage",
+      "fonts": {}
+    },
+    "enabled": false,
+    "permitted_metrics": [
+      "roster",
+      "activity",
+      "feature_mix",
+      "reviewed_use_cases",
+      "task_credits"
+    ],
+    "audience": null
+  },
+  "close": {
+    "signature_evidence": [
+      "verified signed-contract integration with signature date",
+      "a signed agreement supplied by the user",
+      "the user explicitly states signed in this conversation"
+    ],
+    "win_note_max_chars": 280,
+    "followup_days": 7,
+    "ops_channel": null,
+    "ops_owners": [],
+    "deal_desk_channel": null,
+    "terms_default": {
+      "type": null,
+      "billing_interval": null,
+      "billing_terms": null,
+      "contract_term_months": null,
+      "subscription_type": "Paid"
+    },
+    "price_books": {
+      "annual": null,
+      "pilot": null
+    },
+    "credits": {
+      "product": null,
+      "unit_price": null,
+      "discount": 0,
+      "bonus_product": null,
+      "bonus_unit_price": 0
+    },
+    "paid_pilot": {
+      "deal_type": "Paid Trial",
+      "price_book": "pilot",
+      "discount": null,
+      "contract_term": "pilot length in months",
+      "subscription_type": "Paid"
+    },
+    "one_account_one_org": "one Account per org UUID. Several orgs = child Accounts under one parent, one Opportunity each",
+    "handoff_when": [
+      "self-serve org exists",
+      "multiple orgs",
+      "setup provisioning declined or failed",
+      "billing or provisioning failed"
+    ],
+    "no_org_rule": "When the configured close flow requires an org, hold the close until an existing org is verified or approved setup provisioning succeeds. Never assume a vendor-specific trigger exists.",
+    "setup_trial": {
+      "trial_days": 1,
+      "tier_default": null,
+      "payload": {},
+      "precheck_tool": null,
+      "success": "Adapter-defined successful provisioning status plus verified organization and subscription IDs, with no error. A reset trigger alone is not success.",
+      "restore_after": [
+        "SubscriptionType",
+        "SubscriptionBillingInterval",
+        "SubscriptionStartDate",
+        "SubscriptionDeactivationDate",
+        "TrialEndDate"
+      ],
+      "enabled": false
+    },
+    "api_close_flow": null,
+    "enabled": false
+  },
   "mode": "example",
   "identity": {
     "owner_email": "seller@example.com",
     "timezone": "UTC",
     "internal_domains": [
       "example.com"
-    ]
-  },
-  "followup": {
-    "default_next_date_days": 2,
-    "sent_mail_hold_days_cold": 2,
-    "sent_mail_hold_days_active": 1,
-    "recycle_after_unanswered": 7,
-    "cooldown_days": 30
-  },
-  "email_voice": {
-    "greeting": "Hi {first_name},",
-    "closing": "Best,\nSeller",
-    "body": "Short, specific, one concrete question",
-    "reply_in_thread": true
-  },
-  "research": {
-    "max_sources": 5
+    ],
+    "note_author": "SELLER",
+    "owner_id": "seller-record"
   },
   "review_inputs": [
     "_shared/adapters.md"
   ],
-  "call_prep": {
-    "history_days": 90,
-    "expected_information": {
-      "intro": [
-        "workflow",
-        "users",
-        "current tools",
-        "why now",
-        "decision owner"
-      ],
-      "discovery": [
-        "process",
-        "data sources",
-        "constraints",
-        "success measure",
-        "budget owner",
-        "timeline"
-      ],
-      "demo": [
-        "workflow to show",
-        "evaluators",
-        "criteria",
-        "data access",
-        "next step"
-      ],
-      "proposal": [
-        "feedback",
-        "security/legal",
-        "procurement",
-        "scope",
-        "start date",
-        "signer"
-      ],
-      "customer": [
-        "adoption",
-        "blockers",
-        "expansion owner",
-        "renewal",
-        "support"
-      ]
-    }
+  "crm": {
+    "record_url": null,
+    "note_prefix": "M/D/YY SELLER - ",
+    "cooldown_marker": "M/D/YY SELLER - Recycled. Cooldown until M/D/YY.",
+    "call_marker": "Interaction {meeting_id}",
+    "validation_rules": []
   },
-  "pipeline": {
-    "in_scope_stages": [],
-    "stage_entry": {},
-    "required_fields": {},
-    "stale_days": 14,
-    "close_warning_days": 14,
-    "closed_lost_silence_days": 30
-  },
-  "forecast": {
-    "targets": {},
-    "amount_basis": null,
-    "evidence_scope": "all configured in-scope deals in the quarter, plus explicitly selected next-quarter candidates",
-    "buckets": {},
-    "pull_in": null
-  },
-  "pilot_usage": {
-    "enabled": false,
-    "audience": null,
-    "permitted_metrics": []
-  },
-  "close": {
-    "enabled": false,
-    "signature_evidence": [],
-    "paths": []
+  "research": {
+    "max_sources": 5
   }
 }

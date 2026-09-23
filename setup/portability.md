@@ -1,25 +1,34 @@
 # Portability and scope
 
-This is an independently usable ICM template derived from the reviewed
-sales project, with seven canonical workflows. It is a new portable
-implementation, not a byte-for-byte export or a validated deployment of the
-original system's private helpers.
+This repository ports the seven downloaded Sales skills, all eleven referenced
+documents, the shared helper code and its regression scenarios into the existing
+ICM owners. The generated skill and command wrappers remain thin pointers. See
+[source-port.md](source-port.md) for the source inventory and adaptations.
 
-Preserved: workflow ownership, evidence attribution, exact action review,
-fresh reads, provider readback, no sending email, and external systems of record.
-Added for ICM: local editable review artifacts scoped to a task-supplied run ID.
-These do not introduce a customer ledger or replace provider state.
+The port preserves evidence attribution, exact effect review, fresh reads,
+provider readback, source-specific collection, report formats, human-reviewed
+pilot narratives and downstream close verification. Local review files remain
+scoped to a task-supplied run ID and do not replace provider business state.
 
-Configuration: private identities, domain/owner IDs, CRM field names, quotas,
-product claims, source repositories, schedules and collateral are absent.
-The setup owns their local replacements. Example configuration is ignored
-only after being copied to its deployment path; examples themselves are tracked.
+Reusable source defaults are supplied as examples, including stage criteria and
+forecast rules. Review them for the deployment. Identities, native schema mappings,
+quotas, credentials, channel IDs, prices, schedules and branded assets are not
+configured. Pilot and close remain disabled until their required adapters are
+mapped. Setup provisioning has an additional explicit enabled flag and payload.
 
-Pilot analytics and closing need adapters specific to the deploying organization. Call prep accepts a missing transcript or adoption adapter as an explicit gap. No warehouse SQL, private fonts, internal provisioning flow or commercial prices are copied.
+Six SQL templates preserve the original query methods against documented logical
+views. The pilot helpers accept saved warehouse results or complete normalized
+JSON, then assemble, compute, validate, render and print. They do not authenticate
+to a warehouse. System fonts replace private brand assets; optional local fonts
+can be hash checked. The PDF renderer makes no dependency downloads.
 
-The interaction-sync default-date reference is owned by policy.followup.default_next_date_days. Stage and forecast definitions are deliberately unset until setup.
+Coverage checking uses paired, normalized request/result receipts in an explicit
+run directory for daily, Friday and forecast modes. Native requests and responses
+stay alongside them. It verifies represented scope, success and pagination; it
+cannot authenticate provider responses or reveal records hidden by permissions.
 
-Included checks cover repository structure, wrapper routes, local review
-freshness and synthetic cases. They do not validate credentials, field mappings,
-live provider writes, outreach meaning, or every original production helper.
-Install and exercise required adapters before describing a deployment as operational.
+Validation covers local behavior with synthetic data. It does not prove live
+credentials, mappings, customer-facing prose, or downstream provisioning. A
+published repository is a complete reusable port, not a connected production
+installation. To make a deployment operational, configure the selected adapters
+and verify real reads and separately authorized effects in that environment.

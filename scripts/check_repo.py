@@ -26,6 +26,7 @@ def check(root=ROOT):
     if len((root / "AGENTS.md").read_text().splitlines()) >= 60:
         errors.append("AGENTS.md should stay below 60 lines")
     contracts = {"workflows", "_shared", "_templates", "_templates/run", "setup", "scripts", "tests", "examples"}
+    contracts |= {"workflows/engagement/references", "workflows/revenue/references", "scripts/pilot_usage", "examples/pilot-usage"}
     contracts |= {str(Path(r["workspace"]).parent) for r in routes.values()}
     for folder in contracts:
         if not (root / folder / "CONTEXT.md").is_file():
@@ -36,6 +37,17 @@ def check(root=ROOT):
             if heading not in text:
                 errors.append(name + " missing " + heading)
     files = public_files(root)
+    manifest = json.loads((root / "setup/source-manifest.json").read_text())
+    sources = set()
+    for component in manifest["components"]:
+        source = component["source"]
+        if source in sources or not re.fullmatch(r"[0-9a-f]{64}", component["source_sha256"]):
+            errors.append("invalid/duplicate source component: " + source)
+        sources.add(source)
+        for destination in component["destinations"]:
+            rel = Path(destination)
+            if rel.is_absolute() or ".." in rel.parts or rel not in files:
+                errors.append("source destination missing from public template: " + destination)
     for rel in files:
         path = root / rel
         if path.is_symlink():
@@ -44,7 +56,7 @@ def check(root=ROOT):
         if str(rel) in PRIVATE or "output" in rel.parts or rel.name.startswith(".env"):
             errors.append("deployment or runtime material included: " + str(rel))
             continue
-        if path.suffix not in (".md", ".json", ".py", ".txt", ".yml"):
+        if path.suffix not in (".md", ".json", ".py", ".txt", ".yml", ".yaml", ".sql"):
             continue
         text = path.read_text()
         if path.suffix == ".json":

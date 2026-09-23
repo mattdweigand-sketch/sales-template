@@ -4,37 +4,91 @@
     "sales-call-prep": {
       "description": "Prepare a sourced brief for one sales call or a named calendar window.",
       "workspace": "workflows/engagement/CONTEXT.md",
-      "workflow": "workflows/engagement/sales-call-prep.md"
+      "workflow": "workflows/engagement/sales-call-prep.md",
+      "review_inputs": [
+        "_shared/adapter-contract.md",
+        "workflows/engagement/references/sales-call-prep-brief-formats.md",
+        "scripts/gmail_contact_stats.py",
+        "scripts/gmail_thread_digest.py",
+        "scripts/mail_evidence.py"
+      ]
     },
     "interaction-sync": {
       "description": "Turn one completed customer interaction into reviewed CRM updates and an unsent follow-up draft.",
       "workspace": "workflows/engagement/CONTEXT.md",
-      "workflow": "workflows/engagement/interaction-sync.md"
+      "workflow": "workflows/engagement/interaction-sync.md",
+      "review_inputs": [
+        "_shared/adapter-contract.md"
+      ]
     },
     "task-triage-speed-run": {
       "description": "Review due CRM tasks, prepare contextual follow-ups, and apply approved changes.",
       "workspace": "workflows/engagement/CONTEXT.md",
-      "workflow": "workflows/engagement/task-triage-speed-run.md"
+      "workflow": "workflows/engagement/task-triage-speed-run.md",
+      "review_inputs": [
+        "_shared/adapter-contract.md",
+        "workflows/engagement/references/task-triage-speed-run-crm-corrections.md",
+        "scripts/gmail_contact_stats.py",
+        "scripts/gmail_thread_digest.py",
+        "scripts/mail_evidence.py"
+      ]
     },
     "pipeline-review": {
       "description": "Review opportunity hygiene and propose evidence-supported next-step and field updates.",
       "workspace": "workflows/revenue/CONTEXT.md",
-      "workflow": "workflows/revenue/pipeline-review.md"
+      "workflow": "workflows/revenue/pipeline-review.md",
+      "review_inputs": [
+        "_shared/adapter-contract.md",
+        "workflows/revenue/references/pipeline-review-collect.md",
+        "workflows/revenue/references/pipeline-review-report-format.md",
+        "scripts/coverage_check.py",
+        "scripts/hygiene_check.py",
+        "scripts/gmail_thread_digest.py",
+        "scripts/mail_evidence.py"
+      ]
     },
     "forecast-weekly": {
       "description": "Build an evidence-backed quarterly forecast and propose explicit CRM corrections.",
       "workspace": "workflows/revenue/CONTEXT.md",
-      "workflow": "workflows/revenue/forecast-weekly.md"
+      "workflow": "workflows/revenue/forecast-weekly.md",
+      "review_inputs": [
+        "_shared/adapter-contract.md",
+        "workflows/revenue/references/forecast-weekly-report-format.md",
+        "scripts/coverage_check.py",
+        "scripts/hygiene_check.py",
+        "scripts/gmail_thread_digest.py",
+        "scripts/mail_evidence.py",
+        "workflows/revenue/references/pipeline-review-collect.md"
+      ]
     },
     "pilot-usage": {
       "description": "Summarize one pilot's adoption from a configured analytics source.",
       "workspace": "workflows/revenue/CONTEXT.md",
-      "workflow": "workflows/revenue/pilot-usage.md"
+      "workflow": "workflows/revenue/pilot-usage.md",
+      "review_inputs": [
+        "_shared/adapter-contract.md",
+        "workflows/revenue/references/pilot-usage-pdf-format.md",
+        "workflows/revenue/references/pilot-usage-queries.md",
+        "workflows/revenue/references/pilot-usage-report-format.md",
+        "scripts/pilot_usage/assemble_pilot_usage_input.py",
+        "scripts/pilot_usage/compute_pilot_usage_report.py",
+        "scripts/pilot_usage/pilot_usage_local_storage.py",
+        "scripts/pilot_usage/pilot_usage_policy.py",
+        "scripts/pilot_usage/print_pilot_usage_pdf.py",
+        "scripts/pilot_usage/render_pilot_usage_report.py",
+        "scripts/pilot_usage/validate_pilot_usage_report.py"
+      ]
     },
     "close": {
       "description": "Review a signed opportunity's close and track approved downstream handoff effects.",
       "workspace": "workflows/revenue/CONTEXT.md",
-      "workflow": "workflows/revenue/close.md"
+      "workflow": "workflows/revenue/close.md",
+      "review_inputs": [
+        "_shared/adapter-contract.md",
+        "workflows/revenue/references/close-fields.md",
+        "workflows/revenue/references/close-paths.md",
+        "workflows/revenue/references/close-setup-trial.md"
+      ]
     }
   }
 }

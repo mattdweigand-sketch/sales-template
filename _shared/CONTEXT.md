@@ -7,6 +7,7 @@ One job: hold reusable configuration and common rules, separate from customer ru
 | [rules.md](rules.md) | Common evidence and action boundaries |
 | [policy.example.json](policy.example.json) | Portable example values copied once to ignored policy.json |
 | [adapters.example.md](adapters.example.md) | Adapter questionnaire copied once to ignored adapters.md |
+| [adapter-contract.md](adapter-contract.md) | Logical fields, saved-source schemas, pagination and readback requirements |
 
 Inputs: the [setup questionnaire](../setup/questionnaire.md) and approved configuration changes.
 Process: change each fact in its owning file. Load only the selected workflow's sections.

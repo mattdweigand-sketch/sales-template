@@ -66,6 +66,27 @@ class WorkspaceTests(unittest.TestCase):
         policy.write_text(policy.read_text() + "\n")
         self.assertEqual(runs.status(self.root, self.path.name)["state"], "review_stale")
 
+    def test_reference_edit_invalidates_review(self):
+        self.ready()
+        self.approve()
+        reference = self.root / "workflows/engagement/references/sales-call-prep-brief-formats.md"
+        reference.write_text(reference.read_text() + "\nChanged brief requirement.\n")
+        self.assertEqual(runs.status(self.root, self.path.name)["state"], "review_stale")
+
+    def test_helper_edit_invalidates_review(self):
+        self.ready()
+        self.approve()
+        helper = self.root / "scripts/gmail_contact_stats.py"
+        helper.write_text(helper.read_text() + "\n# changed\n")
+        self.assertEqual(runs.status(self.root, self.path.name)["state"], "review_stale")
+
+    def test_dependency_cannot_escape_repository(self):
+        contract = self.root / "scripts/wrapper-contract.json"
+        doc = json.loads(contract.read_text())
+        doc["commands"][self.command]["review_inputs"] = ["scripts/../../outside.py"]
+        contract.write_text(json.dumps(doc))
+        with self.assertRaises(ValueError): wrappers.load_routes(self.root)
+
     def test_declared_missing_artifact_prevents_review_record(self):
         self.ready()
         review = self.path / "01_review.md"

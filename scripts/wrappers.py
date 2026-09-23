@@ -16,7 +16,7 @@ def load_routes(root=ROOT):
     for name, row in doc["commands"].items():
         if not re.fullmatch(r"[a-z][a-z0-9]*(?:-[a-z0-9]+)*", name):
             raise ValueError("invalid command name: " + name)
-        if set(row) != {"description", "workspace", "workflow"}:
+        if set(row) != {"description", "workspace", "workflow", "review_inputs"}:
             raise ValueError("invalid route fields: " + name)
         if not isinstance(row["description"], str) or not row["description"].strip():
             raise ValueError("missing description: " + name)
@@ -26,6 +26,14 @@ def load_routes(root=ROOT):
                 raise ValueError("route must stay under workflows/: " + str(target))
             if not (root / target).is_file() or (root / target).is_symlink():
                 raise ValueError("missing or symlinked route: " + str(target))
+        if not isinstance(row["review_inputs"], list) or any(not isinstance(p, str) for p in row["review_inputs"]):
+            raise ValueError("review_inputs must be a list of dependency paths")
+        for ref in row["review_inputs"]:
+            target = Path(ref)
+            if target.is_absolute() or ".." in target.parts or target.parts[0] not in ("workflows", "scripts", "_shared"):
+                raise ValueError("invalid workflow review dependency: " + ref)
+            if not (root / target).is_file() or any((root / p).is_symlink() for p in [target, *target.parents]):
+                raise ValueError("missing or symlinked review dependency: " + ref)
     return doc["commands"]
 
 

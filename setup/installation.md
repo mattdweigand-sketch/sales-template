@@ -1,7 +1,7 @@
 # Installation
 
 ## Local agent
-Keep the repository intact. Python 3.9+ is needed only for local checks and run helpers.
+Keep the repository intact. Python 3.9+ runs local checks and evidence helpers.
 Copy the factory examples once, preserving an existing configuration:
 
 ```bash
@@ -15,6 +15,9 @@ Fill the [questionnaire](questionnaire.md). Keep mode example for synthetic
 use; set mode live only after required adapters and workflow settings are
 configured and reviewed. No command here installs a connector or creates
 a schedule. Missing private adapters remain explicit unavailable capabilities.
+Read the [adapter contract](../_shared/adapter-contract.md) and review the example
+stage/forecast definitions. Fill native field mappings, owner ID, record URLs,
+targets and any selected pilot or close capabilities before switching to live.
 
 Codex-compatible skill pointers are tracked in .agents/skills/; Claude slash
 command pointers are tracked in .claude/commands/. Work from this repo root.
@@ -49,3 +52,19 @@ python3 scripts/runs.py status demo-001
 Follow the workflow selected by [the root router](../CONTEXT.md), then the
 [run contract](../workflows/run.md). No external action follows merely from
 creating the starter. An example claim cannot be used in live outreach.
+
+## Optional pilot PDF tools
+
+Install `scripts/pilot_usage/requirements.txt` into a virtual environment and
+provide an installed Chromium-compatible renderer. Keep its binary path in local
+configuration; do not assume the source project's fonts or browser exist.
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -r scripts/pilot_usage/requirements.txt
+```
+
+The synthetic [pilot fixture](../examples/pilot-usage/CONTEXT.md) exercises the
+full assemble-to-PDF path without any customer data or external business effects.
+The seven pointer skills are complete only with this repository's workflows,
+references, policy and helper files. Do not distribute pointer-only ZIPs.

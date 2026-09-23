@@ -72,3 +72,11 @@ Inspect only this run's declared request, review, review record and result.
 review_current, recovery_required, result_stale, incomplete or completion_recorded. The last means
 the required local record shape is complete, not independently proven service
 success. A template, stale result or unreviewed file never completes the run.
+
+## Dependency freshness
+
+The selected route lists its supporting references and helper code in
+`scripts/wrapper-contract.json`. Review snapshots include these dependencies,
+the registry, AGENTS.md and the run/routing helpers as well as the policy, workflow and
+run artifacts. Changes invalidate the recorded review. A dependency hash proves
+revision identity only; inspect the original conversation and provider receipts.

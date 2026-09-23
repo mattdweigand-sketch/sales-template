@@ -1,6 +1,7 @@
 # Sales Workflow Template
 
-Seven configurable workflows for sales execution.
+Seven configurable workflows for sales execution, with full procedures,
+eleven task-specific references, and local evidence and pilot-report helpers.
 Built with the Interpretable Context Methodology: small routing files, explicit
 workflow contracts, shared configuration and editable, human-reviewed run outputs.
 
@@ -18,6 +19,9 @@ See [the task router](CONTEXT.md) for all seven commands and their canonical own
 - `.agents/skills/` and `.claude/commands/`: generated thin pointers.
 - `scripts/` and `tests/`: local checks, wrapper generation and run-state tooling.
 
+The [port record](setup/source-port.md) maps every downloaded skill, reference,
+helper and regression file to its destination and explains adaptations.
+
 ## Validate
 ```bash
 python3 scripts/check_repo.py
@@ -27,6 +31,8 @@ python3 -m unittest discover -s tests -v
 No network services are called by these checks. See [portability](setup/portability.md)
 for required adapters and the limits of local validation. The template is not
 connected to a CRM, mail account, warehouse or live Perplexity Project.
+Optional pilot PDF generation requires pypdf and an installed Chromium binary;
+the remaining helpers use the Python standard library.
 
 ## Contribute
 Edit the owning workflow or factory file, then update the wrapper registry only

@@ -1,31 +1,69 @@
----
-type: workflow
-command: sales-call-prep
-mode: read
----
-# sales-call-prep
+# Sales Call Prep
 
 Prepare a sourced brief for one sales call or a named calendar window.
 
 ## Load / Skip
-- Working: output/{run-id}/request.md and only its explicitly named inputs. On resumption, read that run's 01_review.md, review.json and 02_result.json.
-- Reference: _shared/policy.json (identity and the sections named below), _shared/rules.md, _shared/adapters.md.
-- Lifecycle: [workflows/run.md](../run.md). Required adapter capabilities: crm, calendar, mail; transcripts and adoption optional.
-- Skip: other runs, other workflow families, private example data, and unrelated factory sections. A missing adapter is a named limitation or blocks its dependent effect.
+
+- Load [shared rules](../../_shared/rules.md), [run lifecycle](../run.md), the configured policy and adapters, and this procedure.
+- Read [adapter data contract](../../_shared/adapter-contract.md) only for the sources used in this run. Query sketches use logical field names; map them through the adapter before calling a provider.
+- Load the linked reference only at its named step. Keep raw source receipts and derived artifacts in this run.
+- Skip sibling workflows, other runs, unrelated accounts, and unused adapter sections. Missing capabilities are named gaps or block their dependent effects.
 
 ## Process
-1. Resolve the named call or calendar window. Use configured internal domains to identify external attendees. If there is no event, say so and prepare from the supplied account context.
-2. Resolve Contacts by attendee email, then name and domain; read the Account, open Opportunities, and recent activity. Preserve ambiguity instead of picking among plausible deals. Separate calls and notes from long logged email threads.
-3. Read the latest relevant email thread when CRM logs do not already supply it. Read prior transcripts through the configured adapter when available. Attribute buyer statements and commitments to the speaker and source.
-4. Read an adoption adapter only if configured and authorized for this purpose. Its absence is a named gap, never inferred usage. Search dated public company and attendee information within policy.research.max_sources.
-5. Infer the call type from evidence and compare it with policy.call_prep.expected_information. Produce the brief with current situation, buyer objectives, commitments, hypotheses, discovery gaps, suggested questions, and CRM issues. Cite facts and label hypotheses throughout.
-6. End with the handoff to interaction-sync after the call. This workflow has no external effects.
+
+Read-only. CRM is the record; everything else is evidence. Every fact in the brief names its source. Anything inferred is labeled `Hypothesis`. Never restate a hypothesis as fact in a later section.
+
+### 1. Load policy
+
+Read the configured `_shared/policy.json` and `_shared/adapters.md`. In a hosted project, sync the reusable files first. Record the selected scope in the run request.
+
+### 2. Resolve the calls
+
+- Named person or company: calendar search by name, `policy.tooling.calendar_lookback_days` behind to `policy.tooling.calendar_lookahead_days` ahead. If no event, prep from CRM and say `No meeting found on the calendar.`
+- Window ("today", "tomorrow", "this week", "each of these"): calendar search over that range. Keep events with at least one attendee whose domain is not in `policy.identity.internal_domains`.
+- Record per call: title, start, duration, link, external attendees with emails, internal attendees, booking-form text if present in the description.
+
+### 3. CRM
+
+Per call, in this order, batching where possible:
+1. Contacts by attendee email. No match: search by name, then Account by email domain. Report unmatched attendees.
+2. Account: Name, Website, Industry, NumberOfEmployees, Description, OwnerId.
+3. Open Opportunities on the Account: Name, StageName, Amount, CloseDate, NextSteps. Also the most recent closed one if none are open.
+4. Activity in the last `policy.call_prep.history_days` days on the Account and Contacts, `Subject, ActivityDate, Status, Description`, newest first. Two queries: notes and calls with `Subject NOT LIKE 'Email:%'`, then logged emails with `Subject LIKE 'Email:%'`. Logged emails are long; read only the newest one per attendee for the full thread. Note whether any completed live call exists.
+5. Flag record problems you see (wrong Account name, Closed Lost while active, missing Contact) under `CRM notes`. Do not fix them here.
+
+### 4. mail
+
+Skip this step when the CRM email log in step 3 already contains the attendees' thread inside the history window. Otherwise search attendee addresses, at most `policy.tooling.gmail_search_max_addresses` per call. Run `policy.tooling.scripts.gmail_contact_stats <owner_email> <saved_outputs...> --only <addresses>` for counts and the newest thread. Read only the newest thread's messages for what was promised, asked, or sent.
+
+### 5. Prior calls
+
+Use the configured transcript adapter. Search the Account and attendee names over `policy.call_prep.history_days` days. Take: date, attendees, buyer-stated facts as short quotes, commitments by either side, open questions. If unavailable, write `Prior call transcripts not checked.`
+
+### 6. Product footprint
+
+Use the configured adoption lookup for each external attendee email. Report org name, tier, and seat count when returned. If none, write `No enterprise org for <email>.` If the lookup errors, write `Footprint lookup unavailable.` Do not infer usage from seat requests or booking forms.
+
+### 7. Public research
+
+Web search the company and each external attendee. Keep at most `policy.research.max_sources` dated sources per company: strategy, leadership changes, AI or data initiatives, funding or earnings, incumbent tools. Person: current title, tenure, public statements. Cite each with a link and date. Drop anything you cannot date.
+
+### 8. Call type and gaps
+
+Infer the call type per `policy.call_prep.call_type`. State the type and the evidence for it. Discovery gaps are the items in `policy.call_prep.expected_information[type]` not established by any source. Write `not established` for each.
+
+### 9. Write the brief
+
+Read [references/sales-call-prep-brief-formats.md](references/sales-call-prep-brief-formats.md) and use the single-call or multi-call format. Return the brief itself, not a source list with commentary. End with `CRM notes` if any, then one line: `Say "log this call" after the meeting and I will hand off to interaction-sync.`
+
+### Refuse
+
+Writing to CRM, mail, or Calendar. Sending anything. Saving customer material to Project Files.
 
 ## Outputs and readiness
-- output/{run-id}/01_review.md contains the requested read-only deliverable, source coverage, evidence and unresolved items.
-- Ready when the scope is reconciled, findings have source references, required checks above pass, and gaps cannot be mistaken for checked evidence. Unsupported effects are withheld explicitly.
-- output/{run-id}/review.json records the user's review of this exact revision.
-- output/{run-id}/02_result.json follows the shared run contract. Its effects list is empty.
+
+Save the deliverable and exact proposals in `output/{run-id}/01_review.md`; show the relevant readout in the conversation. Declare every source receipt and proposed artifact in its `artifacts` list. A read-only run has no effects. Readiness requires the checks above and explicit source gaps; unsupported effects stay withheld. Record the actual conversation review in `review.json`, and applied, pending, failed, or skipped effects in `02_result.json` through the shared run lifecycle.
 
 ## Human check
-Verify the correct attendees, account and deal; distinguish buyer statements from hypotheses. Missing optional sources stay visible in the brief.
+
+Review the scope, evidence and exact payloads. Approval covers only the listed effects and revision. Fresh reads and independent provider readbacks are required for external effects.

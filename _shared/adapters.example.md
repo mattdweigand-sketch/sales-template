@@ -26,3 +26,11 @@ Transcript retrieval and speaker attribution; organization adoption lookup; pilo
 Each enabled adapter must name its tool, input mapping, output fields,
 completeness criteria, permitted audience and verification read. Keep disabled
 capabilities unavailable until configured and tested with synthetic data.
+
+## Saved-source interface
+Read [adapter-contract.md](adapter-contract.md). Record the normalization mapping,
+raw receipt location, complete-page evidence and source timezone for each adapter.
+For coverage, identify the actual unfiltered owned-open query and scoped secondary
+queries. For pilot SQL, map all five logical views and preserve organization
+filters. For setup provisioning, describe the exact payload, overwritten terms,
+automatic invitations, terminal success criteria and recovery behavior.
