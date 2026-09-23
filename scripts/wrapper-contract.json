@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "commands": {
+    "sales-call-prep": {
+      "description": "Prepare a sourced brief for one sales call or a named calendar window.",
+      "workspace": "workflows/engagement/CONTEXT.md",
+      "workflow": "workflows/engagement/sales-call-prep.md"
+    },
+    "interaction-sync": {
+      "description": "Turn one completed customer interaction into reviewed CRM updates and an unsent follow-up draft.",
+      "workspace": "workflows/engagement/CONTEXT.md",
+      "workflow": "workflows/engagement/interaction-sync.md"
+    },
+    "task-triage-speed-run": {
+      "description": "Review due CRM tasks, prepare contextual follow-ups, and apply approved changes.",
+      "workspace": "workflows/engagement/CONTEXT.md",
+      "workflow": "workflows/engagement/task-triage-speed-run.md"
+    },
+    "pipeline-review": {
+      "description": "Review opportunity hygiene and propose evidence-supported next-step and field updates.",
+      "workspace": "workflows/revenue/CONTEXT.md",
+      "workflow": "workflows/revenue/pipeline-review.md"
+    },
+    "forecast-weekly": {
+      "description": "Build an evidence-backed quarterly forecast and propose explicit CRM corrections.",
+      "workspace": "workflows/revenue/CONTEXT.md",
+      "workflow": "workflows/revenue/forecast-weekly.md"
+    },
+    "pilot-usage": {
+      "description": "Summarize one pilot's adoption from a configured analytics source.",
+      "workspace": "workflows/revenue/CONTEXT.md",
+      "workflow": "workflows/revenue/pilot-usage.md"
+    },
+    "close": {
+      "description": "Review a signed opportunity's close and track approved downstream handoff effects.",
+      "workspace": "workflows/revenue/CONTEXT.md",
+      "workflow": "workflows/revenue/close.md"
+    }
+  }
+}

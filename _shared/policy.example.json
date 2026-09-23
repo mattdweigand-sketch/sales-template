@@ -1,0 +1,96 @@
+{
+  "mode": "example",
+  "identity": {
+    "owner_email": "seller@example.com",
+    "timezone": "UTC",
+    "internal_domains": [
+      "example.com"
+    ]
+  },
+  "followup": {
+    "default_next_date_days": 2,
+    "sent_mail_hold_days_cold": 2,
+    "sent_mail_hold_days_active": 1,
+    "recycle_after_unanswered": 7,
+    "cooldown_days": 30
+  },
+  "email_voice": {
+    "greeting": "Hi {first_name},",
+    "closing": "Best,\nSeller",
+    "body": "Short, specific, one concrete question",
+    "reply_in_thread": true
+  },
+  "research": {
+    "max_sources": 5
+  },
+  "review_inputs": [
+    "_shared/adapters.md"
+  ],
+  "call_prep": {
+    "history_days": 90,
+    "expected_information": {
+      "intro": [
+        "workflow",
+        "users",
+        "current tools",
+        "why now",
+        "decision owner"
+      ],
+      "discovery": [
+        "process",
+        "data sources",
+        "constraints",
+        "success measure",
+        "budget owner",
+        "timeline"
+      ],
+      "demo": [
+        "workflow to show",
+        "evaluators",
+        "criteria",
+        "data access",
+        "next step"
+      ],
+      "proposal": [
+        "feedback",
+        "security/legal",
+        "procurement",
+        "scope",
+        "start date",
+        "signer"
+      ],
+      "customer": [
+        "adoption",
+        "blockers",
+        "expansion owner",
+        "renewal",
+        "support"
+      ]
+    }
+  },
+  "pipeline": {
+    "in_scope_stages": [],
+    "stage_entry": {},
+    "required_fields": {},
+    "stale_days": 14,
+    "close_warning_days": 14,
+    "closed_lost_silence_days": 30
+  },
+  "forecast": {
+    "targets": {},
+    "amount_basis": null,
+    "evidence_scope": "all configured in-scope deals in the quarter, plus explicitly selected next-quarter candidates",
+    "buckets": {},
+    "pull_in": null
+  },
+  "pilot_usage": {
+    "enabled": false,
+    "audience": null,
+    "permitted_metrics": []
+  },
+  "close": {
+    "enabled": false,
+    "signature_evidence": [],
+    "paths": []
+  }
+}
