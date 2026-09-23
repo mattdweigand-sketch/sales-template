@@ -1,7 +1,7 @@
 # Sales Workflow Template
 
 A configurable, human-reviewed sales execution workspace.
-This is the canonical agent entry. CLAUDE.md and generated skills point here.
+This is the canonical entry for all agents. Generated skills point here.
 
 Read [CONTEXT.md](CONTEXT.md), choose one task, then open its workspace contract.
 
