@@ -20,15 +20,15 @@ Read the configured `_shared/policy.json` and `_shared/adapters.md`. In a hosted
 ### 2. Collect from CRM
 
 - Booked: `SELECT Id, Name, Amount, CloseDate, Account.Name FROM Opportunity WHERE OwnerId = '<userId>' AND StageName = 'Closed Won' AND CloseDate = THIS_QUARTER`.
-- Open in quarter: collect one complete owned-open snapshot for coverage, then derive the in-quarter rows with the following fields. `SELECT Id, Name, StageName, Amount, CloseDate, NextSteps, LastActivityDate, ForecastCategoryName, AccountId, Account.Name FROM Opportunity WHERE OwnerId = '<userId>' AND IsClosed = false AND CloseDate = THIS_QUARTER`.
-- Next quarter: same fields, `CloseDate = NEXT_QUARTER`. S2+ rows with an Amount are pull-in scope; all rows feed the preview when within `policy.forecast.next_quarter_preview_days` of quarter end.
+- Open snapshot: `SELECT Id, OwnerId, IsClosed, Name, StageName, Amount, CloseDate, NextSteps, LastActivityDate, ForecastCategoryName, AccountId, Account.Name FROM Opportunity WHERE OwnerId = '<userId>' AND IsClosed = false`. Save this complete owned-open snapshot for coverage, then derive current-quarter and next-quarter rows locally from `CloseDate`.
+- Next quarter: use the next-quarter rows from that snapshot. S2+ rows with an Amount are pull-in scope; all rows feed the preview when within `policy.forecast.next_quarter_preview_days` of quarter end.
 - Tasks and Events for the open rows, the queries in [pipeline collection](references/pipeline-review-collect.md), scoped to all in-quarter deals and eligible next-quarter deals. Run `policy.tooling.scripts.hygiene_check <opps> --tasks <tasks> --events <events> --today <date>`; its lines are the source for the Next line and the newest note date. Do not re-derive them from the text. Use only those two outputs; the query above omits `policy.pipeline.required_fields`, so its `blank_field` lines are not evidence here.
 - Record counts. Every in-scope row appears once in step 4. A query that errors stops the run; quote the message.
 
 ### 3. Collect from Calendar and mail
 
 For each deal in `policy.forecast.evidence_scope`:
-- Contacts on the Account: Name, Email.
+- Contacts on the Account: Id, Name, Email, AccountId. Preserve the returned Id and AccountId in coverage receipts.
 - Calendar: events with any Contact email or the Account name, `policy.tooling.calendar_lookback_days` back to `calendar_lookahead_days` ahead, one query term per search, paged until no `next_cursor`. Record held meetings and accepted upcoming ones.
 - mail: one search per Account, `from:@<account domain> after:<quarter start>`, then by Contact name when empty (`policy.forecast.gmail_lookup`). Page until no `next_cursor`. When the platform saves a result to a file, run `policy.tooling.scripts.gmail_digest` on it and read only its output. Record last buyer message date, timing statements, order form status, blockers.
 - `not checked` per `policy.tooling.not_checked_means`.

@@ -35,10 +35,29 @@ from pilot_usage_local_storage import require_local_only_output_path
 from pilot_usage_policy import load_pilot_usage_policy
 
 MARKERS = ("q1_roster", "q4_grants", "q5_tasks")
+PENDING_STATUSES = {"pending", "queued", "running", "submitted"}
+SUCCESS_STATUSES = {"success", "succeeded"}
 
 
 def _load(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _result_ready(saved: dict[str, Any], result: dict[str, Any], path: Path) -> bool:
+    """Reject failed receipts before inspecting rows, including failures without data."""
+    error = saved.get("error") or result.get("error") or result.get("errors")
+    if saved.get("isError") or error:
+        raise RuntimeError(f"failed saved query result {path.name}: {error or 'tool error'}")
+    status = result.get("status")
+    if status is not None:
+        status = str(status).strip().lower()
+        if status in PENDING_STATUSES:
+            return False
+        if status not in SUCCESS_STATUSES:
+            raise RuntimeError(f"unsuccessful saved query result {path.name}: status {status!r}")
+    # Legacy completed replies have no status; column metadata and complete
+    # row/partition checks below still apply. A submission handle is not a result.
+    return isinstance(result.get("data"), list)
 
 
 def _merge_partitions(handle: str, pages: dict[int, tuple[float, dict[str, Any]]]) -> list[dict[str, Any]]:
@@ -80,29 +99,39 @@ def load_marked_results(tool_calls_dir: Path) -> dict[str, list[dict[str, Any]]]
         else:
             raise RuntimeError(f"missing query handle for marker {marker}: {output_path.name}")
 
+    selected = {}
+    for marker, candidates in handles.items():
+        if not candidates:
+            raise RuntimeError(f"no saved query handle for marker {marker}")
+        selected[marker] = sorted(candidates)[-1][1]
+
     # handle -> partition index -> (mtime, result). Newest save wins per partition.
     completed: dict[str, dict[int, tuple[float, dict[str, Any]]]] = {}
+    pending: dict[str, float] = {}
     for output_path in tool_calls_dir.glob("output_*.json"):
         saved = _load(output_path)
         result = saved.get("result") or {}
-        if not isinstance(result, dict) or not isinstance(result.get("data"), list):
+        if not isinstance(result, dict):
             continue
         handle = result.get("statement_handle")
-        if not handle:
+        if handle not in selected.values():
+            continue
+        mtime = output_path.stat().st_mtime
+        if not _result_ready(saved, result, output_path):
+            if result.get("status") is not None:
+                pending[handle] = max(pending.get(handle, 0), mtime)
             continue
         partition = int(result.get("partition") or 0)
-        mtime = output_path.stat().st_mtime
         pages = completed.setdefault(handle, {})
         if partition not in pages or pages[partition][0] < mtime:
             pages[partition] = (mtime, result)
 
     rows: dict[str, list[dict[str, Any]]] = {}
-    for marker, candidates in handles.items():
-        if not candidates:
-            raise RuntimeError(f"no saved query handle for marker {marker}")
-        latest = sorted(candidates)[-1][1]
+    for marker, latest in selected.items():
         if latest not in completed or not any(page.get("result_set_meta_data") for _, page in completed[latest].values()):
             raise RuntimeError(f"no completed saved result for marker {marker}")
+        if pending.get(latest, 0) >= max(mtime for mtime, _ in completed[latest].values()):
+            raise RuntimeError(f"latest saved query result is not complete for marker {marker}")
         rows[marker] = _merge_partitions(latest, completed[latest])
     return rows
 

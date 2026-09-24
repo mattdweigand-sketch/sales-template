@@ -25,9 +25,12 @@ in the source receipts and reverse-map only an approved write. Task fields:
 An elapsed event is not attendance evidence. Empty results differ from errors.
 
 Mail helpers read `{ "result": { "email_results": { "emails": [...] } } }`.
-Each message has `email_id`, `thread_id`, offset-aware ISO `date`, `from_`, `to`
-and `cc` address lists, `subject`, `body_text` or `body`, optional `snippet`, and
-optional attachment objects with `filename`. Preserve actual sent/inbound direction.
+Each message has `email_id`, `thread_id`, offset-aware ISO `date`, a single
+`from_` sender string (an address or `Name <address>`), `to` and `cc` address
+lists, `subject`, `body_text` or `body`, optional `snippet`, and optional
+attachment objects with `filename`. Normalize a provider's sender list to a
+string only when it identifies one unambiguous sender; retain the raw response.
+Preserve actual sent/inbound direction.
 Fetch all pages before computing unanswered counts; a truncated search is a gap.
 The digest is a navigation aid. Read the full newest outbound and inbound bodies
 before drafting. Save attachment bytes only when the task requires them.

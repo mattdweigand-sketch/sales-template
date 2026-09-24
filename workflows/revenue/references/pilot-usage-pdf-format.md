@@ -59,4 +59,13 @@ print_pilot_usage_pdf.py       --html <dir>/report.html --policy _shared/policy.
 
 Assemble accepts complete normalized results via `--results`, or the explicit saved warehouse directory via `--tool-calls`; no implicit session path is scanned. Normalized result keys are `q1_roster`, `q4_grants`, `q5_tasks`, each an array with the query output columns below. Keep native terminal and pagination receipts beside them. Print uses an installed Chromium binary, validates two Letter pages and metadata, and retains an older output on failure. The default uses system fonts. Optional locally supplied fonts are hash checked; no branded fonts or font downloads are included.
 
+For saved warehouse calls, normalize an explicit `result.status` to `success`
+(or `succeeded`) only after provider terminal success. `pending`, `queued`,
+`running` and `submitted` are not completed results. Explicit errors or other
+statuses on a selected statement handle stop assembly, even if rows are present.
+Legacy completed replies without a status remain supported through their column
+metadata and complete row/partition shape; the adapter must still verify and
+retain their native terminal-success evidence. Do not strip a failed status or
+error to turn it into a legacy reply.
+
 Run the commands with `python3 scripts/pilot_usage/<script>` from the repository root. PDF printing requires the optional dependencies in `scripts/pilot_usage/requirements.txt` and an installed Chromium binary (`--renderer <path>` when not on PATH). Render and visually inspect both pages after printing; page count alone cannot detect clipping. Keep the narrative review separate from the run lifecycle's `review.json`. Declare the narrative review, normalized input, results and delivered PDF as run artifacts. The approved flag records an actual conversation review; it is not itself authorization.
