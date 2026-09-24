@@ -1,35 +1,75 @@
 # Sales Workflow Template
 
-Five configurable workflows for sales execution, with full procedures,
-five task-specific references, and local evidence helpers.
-Built with the Interpretable Context Methodology: small routing files, explicit
-workflow contracts, shared configuration and editable, human-reviewed run outputs.
+A reusable workspace for salespeople working with an AI assistant. It provides
+instructions, templates and checks for turning CRM records, email, calendars
+and meeting notes into useful sales preparation and follow-up.
 
-Start with [setup](setup/CONTEXT.md). Agents enter through [AGENTS.md](AGENTS.md).
+The assistant gathers evidence and prepares recommendations. You review and
+approve the exact changes before it updates CRM or creates an unsent email
+draft. These workflows never send email.
 
-## Workflows
-See [the task router](CONTEXT.md) for all five commands and their canonical owners.
+## What you can do
 
-## Structure
-- `workflows/`: canonical procedures grouped by task family; run.md owns the common review lifecycle.
-- `_shared/`: common boundaries and example configuration; deployment values stay local.
-- `_templates/`: copied run starter; products live in ignored output/{run-id}/.
-- `.agents/skills/` and `.claude/commands/`: generated thin pointers.
-- `scripts/` and `tests/`: local checks, wrapper generation and run-state tooling.
+| Task | What you get |
+|---|---|
+| [Prepare for a sales call](workflows/engagement/sales-call-prep.md) | A brief covering the account, attendees, history and unanswered questions. |
+| [Record a completed interaction](workflows/engagement/interaction-sync.md) | A call summary, proposed CRM updates and a follow-up draft. |
+| [Review due tasks](workflows/engagement/task-triage-speed-run.md) | Suggested follow-ups, drafts and task changes based on recent activity. |
+| [Review the pipeline](workflows/revenue/pipeline-review.md) | Stale or missing deal information and proposed corrections supported by evidence. |
+| [Build a quarterly forecast](workflows/revenue/forecast-weekly.md) | Booked deals, deals expected to close, and a path toward your target when set. |
 
-## Validate
+Reviews cite their sources and label missing evidence.
+
+## Start here
+
+You need an AI assistant that can read this workspace. Python 3.9+ and Git run
+the local checks. For live work, configure the assistant's access to your CRM,
+email and calendar; this repository does not install those connections.
+
+1. Read the [fictional example review](examples/review.md) to see a small example of the output.
+2. Follow [installation and setup](setup/installation.md). Configure your sales settings and service access, then check the setup with fictional test data before using live records.
+3. Ask your assistant to read [AGENTS.md](AGENTS.md), choose a workflow from [the task list](CONTEXT.md), and work on your specific call, tasks or accounts.
+
+Each task gets its own local folder under `output/` for the request, source
+evidence, review and results. Deployment settings and task outputs are ignored
+by Git so they stay separate from the reusable template.
+
+## Repository map
+
+```text
+sales-template/
+├── README.md                    Overview and starting point for people
+├── AGENTS.md                    Starting instructions for AI assistants
+├── CONTEXT.md                   List of workflows and where to find them
+├── setup/                       Installation and configuration guides
+├── workflows/
+│   ├── engagement/              Call prep, interaction notes and follow-up tasks
+│   ├── revenue/                 Pipeline reviews and quarterly forecasts
+│   └── run.md                   How a task moves through review and approval
+├── _shared/                     Common rules, example settings and data formats
+├── _templates/run/              Blank files copied when starting a task
+├── examples/                    Fictional review example
+├── scripts/                     Local validation, calculations and task tools
+├── tests/                       Tests using fictional data
+├── .agents/skills/              Generated workflow shortcuts for agents
+├── .claude/commands/            Generated workflow shortcuts for Claude
+├── .github/workflows/           Automated repository checks
+├── AUDIT-REMEDIATION-SPEC.md     Maintainer audit and verification record
+└── output/                     Local task folders; created during use, Git-ignored
+```
+
+## Check the repository
+
+Run from the repository root:
+
 ```bash
 python3 scripts/check_repo.py
 python3 -m unittest discover -s tests -v
 ```
 
-No network services are called by these checks. See [portability](setup/portability.md)
-for required adapters and the limits of local validation. The template is not
-connected to a CRM, mail account, calendar or agent host.
-All local helpers use the Python standard library.
+These checks use local files and fictional test data; they do not call live services.
+The Python helpers use the standard library, with no extra Python packages.
 
-## Contribute
-Edit the owning workflow or factory file, then update the wrapper registry only
-if routing changes. Run `python3 scripts/wrappers.py` to regenerate task maps and pointers,
-and validate. Keep examples synthetic and never commit deployment configuration
-or run outputs. [MIT license](LICENSE).
+For changes to workflows or helpers, see [the tooling guide](scripts/CONTEXT.md).
+For deployment requirements, see [portability](setup/portability.md).
+Keep examples fictional and customer data out of commits. [MIT license](LICENSE).
