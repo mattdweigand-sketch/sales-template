@@ -1,4 +1,5 @@
 """Synthetic regressions for review isolation, invalidation and exact result accounting."""
+import copy
 import hashlib
 import json
 from pathlib import Path
@@ -89,7 +90,27 @@ class WorkspaceTests(unittest.TestCase):
             self.pair("booked", "crm", [], "booked_in_quarter", object="Opportunity", start_date="2026-07-01", end_date="2026-10-01")
             self.bind_rows("forecast", {"quarter_start":"2026-07-01", "quarter_end":"2026-10-01", "target":None,
                 "rows":[{"deal_id":"o1", "population":"current", "bucket":"upside", "amount":"100", "currency":"USD", "revenue_basis":"synthetic basis", "source_refs":["raw/opps.json"]}]})
+            statement = self.forecast_statement("timing-1", "We aim to decide this quarter.", "2026-07-01", "2026-09-30")
+            self.assessment = {"deals":[{"deal_id":"o1", "rationale":"Buyer names an in-quarter decision window; assess as Upside.",
+                                         "statements":[statement], "blockers":[], "conflicts":[]}]}
+            self.bind_rows("forecast_assessment", self.assessment)
         self.save_inputs()
+
+    def forecast_statement(self, sid, quote, first, last, kind="decision", occurred_at="2026-09-22T12:00:00Z", **changes):
+        ref = "raw/" + sid + ".json"
+        (self.path / ref).write_text(json.dumps({"email_id":sid, "body_text":quote}))
+        return {"id":sid, "source_id":sid, "source_refs":[ref], "text_path":["body_text"],
+                "speaker":"buyer", "speaker_name":"Example Buyer", "occurred_at":occurred_at,
+                "quote":quote, "kind":kind, "date_start":first, "date_end":last,
+                "supersedes":[], "revision_quote":None, **changes}
+
+    def assess_forecast(self, bucket="upside"):
+        self.bind_rows("forecast_assessment", self.assessment)
+        path = self.path / "forecast.json"
+        forecast = json.loads(path.read_text()); forecast["rows"][0]["bucket"] = bucket
+        path.write_text(json.dumps(forecast))
+        self.save_inputs()
+        return runs.validate(self.root, self.path.name)
 
     def test_pipeline_recomputes_coverage_and_exact_census(self):
         self.revenue_fixture()
@@ -122,6 +143,191 @@ class WorkspaceTests(unittest.TestCase):
             doc = json.loads(original); doc[section][key] = value; target.write_text(json.dumps(doc))
             checked = runs.validate(self.root, self.path.name)
             self.assertFalse(checked["report_complete"], (section,key,checked))
+
+    def test_forecast_assessment_is_required_even_without_effects(self):
+        self.revenue_fixture("forecast-weekly")
+        del self.inputs["sources"]["forecast_assessment"]; self.save_inputs()
+        checked = runs.validate(self.root, self.path.name)
+        self.assertTrue(checked["can_review"])
+        self.assertFalse(checked["report_complete"])
+        self.assertFalse(checked["ready_for_effects"])
+        self.assertIn("missing required source: forecast_assessment", checked["errors"])
+        # A genuine partial report remains reviewable; it gains no effect approval.
+        runs.record_review(self.root, self.path.name, "Synthetic reviewer", "test-only-partial", [])
+
+    def test_buyer_deferral_blocks_commit_and_upside_but_allows_exclusion(self):
+        self.revenue_fixture("forecast-weekly")
+        self.assessment["deals"][0]["statements"] = [self.forecast_statement(
+            "delay", "Our decision moved to October 15. We cannot sign in September.", "2026-10-15", "2026-10-15")]
+        for bucket in ("commit", "upside"):
+            checked = self.assess_forecast(bucket)
+            self.assertFalse(checked["ready_for_effects"], bucket)
+            self.assertTrue(any("deferral beyond" in e for e in checked["errors"]), checked)
+        self.assertTrue(self.assess_forecast("excluded")["report_complete"])
+
+    def test_unrelated_newer_message_cannot_override_deferral(self):
+        self.revenue_fixture("forecast-weekly")
+        prior = self.forecast_statement("delay", "We will decide October 15.", "2026-10-15", "2026-10-15")
+        newer = self.forecast_statement("thanks", "Thanks for the deck.", None, None, kind="context", occurred_at="2026-09-23T08:00:00Z")
+        self.assessment["deals"][0]["statements"] = [prior, newer]
+        self.assertFalse(self.assess_forecast("commit")["ready_for_effects"])
+        newer.update(supersedes=["delay"], revision_quote=newer["quote"])
+        checked = self.assess_forecast("commit")
+        self.assertFalse(checked["ready_for_effects"])
+        self.assertTrue(any("revision needs" in e for e in checked["errors"]), checked)
+
+    def test_later_explicit_buyer_revision_preserves_old_source_and_allows_bucket(self):
+        self.revenue_fixture("forecast-weekly")
+        prior = self.forecast_statement("delay", "We will decide October 15.", "2026-10-15", "2026-10-15")
+        quote = "We have brought our signature forward from October 15 to September 29."
+        newer = self.forecast_statement("revision", quote, "2026-09-29", "2026-09-29", kind="signature",
+                                        occurred_at="2026-09-23T08:00:00Z", supersedes=["delay"], revision_quote=quote)
+        self.assessment["deals"][0]["statements"] = [prior, newer]
+        checked = self.assess_forecast("commit")
+        self.assertTrue(checked["report_complete"], checked["errors"])
+        assessment = checked["checks"]["forecast_assessment"]["deals"][0]
+        self.assertEqual(assessment["active_statement_ids"], ["revision"])
+        self.assertEqual(assessment["superseded_statement_ids"], ["delay"])
+        self.assertTrue((self.path / "raw/delay.json").is_file())
+        original = copy.deepcopy(newer)
+        for changes in ({"occurred_at":prior["occurred_at"]}, {"speaker":"seller"},
+                        {"kind":"milestone"}, {"date_start":None,"date_end":None},
+                        {"revision_quote":None}, {"revision_quote":"Invented revision"}, {"supersedes":["missing"]}):
+            with self.subTest(changes=changes):
+                self.assessment["deals"][0]["statements"][1] = dict(original, **changes)
+                self.assertFalse(self.assess_forecast("commit")["ready_for_effects"])
+
+    def test_milestone_and_seller_date_do_not_establish_buyer_signature(self):
+        self.revenue_fixture("forecast-weekly")
+        self.assessment["deals"][0]["statements"] = [self.forecast_statement(
+            "milestone", "Our evaluation review is September 29.", "2026-09-29", "2026-09-29", kind="milestone")]
+        checked = self.assess_forecast("commit")
+        self.assertFalse(checked["report_complete"])
+        self.assertEqual(checked["checks"]["forecast_assessment"]["deals"][0]["timing"], "unknown")
+        self.assessment["deals"][0]["statements"][0].update(kind="decision", speaker="seller")
+        self.assertFalse(self.assess_forecast("upside")["ready_for_effects"])
+
+    def test_conflicting_buyer_timing_requires_input_even_when_excluded(self):
+        self.revenue_fixture("forecast-weekly")
+        self.assessment["deals"][0]["statements"] = [
+            self.forecast_statement("early", "We will decide September 29.", "2026-09-29", "2026-09-29"),
+            self.forecast_statement("late", "Decision is October 15.", "2026-10-15", "2026-10-15", occurred_at="2026-09-23T08:00:00Z")]
+        for bucket in ("commit", "upside", "excluded"):
+            checked = self.assess_forecast(bucket)
+            self.assertFalse(checked["ready_for_effects"])
+            self.assertEqual(checked["checks"]["forecast_assessment"]["deals"][0]["timing"], "conflicting")
+
+    def test_decision_and_signature_can_differ_but_signature_deferral_still_wins(self):
+        self.revenue_fixture("forecast-weekly")
+        decision = self.forecast_statement("decision", "We will decide September 28.", "2026-09-28", "2026-09-28")
+        signature = self.forecast_statement("signature", "We will sign September 29.", "2026-09-29", "2026-09-29", kind="signature")
+        self.assessment["deals"][0]["statements"] = [decision, signature]
+        self.assertTrue(self.assess_forecast("commit")["report_complete"])
+        self.assessment["deals"][0]["statements"][1] = self.forecast_statement(
+            "signature", "We will sign October 15.", "2026-10-15", "2026-10-15", kind="signature")
+        self.assertFalse(self.assess_forecast("upside")["ready_for_effects"])
+        self.assertTrue(self.assess_forecast("excluded")["report_complete"])
+
+    def test_declared_conflict_and_unknown_timing_are_not_silent_exclusions(self):
+        self.revenue_fixture("forecast-weekly")
+        deal = self.assessment["deals"][0]
+        other = self.forecast_statement("other", "The approval owner remains disputed.", None, None, kind="context")
+        deal["statements"].append(other)
+        deal["conflicts"] = [{"statement_ids":["timing-1", "other"], "reason":"Decision authority conflicts with the stated timing."}]
+        self.assertFalse(self.assess_forecast("excluded")["report_complete"])
+        deal["conflicts"] = []; deal["statements"] = []
+        self.assertFalse(self.assess_forecast("excluded")["report_complete"])
+
+    def test_forecast_timing_range_must_fit_configured_quarter(self):
+        self.revenue_fixture("forecast-weekly")
+        statement = self.assessment["deals"][0]["statements"][0]
+        for first, last in (("2026-09-30", "2026-10-02"), ("2026-06-29", "2026-06-30"),
+                            (None, "2026-09-30"), ("2026-09-30", "2026-09-01")):
+            with self.subTest(first=first, last=last):
+                statement.update(date_start=first, date_end=last)
+                self.assertFalse(self.assess_forecast("commit")["ready_for_effects"])
+        statement.update(date_start="2026-10-15", date_end="2026-10-15")
+        policy_path = self.root / "_shared/policy.json"
+        policy = json.loads(policy_path.read_text()); policy["forecast"]["fiscal_year_start_month"] = 2
+        policy_path.write_text(json.dumps(policy))
+        path = self.path / "forecast.json"; forecast = json.loads(path.read_text())
+        forecast.update(quarter_start="2026-08-01", quarter_end="2026-11-01"); path.write_text(json.dumps(forecast))
+        path = self.path / "calls/input_booked.json"; receipt = json.loads(path.read_text())
+        receipt["arguments"].update(start_date="2026-08-01", end_date="2026-11-01"); path.write_text(json.dumps(receipt))
+        checked = self.assess_forecast("commit")
+        self.assertTrue(checked["report_complete"], checked["errors"])
+
+    def test_forecast_quote_and_full_body_location_are_verified(self):
+        self.revenue_fixture("forecast-weekly")
+        statement = self.assessment["deals"][0]["statements"][0]
+        original = copy.deepcopy(statement)
+        for changes in ({"quote":"Invented buyer promise"}, {"text_path":["missing"]},
+                        {"source_refs":[]}, {"source_refs":["../outside.txt"]}, {"source_refs":["raw/missing.json"]}):
+            with self.subTest(changes=changes):
+                self.assessment["deals"][0]["statements"][0] = dict(original, **changes)
+                self.assertFalse(self.assess_forecast()["ready_for_effects"])
+        raw = self.path / original["source_refs"][0]
+        raw.write_text(json.dumps({"snippet":original["quote"]}))
+        self.assessment["deals"][0]["statements"][0] = dict(original, text_path=["snippet"])
+        self.assertFalse(self.assess_forecast()["ready_for_effects"])
+        raw = self.path / "raw/plain.txt"; raw.write_text(original["quote"])
+        self.assessment["deals"][0]["statements"][0] = dict(original, source_refs=["raw/plain.txt"], text_path=[])
+        self.assertTrue(self.assess_forecast()["report_complete"])
+
+    def test_forecast_assessment_census_is_exact(self):
+        self.revenue_fixture("forecast-weekly")
+        original = copy.deepcopy(self.assessment)
+        for deals in ([], original["deals"] * 2, [dict(original["deals"][0], deal_id="another-deal")], [None]):
+            self.assessment = {"deals":deals}
+            self.assertFalse(self.assess_forecast()["ready_for_effects"])
+
+    def test_commit_requires_owned_dated_open_blockers(self):
+        self.revenue_fixture("forecast-weekly")
+        deal = self.assessment["deals"][0]
+        deal["statements"].append(self.forecast_statement("legal", "Legal review is still outstanding.", None, None, kind="context"))
+        deal["blockers"] = [{"summary":"Legal review", "statement_ids":["legal"], "owner":None, "due_date":None}]
+        self.assertFalse(self.assess_forecast("commit")["ready_for_effects"])
+        self.assertTrue(self.assess_forecast("upside")["report_complete"])
+        deal["blockers"][0].update(owner="Example Buyer", due_date="2026-09-28")
+        self.assertTrue(self.assess_forecast("commit")["report_complete"])
+        deal["blockers"] = None
+        for bucket in ("commit", "upside"):
+            self.assertFalse(self.assess_forecast(bucket)["ready_for_effects"])
+
+    def test_forecast_assessment_and_full_sources_are_frozen(self):
+        self.revenue_fixture("forecast-weekly")
+        paths = [self.path / "forecast_assessment.json", self.path / "raw/timing-1.json",
+                 self.root / "scripts/forecast_assessment.py",
+                 self.root / "workflows/revenue/references/forecast-assessment.md"]
+        for path in paths:
+            with self.subTest(path=str(path)):
+                runs.record_review(self.root, self.path.name, "Synthetic reviewer", "test-only-review", [])
+                original = path.read_bytes()
+                path.write_bytes(original + b"\n")
+                self.assertEqual(runs.status(self.root, self.path.name)["state"], "review_stale")
+                path.write_bytes(original)
+
+    def test_forecast_category_effect_cannot_bypass_assessed_bucket(self):
+        self.revenue_fixture("forecast-weekly")
+        effect = {"id":"F1", "operation":"update", "destination":"Opportunity", "record_id":"o1",
+                  "preimage":{"ForecastCategoryName":"Pipeline"}, "payload":{"ForecastCategoryName":"Commit"},
+                  "source_refs":["raw/opps.json"]}
+        self.inputs["effects"] = [effect]
+        with (self.path / "01_review.md").open("a") as stream:
+            stream.write("\n## Effect F1\nSee exact category proposal in inputs.json.\n")
+        checked = self.assess_forecast("upside")
+        self.assertFalse(checked["ready_for_effects"])
+        self.assertTrue(any("category update contradicts" in e for e in checked["errors"]), checked)
+        effect["payload"]["ForecastCategoryName"] = "Best Case"
+        self.assertTrue(self.assess_forecast("upside")["ready_for_effects"])
+        self.assessment["deals"][0]["statements"] = [self.forecast_statement(
+            "delay", "We will decide October 15.", "2026-10-15", "2026-10-15")]
+        self.assertFalse(self.assess_forecast("excluded")["ready_for_effects"])
+        with self.assertRaisesRegex(ValueError, "category update contradicts"):
+            runs.record_review(self.root, self.path.name, "Synthetic reviewer", "test-only-effect", ["F1"])
+        self.assess_forecast("upside")
+        with self.assertRaisesRegex(ValueError, "deferral beyond"):
+            runs.record_review(self.root, self.path.name, "Synthetic reviewer", "test-only-effect", ["F1"])
 
     def test_shared_review_input_ancestor_symlink_rejected(self):
         self.ready()

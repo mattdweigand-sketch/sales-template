@@ -13,6 +13,7 @@ Process and ownership:
 | mail_contact_stats.py | Count complete paired mail history with source-linked reply classification |
 | mail_thread_digest.py | Produce bounded navigation excerpts; full bodies remain decision evidence |
 | forecast_math.py | Compute Decimal totals and the shortest reviewed Upside path |
+| forecast_assessment.py | Check recorded buyer timing, quotes and contradictions through runs.py; meaning remains reviewed |
 | triage_check.py | Compute fixed Task groups and local calendar dates from established facts |
 
 Read the relevant [adapter data contract](../_shared/adapter-contract.md) before

@@ -37,6 +37,14 @@ For each deal in `policy.forecast.evidence_scope`:
 
 Apply `policy.forecast.timing_guard` before the first-match bucket rules: a buyer's explicit signature/decision deferral beyond this quarter excludes the deal unless later evidence explicitly revises that timing. Unresolved conflicting timing needs input and cannot enter Commit/Upside; an unrelated newer message or stale CRM date does not override it. Then test `policy.forecast.buckets` against complete evidence. Name failed conditions and sources. A passed CRM CloseDate alone does not exclude a deal. Apply pull_in separately to next-quarter scope, and record CRM corrections only under `policy.forecast.crm_gaps`.
 
+Read [the assessment contract](references/forecast-assessment.md). Save one
+source-backed assessment for each current-quarter row, including excluded deals,
+in `forecast-assessment.json`, bound as `sources.forecast_assessment`. Retain exact
+buyer quotes, full-body locations, timing ranges, open blockers and conflicting
+statements. Distinguish signature/decision timing from milestones. Preserve an
+earlier deferral and name the later explicit revision if it is superseded. Missing
+timing stays needs-input; a stage label alone does not establish this quarter.
+
 ### 5. Compute
 
 Save `forecast-input.json`, bound as `inputs.json`'s `sources.forecast`: `quarter_start`, `quarter_end`, decimal-string-or-null `target`, and `rows`. Each row has `deal_id`, `population` (booked/current/next), `bucket` (commit/upside/excluded for current; null otherwise), decimal-string-or-null `amount`, `currency`, the reviewed `revenue_basis` label, and run-relative `source_refs`. Include every covered population member once; readiness reconciles it against the source census.
@@ -46,6 +54,13 @@ Run `policy.tooling.scripts.forecast_math <run>/forecast-input.json --policy _sh
 ### 6. Report
 
 Run `policy.tooling.scripts.coverage_check --calls <run>/calls --scope forecast --since <run-start> --policy _shared/policy.json`. Exit 1 means incomplete: resolve it or deliver an explicitly partial report and withhold affected effects through the run lifecycle. Read [the report format](references/forecast-weekly-report-format.md), which owns header order and section layout. Notes use the checker's newest valid stored-entry date across in-scope deals; no valid date means unknown. If before the configured business-week start, append `no notes written this week`. Include every pull-in candidate/noncandidate, next-quarter preview only in its policy window, and source-supported CRM/category proposals.
+
+Save the actual report and exact proposals through the run lifecycle, set its
+review status to ready, then run `python3 scripts/runs.py validate RUN_ID` before
+presenting it for approval. This checks the assessment as well as coverage and
+arithmetic. Resolve timing/contradiction errors or deliver a partial report with
+dependent call/path claims and effects withheld. Matching quotes and consistent
+dates do not establish that the interpretation is correct.
 
 Then wait. Every proposal is one record per approval. `skip` is an answer.
 
@@ -69,5 +84,7 @@ calculation checks before following the [run lifecycle](../run.md).
 
 ## Human check
 
-Review the evidence behind each forecast bucket, amount basis, target and
-proposed CRM correction before approving effects.
+Review each bucket beside its supporting quote, contrary evidence, blockers and
+any claimed timing revision. Confirm speaker attribution and that a milestone
+was not interpreted as a signature date. Review amount basis, target and exact
+CRM corrections through the existing approval gate before any effects.

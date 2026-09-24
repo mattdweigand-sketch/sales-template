@@ -21,7 +21,7 @@ REQUIRED = {
     "interaction-sync": {"interaction", "reconciliation"},
     "task-triage-speed-run": {"tasks", "triage", "calls", "mail"},
     "pipeline-review": {"opportunities", "tasks", "events", "calls"},
-    "forecast-weekly": {"opportunities", "tasks", "events", "calls", "forecast"},
+    "forecast-weekly": {"opportunities", "tasks", "events", "calls", "forecast", "forecast_assessment"},
 }
 
 
@@ -411,7 +411,7 @@ def validate(root, run_id):
                             errors.append("invalid person reconciliation")
                         elif person["status"] == "unresolved":
                             errors.append("person identity remains unresolved")
-        if name in ("pipeline-review", "forecast-weekly") and REQUIRED[name] <= set(sources):
+        if name in ("pipeline-review", "forecast-weekly") and REQUIRED[name] - {"forecast_assessment"} <= set(sources):
             scope = "forecast" if name == "forecast-weekly" else "pipeline-daily" if doc["mode"] == "daily" else "pipeline"
             covered = coverage(source("calls"), policy, since, scope)
             checks["coverage"] = covered
@@ -443,6 +443,11 @@ def validate(root, run_id):
                 errors += calculated["errors"]
                 if not calculated["complete"]:
                     errors.append("forecast calculation incomplete")
+                if "forecast_assessment" in sources and not calculated["errors"]:
+                    from forecast_assessment import evaluate as assess_forecast
+                    assessed = assess_forecast(read_json(source("forecast_assessment")), forecast, path)
+                    checks["forecast_assessment"] = assessed
+                    errors += assessed["errors"]
                 start, end, following = quarter_bounds(day, policy["forecast"])
                 expected_target = policy["forecast"]["targets"].get(start.isoformat(), policy["forecast"].get("target_default"))
                 from decimal import Decimal
@@ -454,6 +459,14 @@ def validate(root, run_id):
                 expected_ids = set(covered.get("in_scope_ids", [])) | set(covered.get("booked_ids", []))
                 if set(calculated["row_ids"]) != expected_ids:
                     errors.append("forecast rows do not match complete covered populations")
+                forecast_rows = {r["deal_id"]: r for r in forecast.get("rows", [])}
+                for effect in doc["effects"]:
+                    if effect.get("destination") == "Opportunity" and "ForecastCategoryName" in effect.get("payload", {}):
+                        row = forecast_rows.get(effect.get("record_id"), {})
+                        bucket = row.get("bucket")
+                        if (row.get("population") != "current" or bucket not in ("commit", "upside")
+                                or effect["payload"]["ForecastCategoryName"] != policy["forecast"]["category_mapping"].get(bucket)):
+                            errors.append(effect["id"] + ": category update contradicts the assessed current-quarter bucket")
                 opportunity_by_id = {r["Id"]: r for r in census["opportunities"]}
                 booked_by_id = {r["Id"]: r for q in queries if q.get("selection") == "booked_in_quarter" for r in q["records"]}
                 for row in forecast.get("rows", []):

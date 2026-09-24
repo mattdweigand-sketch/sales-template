@@ -33,6 +33,13 @@ Every next-quarter in-scope deal with an Amount, one line each. No deal is omitt
 - <who>: <what, for which deal, by when>
 (or `None.`)
 
+## Bucket evidence
+- <Account> · <bucket> · <rationale under the configured criteria>.
+  Buyer timing: "<exact quote>" · <speaker, source date and full-body link>.
+  Blockers: <none identified after review | named blockers, owners and dates | unknown>.
+  Contrary evidence: <quoted source and unresolved conflict | none identified>.
+  Timing revision: <earlier statement → later explicit revision quote and source | none>.
+
 ## CRM gaps (<n>)
 A. <Account> CloseDate <old> → <new>. Evidence: <source, date>.
 B. <Account> NextSteps current first entry → exact proposed dated sentence per policy.pipeline.note_next_line. Include a separate factual history entry only when proposed and supported. Preserve existing dated entries. Evidence: <source, date>.
@@ -50,3 +57,12 @@ omit gap/path claims that depend on a complete call. Unknown Upside means an
 incomplete path. Never display unknown as zero. Use the helper's selected-path
 buffer; any optional all-Upside buffer must be separately labeled. When the call
 already meets target, the selected path is empty and no additional deal is required.
+
+Include every current-quarter row once under Bucket evidence, including excluded
+and needs-input deals. Use the bound forecast assessment; do not author a separate
+decision payload. Show the source-backed reason for exclusion and retain contrary
+evidence beside the recommendation. Label unknown timing as needs input, not as
+a buyer refusal. If assessment validation fails, mark the report partial and
+withhold dependent complete call, gap and target-path claims and all effects.
+The existing review checks quote meaning and claimed revisions; a structural
+pass does not certify the forecast judgment.

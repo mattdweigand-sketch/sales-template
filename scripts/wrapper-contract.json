@@ -71,6 +71,8 @@
         "scripts/mail_evidence.py",
         "workflows/revenue/references/pipeline-review-collect.md",
         "scripts/forecast_math.py",
+        "scripts/forecast_assessment.py",
+        "workflows/revenue/references/forecast-assessment.md",
         "scripts/mail_contact_stats.py"
       ]
     }

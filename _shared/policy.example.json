@@ -157,7 +157,7 @@
       "mail"
     ],
     "activity_days": 14,
-    "timing_guard": "Before Commit/Upside: a verified buyer statement placing signature or decision at or after the next-quarter start excludes the deal from the current-quarter call unless later verified evidence explicitly supersedes that timing. An unrelated newer message or stale CRM CloseDate does not supersede it. Unresolved contradictory timing needs input and cannot enter Commit or Upside.",
+    "timing_guard": "Before Commit/Upside: require a source-backed buyer signature/decision date or window within this quarter. Missing or conflicting timing needs input; a stage label or CRM CloseDate alone does not supply it. A buyer statement placing signature or decision at or after the next-quarter start excludes the deal unless later buyer evidence explicitly supersedes that timing. Retain both statements and the exact revision quote in the forecast assessment. An unrelated newer message or evaluation milestone does not supersede a deferral. Human review checks the recorded interpretation against the full sources.",
     "buckets": {
       "commit": "Meets commit_stages and its configured stage-entry criteria, or has a buyer-named decision date inside the quarter; activity within activity_days from an approved source; no open blocker without a named owner and date. A passed CloseDate becomes a CRM proposal.",
       "upside": "An in-scope deal with Amount set, a plausible path to a decision this quarter, activity within activity_days, and no buyer-stated delay past quarter end.",

@@ -64,3 +64,13 @@ in each workflow. Forecast source settings name crm/calendar/mail exactly once;
 stage keys, nonnegative integer thresholds and reporting precision must be valid.
 Legacy mail envelopes remain readable for inspection, but definitive counts need
 real paired receipts and reviewed classifications. Never synthesize completion.
+
+Forecast runs now require `sources.forecast_assessment` using the
+[forecast assessment contract](../workflows/revenue/references/forecast-assessment.md).
+Existing runs without it remain inspectable but cannot claim a complete report
+or effect readiness. Add assessments from the retained full evidence, rerun
+validation and obtain review again; do not invent quotations or migrate approval
+automatically. Compare the existing `forecast.timing_guard` text with the updated
+example: Commit/Upside now need an evidenced buyer date or window within the
+quarter. Preserve other private policy settings. No new connector, policy key or
+approval channel is required.

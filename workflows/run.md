@@ -23,7 +23,7 @@ not an empty successful result. `effects` is the exact proposal list below.
 | interaction-sync | `interaction`: transcript or user notes; `reconciliation`: JSON with people and source_refs |
 | task-triage-speed-run | `tasks`: selected Task census; `triage`: assessed helper input; `calls`: paired receipts; `mail`: raw mail file/directory |
 | pipeline-review | `opportunities`, `tasks`, `events`: normalized record arrays; `calls`: paired receipts |
-| forecast-weekly | Pipeline sources plus `forecast`: assessed forecast_math input |
+| forecast-weekly | Pipeline sources plus `forecast`: assessed forecast_math input; `forecast_assessment`: source-backed current-quarter bucket assessments |
 
 A reconciliation person has `status` (matched/proposed/unresolved) and source_refs;
 include the actual email, employer, Account and Contact/Lead findings described
@@ -35,6 +35,10 @@ Use [adapter receipts](../_shared/adapter-contract.md); triage binds its selecte
 Task census to `selected_tasks` receipts. Calculations are recomputed from these
 files; saved pass flags are not evidence. Forecast populations and target must
 match the receipts and configured quarter. Unknown amounts remain visible gaps.
+Forecast assessments additionally bind exact buyer quotes, dates, contradictions
+and explicit timing revisions through the
+[assessment contract](revenue/references/forecast-assessment.md). Their source
+files are frozen with the review. Recorded consistency is not semantic approval.
 
 All paths stay inside the active run; absolute paths, traversal and symlinks are
 rejected. JSON `source_refs`/`evidence_refs` identify saved evidence files relative
