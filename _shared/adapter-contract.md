@@ -22,7 +22,9 @@ The hygiene helper reads an array or `{ "records": [...] }`, optionally inside
 `result`. Opportunity fields: `Id`, `AccountId`, `Account.Name`, `StageName`,
 `Amount`, `CloseDate`, `NextSteps` and the configured required/conditional fields.
 Normalize stage labels to a configured key or `key - label`; keep native values
-in the source receipts and reverse-map only an approved write. Task fields:
+in the source receipts and reverse-map only an approved write. An unknown or
+uncollected stage leaves scope unresolved. Amount is a finite JSON number or
+explicit null; boolean is not numeric. Task fields:
 `Id`, `ActivityDate`, `Status`, `IsClosed`, `Subject`, `WhatId`, `AccountId`,
 `Who.Name`, `TaskSubtype` and `Direction` (`inbound`/`outbound` when verified).
 Normalize email/call kinds and direction from provider metadata; a subject prefix
@@ -35,10 +37,47 @@ Each message has `email_id`, `thread_id`, offset-aware ISO `date`, a single
 lists, `subject`, `body_text` or `body`, optional `snippet`, and optional
 attachment objects with `filename`. Normalize a provider's sender list to a
 string only when it identifies one unambiguous sender; retain the raw response.
-Preserve actual sent/inbound direction.
-Fetch all pages before computing unanswered counts; a truncated search is a gap.
-The digest is a navigation aid. Read the full newest outbound and inbound bodies
-before drafting. Save attachment bytes only when the task requires them.
+Preserve actual sent/inbound direction. Legacy envelopes remain readable by the
+digest, but cannot establish complete history by themselves.
+
+For decision-ready counts run `mail_contact_stats.py <owner-email> <saved-envelopes...>
+--only <addresses> --calls <run>/calls --since <offset-aware-run-start>
+--policy _shared/policy.json`. It reuses the paired-receipt checker below and
+requires `contact_history` in both directions. Every supplied envelope must be
+named by its exact `provider_reference`, including empty results. Supply all
+envelopes in each selected chain. The source fields and message IDs must match
+the normalized records; passing an unrelated complete query is insufficient.
+Overlapping identical messages count once; conflicting copies fail.
+The CLI emits `{ready, errors, contacts}`; contacts retain the existing count and
+message fields. Missing completeness makes decisive counts null, with observed
+counts labeled separately. Exit 1 means a source or interpretation gap remains.
+
+Add reviewed classification only to a normalized message, retaining raw evidence:
+
+```json
+{"classification":{"kind":"substantive","basis":"content_review","evidence_refs":["../raw/message.json"]}}
+```
+
+Kinds are `substantive`, `ooo`, `bounce`, `calendar`, or `unknown`; basis is
+`provider_metadata` or `content_review`. References resolve to saved evidence.
+Metadata must establish the asserted meaning: a generic auto-replied header
+does not prove OOO. Subject/body regex matches are not classifications. Missing
+classification stays unknown; a relevant unknown response makes the unanswered
+interval unavailable. A later confirmed substantive reply can resolve an older
+ambiguity. Outbound counting does not require a response classification.
+
+Delivery evidence uses an optional `delivery_failures` list of objects with
+`recipients` (address list), `status` (`failed`, `delayed`, or `unknown`), and
+`evidence_refs`. Only an identified recipient with `failed` status receives a
+bounce consequence. Missing status is unknown. Quoted To/Cc lines and signatures
+do not identify failed recipients; a delay does not prove a permanent failure.
+These annotations are traceable assertions, not proof of human approval.
+
+The digest is a navigation aid. Read complete relevant buyer bodies before timing,
+commitment, blocker, stage, or CRM decisions; inspect the newest substantive buyer
+message for each assessed deal. Read full newest outbound/inbound bodies before
+drafting. Missing/truncated bodies are gaps; previews cannot establish absence of
+blockers. Save attachment bytes only when the task requires them.
 
 Unsent drafts need recipient/body/subject/thread readback. Some providers accept
 `thread_id` without a parent-message field; others require an explicit reply API.
@@ -85,7 +124,9 @@ recovered errors. Do not discard an unresolved failure just to pass the checker.
 ```
 
 `query_id` is stable across pages; selection arguments stay identical except the
-returned cursor and native page request. `total_count` is the complete query's
+returned cursor and native page request. Initial `cursor: null` and terminal
+`next_cursor: null` must be explicit; absence is not terminal evidence.
+`total_count` is the complete query's
 count, not the page length. If the provider lacks a count, an adapter may compute
 it only after following the native terminal page, retaining that evidence. A
 missing output, failed result, duplicate ID, orphan cursor, unreturned cursor,
@@ -93,17 +134,35 @@ changed selection or count mismatch fails every mode. Timestamps are actual
 call times. Raw references and normalized metadata still require human review;
 this local check cannot authenticate a provider or detect invisible permission
 filters. Never claim it certifies access to every possible record.
+`provider_reference` and normalized message annotation references are relative
+to `calls`; `../raw/...` siblings within the same run are allowed. Referenced
+files must exist. Absolute paths, escape outside the run, and symlinks fail.
+Other run input references remain relative to the run, as specified by its contract.
 
 Required selections:
 
 | Source | Selection | Additional arguments |
 |---|---|---|
-| crm / Opportunity | all_owned_open | One complete snapshot of every owned open opportunity; rows include OwnerId and IsClosed=false |
+| crm / Opportunity | all_owned_open | One complete snapshot of every owned open opportunity; rows include Id, OwnerId, IsClosed=false, StageName; scoped rows need AccountId and forecast rows need CloseDate and Amount |
 | crm / Contact, Task, Event | linked_accounts_and_opportunities | account_ids and opportunity_ids from the snapshot; Event fields include StartDateTime and EndDateTime |
-| crm / Opportunity | booked_in_quarter (forecast) | start_date inclusive and end_date exclusive, configured fiscal-quarter boundaries |
-| mail | external_inbox (daily review) | start_date at/before yesterday, exclude_domains exactly policy.internal domains; no account or other narrowing filters |
-| mail | account_inbound (extended review/forecast) | domains includes every known external Contact domain; start_date at/before activity window or quarter start |
-| calendar | account_calendar | account_ids, start_date and end_date covering the required window; native searches use Account name or Contact email |
+| crm / Opportunity | booked_in_quarter (forecast) | Exact fiscal-quarter start_date/end_date; rows include Id, OwnerId, IsClosed=true, IsWon=true and in-quarter CloseDate; IDs cannot overlap the open snapshot |
+| crm / Task | selected_tasks (triage) | task_ids are the exact requested Task IDs; bound Task rows match the complete receipt records |
+| mail | external_inbox (daily review) | start_date at/before yesterday; end_date covers today or is explicitly null; exclude_domains exactly policy internal domains; no account/address/subject narrowing |
+| mail | account_inbound (extended review/forecast) | domains includes every known external Contact domain; start_date at/before activity window or quarter start; end_date covers today or is explicitly null; no additional narrowing |
+| mail | contact_history (engagement) | addresses, direction=both, explicit start_date/end_date; null means unbounded; no extra mailbox/subject filters; all-history cold/unanswered decisions require an unbounded start |
+| calendar | account_calendar | account_ids, start_date and end_date covering the required window including its last lookahead day; native searches use Account name or Contact email; optional addresses must include every known Contact email for each covered account |
+
+Date intervals use inclusive starts and exclusive ends in the configured timezone.
+A finite mail end_date must be at least tomorrow; a missing bound is unknown.
+Domain comparisons ignore case. Projection `fields` and `page_size` do not narrow
+scope. Other unrecognized selection arguments, including CRM narrowing filters,
+are rejected. Common descriptor fields are query_id, source, owner_id, selection,
+object, fields and page_size, plus the selection-specific arguments above;
+provider_query and cursor identify the actual native page request.
+Calendar records use `event_id`, optional offset-aware `start`/`end`, and optional
+`attendees` objects with a single `email` address. Malformed rows remain explicit
+errors rather than becoming empty results. Narrow history can support labeled
+inspection, but cannot prove never-replied/cold status outside its window.
 
 The source object and selection describe the **actual request**, not the desired
 scope. Reviewer checks `provider_query` against that declaration. Calendar pages

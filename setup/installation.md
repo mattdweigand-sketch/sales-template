@@ -32,10 +32,26 @@ Python can use a configured execution environment; report missing capabilities
 instead of assuming a tool is installed.
 
 ### Perplexity Computer
-Install the canonical AGENTS.md, CONTEXT.md, workflows/, _shared/, _templates/
-and scripts/ into one new Project, preserving relative paths. Configure the
-local deployment files there. Before a run, sync Project Files into the
-current sandbox through the host's project-file sync capability.
+Install an intact clean export of the reviewed repository into one new Project,
+preserving relative paths and hidden directories. Include setup/, examples/,
+tests/, .agents/, .claude/, the root files and all their dependencies. A partial
+file list breaks navigation and local validation. From the reviewed checkout:
+
+```bash
+python3 scripts/check_repo.py
+git archive --format=tar --output=../sales-template-reviewed.tar HEAD
+```
+
+Extract that archive into a new empty directory and run the README validation
+commands there before uploading it. `HEAD` means the reviewed commit; uncommitted
+edits are not exported. Check that the archive contains no deployment files,
+credentials, output/, or caches. A clean Git export omits ignored/untracked local
+material; the repository check must also reject accidentally tracked private files.
+
+Configure the local deployment files in the installed copy. Before a run, sync
+Project Files into the current sandbox through the host's project-file sync
+capability. Verify path and hidden-file support in that deployment; the template
+does not establish the host's capabilities.
 
 Create each saved Project skill from the matching .agents/skills/NAME/SKILL.md
 pointer. Keep its procedure in Project Files; do not copy the full workflow
@@ -59,6 +75,11 @@ python3 scripts/runs.py status demo-001
 Follow the workflow selected by [the root router](../CONTEXT.md), then the
 [run contract](../workflows/run.md). No external action follows merely from
 creating the starter. An example claim cannot be used in live outreach.
+
+Fill the run's inputs.json with its real saved sources and proposed effects,
+then run `python3 scripts/runs.py validate demo-001` before recording review.
+An incomplete report can be reviewed with explicit gaps and no effects; an
+authored ready flag is not a replacement for the required checks.
 
 The five pointer skills require this repository's workflows, references, policy
 and helper files. Do not distribute pointer-only ZIPs.

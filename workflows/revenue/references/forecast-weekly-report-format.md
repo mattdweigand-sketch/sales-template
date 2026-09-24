@@ -5,7 +5,7 @@ Forecast layout. Plain text. Amounts use policy.reporting.currency and amount_de
 ```
 # <quarter> forecast · <report date>
 <Coverage line from coverage_check>
-Notes as of <report date>[. no notes written this week]
+Notes as of <newest valid stored-entry date | unknown: no valid dated entries>[. no notes written this week]
 
 Booked <formatted booked> (<n> deals)
 Calling
@@ -16,7 +16,7 @@ Gap to <formatted target> <formatted gap>
 ## Path to <formatted target>
 1. <Account> | <formatted amount>. <Next line action>. Buyer date: <date only if the buyer wrote it, else none stated, "<buyer's words>">.
 2. ...
-<Call plus these reaches <formatted sum>, a <formatted buffer> buffer.> | <Upside does not cover the gap by <formatted n>.>
+<Call plus these reaches <formatted path_total>, a <formatted path_buffer> buffer.> | <Upside does not cover the gap by <formatted uncovered_gap>.>
 
 ## Pull-in scope (<n>)
 Every next-quarter in-scope deal with an Amount, one line each. No deal is omitted.
@@ -45,3 +45,8 @@ Reply with letters to apply, or `skip`.
 ```
 
 When the target is null, replace the Gap line with `Target not set.` and omit the Path section.
+Unknown booked/Commit amounts require a labeled known subtotal and unknown count;
+omit gap/path claims that depend on a complete call. Unknown Upside means an
+incomplete path. Never display unknown as zero. Use the helper's selected-path
+buffer; any optional all-Upside buffer must be separately labeled. When the call
+already meets target, the selected path is empty and no additional deal is required.

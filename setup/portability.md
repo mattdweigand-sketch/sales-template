@@ -34,6 +34,9 @@ They verify represented scope, success and counts; they cannot authenticate
 provider responses or reveal records hidden by permissions. Synthetic validation
 does not prove live credentials, native mappings or successful business effects.
 Verify real reads and separately authorized effects in each deployment.
+Deploy the intact clean export described in [installation.md](installation.md),
+including hidden pointers and the setup/test/example files used by its links and
+checks. A saved pointer without those repository dependencies is incomplete.
 
 ## Existing deployment migration
 
@@ -47,3 +50,17 @@ schedules for capabilities absent from the current task router. Mail helper name
 use `mail_`; normalize Task Direction from provider metadata and configure
 reporting, cadence and fiscal-calendar settings. Preserve old run evidence and
 obtain review again when scope, evidence or proposals change.
+
+Existing runs without inputs.json remain inspectable but unvalidated. Bind their
+actual source files and exact effects, rerun checks, and obtain review of the
+changed proposal before continuing. Preserve pending provider evidence and
+reconcile uncertain effects first. Do not invent receipts or overwrite local
+policy/adapters with examples to make an old run pass.
+
+For this revision, compare and add the two helper paths
+`tooling.scripts.forecast_math` and `tooling.scripts.triage_check`, and the
+`forecast.timing_guard` rule from the example policy. Use the new input shapes
+in each workflow. Forecast source settings name crm/calendar/mail exactly once;
+stage keys, nonnegative integer thresholds and reporting precision must be valid.
+Legacy mail envelopes remain readable for inspection, but definitive counts need
+real paired receipts and reviewed classifications. Never synthesize completion.

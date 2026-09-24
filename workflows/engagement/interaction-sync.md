@@ -4,7 +4,7 @@ Turn one completed customer interaction into reviewed CRM updates and an unsent 
 
 ## Load / Skip
 
-- Load [shared rules](../../_shared/rules.md), [run lifecycle](../run.md), the configured policy and adapters, and this procedure.
+- Load [shared rules](../../_shared/rules.md), this procedure and the policy sections named below. In the [run lifecycle](../run.md), read Start/Prepare/Status for review; read Exact effects/Apply only when proposing or executing changes.
 - Read [adapter data contract](../../_shared/adapter-contract.md) only for the sources used in this run. Collection requirements use logical field names; map them through the adapter before calling a provider.
 - Load the linked reference only at its named step. Keep raw source receipts and derived artifacts in this run.
 - Skip sibling workflows, other runs, unrelated accounts, and unused adapter sections. Missing capabilities are named gaps or block their dependent effects.
@@ -15,13 +15,13 @@ One call in, one set of numbered proposals out, writes only on exact approval. C
 
 ### 1. Load policy
 
-Read the configured `_shared/policy.json` and `_shared/adapters.md`. Make the reusable workspace files available through the configured host before starting. Record the selected scope in the run request.
+From `_shared/policy.json`, load identity, crm, interaction, call_prep, email_voice, followup.default_next_date_days and the pipeline stage/required-field/NextSteps rules. Load the relevant source/write sections of `_shared/adapters.md`; skip forecast and research policy. Record the selected scope in the run request.
 
 ### 2. Find the interaction
 
 - Named call or "log this call": use the configured transcript adapter and search by day, newest first, filtering on attendee domain or title.
 - No recording: search the calendar for the meeting, tell the user `No transcript found.`, and build the log from what the user tells you plus the calendar description.
-- Record: transcript meeting id, date, start and end, attendees with emails.
+- Record date, start/end and attendees with emails. Persist `interaction_id` in request.md: use a verified namespaced transcript ID, otherwise a verified calendar occurrence ID (including the recurring occurrence), otherwise one newly generated local ID labeled `local`. Reuse it on resume; never invent a provider meeting ID. User notes must establish completion when no transcript exists; a calendar invitation alone does not.
 
 ### 3. Extract
 
@@ -33,17 +33,17 @@ From the transcript take, with speaker attribution:
 
 ### 4. Reconcile
 
-1. Contacts by attendee email, then name. Unmatched external attendees become Contact-create proposals with the Account from the matched attendees' domain.
+1. Contacts by attendee email, then name. Before any Contact create or re-parent, follow [shared identity reconciliation](references/task-triage-speed-run-crm-corrections.md#shared-identity-reconciliation). Each person's employer and verified Account need their own evidence; another attendee's domain proves neither. Ambiguous matches, unavailable required duplicate searches and unconverted Leads needing conversion remain needs-input findings.
 2. Account and open Opportunities. If several are open, ask which one before proposing. If none, say so and propose nothing on the Opportunity; creation is the user's call.
 3. Opportunity Contact Roles for each matched attendee. Missing roles become proposals.
 4. Open Tasks: retrieve Id, Subject, ActivityDate and Description for all open Tasks linked to the selected Opportunity or matched Contacts. Mark each as tied to this call or unrelated.
-5. Duplicate check: retrieve those fields for all call activities on the interaction date linked to the Opportunity or matched Contacts and read Subject and Description for `policy.crm.call_marker`. A hit means the call is already logged. Report it, skip proposal A, and in B, C, and F propose only what that Task and the existing Next line do not already carry.
+5. Duplicate check: retrieve those fields for all call activities on the interaction date linked to the Opportunity or matched Contacts. Compare the persisted interaction marker and legacy `Interaction {meeting_id}` markers, corroborating date and participants. A later transcript links to the existing calendar/local interaction rather than creating a second log. An ambiguous match requires input. On a verified match, skip A; in B, C and F propose only what that Task and the existing Next line do not already carry.
 
 ### 5. Propose
 
 Number every proposal. One record per approval. Show the full payload, current value to new value.
 
-- **A. Completed-call Task.** Status Completed, TaskSubtype Call, ActivityDate call date, WhoId primary external Contact, WhatId Opportunity (Account if none), OwnerId the seller. Description line 1 is the `call_marker`, then the note with `note_prefix`, attendees, the quotes, commitments, and open items.
+- **A. Completed-call Task.** Status Completed, TaskSubtype Call, ActivityDate call date, WhoId primary external Contact, WhatId Opportunity (Account if none), OwnerId the seller. Render `policy.crm.call_marker` with the persisted interaction ID in its `{meeting_id}` slot; retain legacy markers on existing records. Description then contains `note_prefix`, attendees, quotes, commitments and open items.
 - **B. Opportunity update.** `NextSteps` per `policy.pipeline.next_steps_format`. Propose `StageName` only when `policy.pipeline.stage_entry` for the target stage, or a `stage_rules` line, is met in the transcript; quote the criterion in one clause. Include any `policy.pipeline.required_fields` value stated on the call, marked buyer_confirmed or seller_stated. `Amount` only from a source in `policy.interaction.amount_source`. If the configured CRM validation rules require a source field when leaving an early stage, include its supported value in the same proposal. A blank required field without evidence blocks the move.
 - **C. Follow-up Task.** Due the Next line date from B, Not Started, Subject names the awaited item, linked to the Contact and Opportunity. The Next line date in B is the buyer-stated date when the buyer owns the action, else today plus `policy.followup.default_next_date_days`.
 - **D. mail follow-up draft.** Follow `policy.email_voice`. Reply in the existing thread when one exists. To the external attendees, cc the seller. Include links promised on the call. Below the draft, list `Suggested attachments`: every document, deck, benchmark, or case study mentioned on the call, with the speaker and whether a matching file exists in `policy.email_voice.collateral_path`. Attach only what the user approves; a file must exist there or the user supplies it. Never send.
@@ -53,6 +53,8 @@ Number every proposal. One record per approval. Show the full payload, current v
 ### 6. Apply
 
 For each approval: fresh read, write, readback with the changed fields and record link. If the draft adapter returns no ID, confirm by listing drafts on the thread and reading the exact draft back. Report anything CRM rejects with the validation message and one corrected proposal.
+
+A dependent link to a new Contact or call Task waits for its verified returned ID and a separate exact proposal. A failed or pending prerequisite withholds that link; never fill it with a guessed ID. Follow the run lifecycle for attempt recording and recovery.
 
 ### 7. Close
 

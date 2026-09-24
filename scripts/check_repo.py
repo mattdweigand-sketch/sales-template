@@ -12,11 +12,18 @@ PRIVATE = {"_shared/policy.json", "_shared/adapters.md"}
 
 
 def public_files(root):
-    if (root / ".git").is_dir():
+    root = root.resolve()
+    probe = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=root, capture_output=True, text=True)
+    if probe.returncode == 0 and Path(probe.stdout.strip()).resolve() == root:
         proc = subprocess.run(["git", "ls-files", "--cached", "--others", "--exclude-standard", "-z"], cwd=root, capture_output=True, check=True)
         return sorted({Path(p) for p in proc.stdout.decode().split("\0")
                        if p and ((root / p).exists() or (root / p).is_symlink())})
-    return sorted(p.relative_to(root) for p in root.rglob("*") if p.is_file()
+    if (root / ".git").exists() or (root / ".git").is_symlink():
+        raise ValueError("cannot inspect this repository's Git inventory: " + probe.stderr.strip())
+    if probe.returncode and "not a git repository" not in probe.stderr.lower():
+        raise ValueError("Git inventory discovery failed: " + probe.stderr.strip())
+    # A standalone export nested in another checkout is still scoped to this root.
+    return sorted(p.relative_to(root) for p in root.rglob("*") if (p.is_file() or p.is_symlink())
                   and not any(x in (".git", "output", "__pycache__", ".venv") for x in p.relative_to(root).parts)
                   and str(p.relative_to(root)) not in PRIVATE)
 

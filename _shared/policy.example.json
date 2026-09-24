@@ -29,6 +29,8 @@
     "scripts": {
       "hygiene_check": "scripts/hygiene_check.py",
       "coverage_check": "scripts/coverage_check.py",
+      "forecast_math": "scripts/forecast_math.py",
+      "triage_check": "scripts/triage_check.py",
       "mail_contact_stats": "scripts/mail_contact_stats.py",
       "mail_digest": "scripts/mail_thread_digest.py"
     },
@@ -155,6 +157,7 @@
       "mail"
     ],
     "activity_days": 14,
+    "timing_guard": "Before Commit/Upside: a verified buyer statement placing signature or decision at or after the next-quarter start excludes the deal from the current-quarter call unless later verified evidence explicitly supersedes that timing. An unrelated newer message or stale CRM CloseDate does not supersede it. Unresolved contradictory timing needs input and cannot enter Commit or Upside.",
     "buckets": {
       "commit": "Meets commit_stages and its configured stage-entry criteria, or has a buyer-named decision date inside the quarter; activity within activity_days from an approved source; no open blocker without a named owner and date. A passed CloseDate becomes a CRM proposal.",
       "upside": "An in-scope deal with Amount set, a plausible path to a decision this quarter, activity within activity_days, and no buyer-stated delay past quarter end.",
@@ -163,7 +166,7 @@
     "pull_in": "Next-quarter in-scope deal with an Amount where, from any source, either a proposal or order form is out and the buyer confirmed reviewing it, or the buyer named a signature or decision date inside this quarter. No stage gate, no date window. Ranked by Amount. Not counted in the call.",
     "crm_gaps": "when Calendar or mail shows activity CRM lacks, propose CloseDate, NextSteps update per pipeline.next_steps_format, or Contact Email; one record per approval",
     "call": "booked plus commit",
-    "path_to_target": "upside deals ranked by Amount, each with one action and the buyer-owned date, until the gap is covered or the list ends; in-quarter upside only, pull-ins are never in the buffer",
+    "path_to_target": "in-quarter upside deals ranked by Amount descending then stable ID, stopping once the gap is covered or the list ends; none when the call meets target. Each has one action and its buyer-owned date. The displayed path buffer uses only these selected deals. Pull-ins never enter the call or buffer. forecast_math computes sums; unknown amounts remain explicit.",
     "amount_basis": "Amount in reporting.currency; configure the revenue basis and any reviewed conversion before summing.",
     "crm_sync": "Propose ForecastCategoryName using category_mapping; excluded keeps its current category with no proposal. One record per approval.",
     "fiscal_year_start_month": 1,

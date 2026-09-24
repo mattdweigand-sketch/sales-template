@@ -2,37 +2,63 @@
 """Generate thin skill and command pointers from one routing registry."""
 import argparse
 import json
+import os
 from pathlib import Path
 import re
 import sys
+import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def safe_path(root, relative):
+    """Validate every existing component before reading or generating a surface."""
+    if not isinstance(relative, (str, Path)) or not str(relative):
+        raise ValueError("path must be nonempty")
+    rel = Path(relative)
+    if rel.is_absolute() or ".." in rel.parts or not rel.parts:
+        raise ValueError("path must stay inside repository: " + str(relative))
+    root = root.resolve()
+    dest = root / rel
+    for part in [rel, *rel.parents]:
+        candidate = root / part
+        if candidate.is_symlink():
+            raise ValueError("symlinked path: " + str(part))
+        if part != rel and candidate.exists() and not candidate.is_dir():
+            raise ValueError("path ancestor is not a directory: " + str(part))
+    try:
+        dest.resolve().relative_to(root)
+    except ValueError as exc:
+        raise ValueError("path escapes repository: " + str(relative)) from exc
+    return dest
+
+
 def load_routes(root=ROOT):
-    doc = json.loads((root / "scripts/wrapper-contract.json").read_text())
-    if doc.get("version") != 1 or not isinstance(doc.get("commands"), dict):
+    doc = json.loads(safe_path(root, "scripts/wrapper-contract.json").read_text())
+    if not isinstance(doc, dict) or doc.get("version") != 1 or not isinstance(doc.get("commands"), dict):
         raise ValueError("invalid wrapper contract")
     for name, row in doc["commands"].items():
         if not re.fullmatch(r"[a-z][a-z0-9]*(?:-[a-z0-9]+)*", name):
             raise ValueError("invalid command name: " + name)
-        if set(row) != {"description", "workspace", "workflow", "review_inputs"}:
+        if not isinstance(row, dict) or set(row) != {"description", "workspace", "workflow", "review_inputs"}:
             raise ValueError("invalid route fields: " + name)
         if not isinstance(row["description"], str) or not row["description"].strip():
             raise ValueError("missing description: " + name)
         for key in ("workspace", "workflow"):
+            if not isinstance(row[key], str) or not row[key]:
+                raise ValueError("missing route path: " + name)
             target = Path(row[key])
             if target.is_absolute() or ".." in target.parts or not str(target).startswith("workflows/"):
                 raise ValueError("route must stay under workflows/: " + str(target))
-            if not (root / target).is_file() or (root / target).is_symlink():
+            if not safe_path(root, target).is_file():
                 raise ValueError("missing or symlinked route: " + str(target))
         if not isinstance(row["review_inputs"], list) or any(not isinstance(p, str) for p in row["review_inputs"]):
             raise ValueError("review_inputs must be a list of dependency paths")
         for ref in row["review_inputs"]:
             target = Path(ref)
-            if target.is_absolute() or ".." in target.parts or target.parts[0] not in ("workflows", "scripts", "_shared"):
+            if target.is_absolute() or ".." in target.parts or not target.parts or target.parts[0] not in ("workflows", "scripts", "_shared"):
                 raise ValueError("invalid workflow review dependency: " + ref)
-            if not (root / target).is_file() or any((root / p).is_symlink() for p in [target, *target.parents]):
+            if not safe_path(root, target).is_file():
                 raise ValueError("missing or symlinked review dependency: " + ref)
     return doc["commands"]
 
@@ -80,17 +106,33 @@ def render(root=ROOT, check=False):
     actual |= set(p.relative_to(root) for p in (root / ".claude/commands").glob("*.md"))
     extra = actual - set(files)
     problems = ["unexpected generated wrapper: " + str(p) for p in sorted(extra)]
-    # Never delete an unknown wrapper; its owner must resolve it explicitly.
+    # Preflight every destination before changing any file. Unknown wrappers stay owned.
+    for path in files:
+        try:
+            dest = safe_path(root, path)
+            if dest.exists() and not dest.is_file():
+                problems.append("wrapper destination is not a file: " + str(path))
+        except ValueError as exc:
+            problems.append(str(exc))
+    if problems:
+        return problems
     for path, content in files.items():
         dest = root / path
-        if dest.is_symlink():
-            problems.append("symlinked wrapper: " + str(path))
-        elif check:
+        if check:
             if not dest.is_file() or dest.read_text() != content:
                 problems.append("wrapper drift: " + str(path))
         else:
             dest.parent.mkdir(parents=True, exist_ok=True)
-            dest.write_text(content)
+            temporary = None
+            try:
+                with tempfile.NamedTemporaryFile(mode="w", dir=dest.parent, delete=False) as stream:
+                    temporary = Path(stream.name)
+                    stream.write(content)
+                temporary.chmod(dest.stat().st_mode & 0o777 if dest.exists() else 0o644)
+                os.replace(temporary, dest)
+            finally:
+                if temporary is not None and temporary.exists():
+                    temporary.unlink()
     return problems
 
 

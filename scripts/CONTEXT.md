@@ -6,12 +6,14 @@ Process and ownership:
 | Tool | Job |
 |---|---|
 | wrappers.py | Generate/check root and family task maps, .agents skill pointers and .claude command pointers |
-| runs.py | Copy a run starter, record an existing review reference, inspect local run state |
+| runs.py | Initialize, validate bound inputs/effects, record an existing review, inspect recovery state |
 | check_repo.py | Check links, contract shape, wrapper parity and public-template hygiene |
 | coverage_check.py | Check complete paired current-run source receipts and pagination for pipeline and forecast |
 | hygiene_check.py | Calculate next-step dates, required-field gaps, linked activity and mechanical triggers |
-| mail_contact_stats.py | Count sent, inbound and unanswered messages from explicit saved mail results |
-| mail_thread_digest.py | Reduce newest message bodies without quoted history or signed URL parameters |
+| mail_contact_stats.py | Count complete paired mail history with source-linked reply classification |
+| mail_thread_digest.py | Produce bounded navigation excerpts; full bodies remain decision evidence |
+| forecast_math.py | Compute Decimal totals and the shortest reviewed Upside path |
+| triage_check.py | Compute fixed Task groups and local calendar dates from established facts |
 
 Read the relevant [adapter data contract](../_shared/adapter-contract.md) before
 normalizing inputs. Helpers operate on explicit run files. Their output is

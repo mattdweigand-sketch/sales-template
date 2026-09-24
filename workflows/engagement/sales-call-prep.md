@@ -4,7 +4,7 @@ Prepare a sourced brief for one sales call or a named calendar window.
 
 ## Load / Skip
 
-- Load [shared rules](../../_shared/rules.md), [run lifecycle](../run.md), the configured policy and adapters, and this procedure.
+- Load [shared rules](../../_shared/rules.md), this procedure and the policy sections named below. In the [run lifecycle](../run.md), read Start/Prepare/Status for review; read Exact effects/Apply only when proposing or executing changes.
 - Read [adapter data contract](../../_shared/adapter-contract.md) only for the sources used in this run. Collection requirements use logical field names; map them through the adapter before calling a provider.
 - Load the linked reference only at its named step. Keep raw source receipts and derived artifacts in this run.
 - Skip sibling workflows, other runs, unrelated accounts, and unused adapter sections. Missing capabilities are named gaps or block their dependent effects.
@@ -15,7 +15,7 @@ Read-only. CRM is the record; everything else is evidence. Every fact in the bri
 
 ### 1. Load policy
 
-Read the configured `_shared/policy.json` and `_shared/adapters.md`. Make the reusable workspace files available through the configured host before starting. Record the selected scope in the run request.
+From `_shared/policy.json`, load identity, call_prep, research, tooling and crm.record_url; load the relevant source sections of `_shared/adapters.md`. Record the selected scope in the run request. Skip revenue and drafting policy.
 
 ### 2. Resolve the calls
 
@@ -34,7 +34,7 @@ Per call, in this order, batching where possible:
 
 ### 4. mail
 
-Skip this step when the CRM email log in step 3 already contains the attendees' thread inside the history window. Otherwise search attendee addresses, at most `policy.tooling.mail_search_max_addresses` per call. Run `policy.tooling.scripts.mail_contact_stats <owner_email> <saved_outputs...> --only <addresses>` for counts and the newest thread. Read only the newest thread's messages for what was promised, asked, or sent.
+Skip this step when the CRM email log in step 3 already contains the attendees' thread inside the history window. Otherwise search attendee addresses, at most `policy.tooling.mail_search_max_addresses` per call. Save complete paired receipts and run `policy.tooling.scripts.mail_contact_stats <owner_email> <saved_outputs...> --only <addresses> --calls <run>/calls --since <run-start>` for counts and thread navigation. Limited history stays labeled; it cannot establish never-replied status. Read the complete relevant messages for what was promised, asked, or sent.
 
 ### 5. Prior calls
 

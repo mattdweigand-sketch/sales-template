@@ -1,12 +1,17 @@
 """Regression checks for next-step sentences, event timing, and linked activity."""
 from __future__ import annotations
 import datetime as dt
+import json
+import os
+import subprocess
+import tempfile
 import unittest
 from pathlib import Path
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
 import hygiene_check as hygiene
+from zoneinfo import ZoneInfo
 
 
 class PipelineTimingTests(unittest.TestCase):
@@ -266,6 +271,198 @@ class DatedNextStepTests(unittest.TestCase):
         )
         self.assertEqual(result["next"], "OK")
         self.assertEqual(result["next_date"], "2026-09-24")
+
+
+class HygieneAuditRegressions(unittest.TestCase):
+    setUp = PipelineTimingTests.setUp
+    event = PipelineTimingTests.event
+    result = PipelineTimingTests.result
+
+    def test_earliest_event_uses_instant_not_input_order(self):
+        late = self.event("2026-09-21T16:00:00-07:00", "2026-09-21T17:00:00-07:00")
+        early = self.event("2026-09-21T09:00:00-07:00", "2026-09-21T10:00:00-07:00")
+        late["Id"], early["Id"] = "late", "early"
+        for events in ([late, early], [early, late]):
+            self.assertEqual(self.result(events)["upcoming_event_evidence"]["id"], "early")
+
+    def test_date_only_candidate_does_not_get_an_invented_time(self):
+        unknown = self.event(None, None)
+        unknown["Id"] = "unknown"
+        known = self.event("2026-09-21T09:00:00-07:00", "2026-09-21T10:00:00-07:00")
+        result = self.result([known, unknown])
+        self.assertTrue(result["upcoming_event_order_uncertain"])
+        self.assertIn("order uncertain", hygiene.fmt(result))
+        self.assertIsNone(next(e for e in result["unverified_events"] if e["id"] == "unknown")["start"])
+
+    def test_zoneinfo_dates_and_local_midnight(self):
+        self.policy["identity"] = {"timezone": "America/Los_Angeles"}
+        spring = hygiene.resolve_as_of(self.policy, "2026-03-08")
+        autumn = hygiene.resolve_as_of(self.policy, "2026-11-01")
+        self.assertEqual(spring.isoformat(), "2026-03-08T00:00:00-08:00")
+        self.assertEqual(autumn.isoformat(), "2026-11-01T00:00:00-07:00")
+        instant = hygiene.resolve_as_of(self.policy, as_of="2026-11-02T07:30:00Z")
+        self.assertEqual(instant.date(), dt.date(2026, 11, 1))
+        with self.assertRaises(ValueError):
+            hygiene.resolve_as_of(self.policy, "2026-11-02", "2026-11-02T07:30:00Z")
+
+    def test_repeated_hour_orders_by_utc(self):
+        self.as_of = dt.datetime.fromisoformat("2026-11-01T00:00:00-07:00")
+        late = self.event("2026-11-01T01:15:00-08:00", "2026-11-01T01:45:00-08:00")
+        early = self.event("2026-11-01T01:45:00-07:00", "2026-11-01T01:55:00-07:00")
+        late["Id"], early["Id"] = "late", "early"
+        self.assertEqual(self.result([late, early])["upcoming_event_evidence"]["id"], "early")
+        zone = ZoneInfo("America/Los_Angeles")
+        start = dt.datetime(2026, 11, 1, 1, 30, tzinfo=zone, fold=0)
+        end = dt.datetime(2026, 11, 1, 1, 15, tzinfo=zone, fold=1)
+        as_of = dt.datetime(2026, 11, 1, 1, 45, tzinfo=zone, fold=0)
+        self.assertEqual(hygiene.classify_event_timing(start, end, as_of), "in_progress")
+
+    def test_blank_values_and_known_types_are_distinct(self):
+        self.policy["pipeline"]["required_fields"] = {"S2": ["Amount", "Checkbox", "CustomText"]}
+        self.opp.update(Amount=0, Checkbox=False, CustomText="  ")
+        result = self.result([])
+        self.assertEqual(result["blank_fields"], ["CustomText"])
+        self.assertEqual(result["errors"], [])
+        self.assertIn("Checkbox", result["unverified_field_types"])
+        self.opp["Amount"] = False
+        self.assertTrue(any("Amount must be number" in e for e in self.result([])["errors"]))
+        for value in (None, "", "  ", [], {}):
+            self.assertTrue(hygiene.is_blank(value))
+        self.assertFalse(hygiene.is_blank(False))
+        self.assertFalse(hygiene.is_blank(0))
+
+    def test_declared_custom_type_is_applied_without_guessing(self):
+        self.policy["pipeline"]["required_fields"] = {"S2": ["Checkbox"]}
+        self.opp["Checkbox"] = "false"
+        result = hygiene.evaluate([self.opp], [], [], self.policy, as_of=self.as_of, field_types={"Checkbox": "boolean"})
+        self.assertFalse(result["ready"])
+        self.assertTrue(any("Checkbox must be boolean" in e for e in result["errors"]))
+
+    def test_bad_activity_preserves_other_record_diagnostics(self):
+        self.opp["NextSteps"] = None
+        bad = {"Id": "bad-task", "WhatId": "opp-1", "ActivityDate": "not-a-date", "IsClosed": True}
+        other = {**self.opp, "Id": "opp-2", "AccountId": "account-2"}
+        result = hygiene.evaluate([self.opp, other], [bad], [], self.policy, as_of=self.as_of)
+        self.assertFalse(result["ready"])
+        first, second = result["results"]
+        self.assertNotIn("stale", first["triggers"])
+        self.assertIsNone(first["task_gap"])
+        self.assertIn("blank_field", first["triggers"])
+        self.assertIn("stale", second["triggers"])
+        self.assertTrue(any("bad-task" in error for error in result["errors"]))
+
+    def test_unlinked_bad_activity_blocks_global_dependent_claims(self):
+        self.opp["NextSteps"] = None
+        result = hygiene.evaluate([self.opp], [None], [], self.policy, as_of=self.as_of)
+        self.assertFalse(result["ready"])
+        self.assertNotIn("stale", result["results"][0]["triggers"])
+        self.assertIn("Task row 0", result["errors"][0])
+
+    def test_completed_task_requires_activity_date_but_open_task_can_be_undated(self):
+        self.opp["NextSteps"] = None
+        for value in (None, ""):
+            for state in ({"IsClosed": True}, {"Status": "Completed"}):
+                with self.subTest(value=value, state=state):
+                    task = {"Id": "undated", "WhatId": "opp-1", "ActivityDate": value, **state}
+                    outcome = hygiene.evaluate([self.opp], [task], [], self.policy, as_of=self.as_of)
+                    result = outcome["results"][0]
+                    self.assertFalse(outcome["ready"])
+                    self.assertFalse(result["activity_complete"])
+                    self.assertNotIn("stale", result["triggers"])
+                    self.assertNotIn("new_activity", result["triggers"])
+                    self.assertIn("blank_field", result["triggers"])
+                    self.assertTrue(any("ActivityDate" in e and "undated" in e for e in outcome["errors"]))
+            open_task = {"Id": "undated-open", "WhatId": "opp-1", "ActivityDate": value, "IsClosed": False}
+            outcome = hygiene.evaluate([self.opp], [open_task], [], self.policy, as_of=self.as_of)
+            self.assertTrue(outcome["ready"])
+            self.assertTrue(outcome["results"][0]["activity_complete"])
+
+    def test_contradictory_task_completion_is_incomplete(self):
+        task = {"Id": "contradiction", "WhatId": "opp-1", "ActivityDate": "2026-09-20", "IsClosed": False, "Status": "Completed"}
+        outcome = hygiene.evaluate([self.opp], [task], [], self.policy, as_of=self.as_of)
+        self.assertFalse(outcome["ready"])
+        self.assertTrue(any("contradicts" in e for e in outcome["errors"]))
+
+    def test_reversed_event_marks_affected_scope_incomplete(self):
+        self.opp["NextSteps"] = None
+        event = self.event("2026-09-21T16:00:00Z", "2026-09-21T09:00:00Z")
+        other = {**self.opp, "Id": "opp-2", "AccountId": "account-2"}
+        outcome = hygiene.evaluate([self.opp, other], [], [event], self.policy, as_of=self.as_of)
+        first, second = outcome["results"]
+        self.assertFalse(outcome["ready"])
+        self.assertFalse(first["activity_complete"])
+        self.assertNotIn("stale", first["triggers"])
+        self.assertNotIn("new_activity", first["triggers"])
+        self.assertIn("blank_field", first["triggers"])
+        self.assertTrue(second["activity_complete"])
+        self.assertIn("stale", second["triggers"])
+        self.assertTrue(any("event-1" in e and "EndDateTime precedes StartDateTime" in e for e in outcome["errors"]))
+
+    def test_event_duration_compares_instants_and_allows_equal_boundary(self):
+        for start, end in (("2026-09-21T09:00:00Z", "2026-09-21T09:00:00Z"),
+                           ("2026-11-01T01:45:00-07:00", "2026-11-01T01:15:00-08:00")):
+            with self.subTest(start=start, end=end):
+                outcome = hygiene.evaluate([self.opp], [], [self.event(start, end)], self.policy, as_of=self.as_of)
+                self.assertTrue(outcome["ready"], outcome["errors"])
+        outcome = hygiene.evaluate([self.opp], [], [self.event("2026-11-01T01:15:00-08:00", "2026-11-01T01:45:00-07:00")], self.policy, as_of=self.as_of)
+        self.assertFalse(outcome["ready"])
+
+    def test_bad_opportunities_are_contextual_not_tracebacks(self):
+        for row in (None, 42, {**self.opp, "AccountId": []}, {**self.opp, "CloseDate": "bad"}):
+            result = hygiene.evaluate([row], [], [], self.policy, as_of=self.as_of)
+            self.assertFalse(result["ready"])
+            self.assertTrue(result["errors"])
+
+    def test_policy_errors_fail_explicitly(self):
+        for key, value in (("stale_days", True), ("close_warning_days", -1), ("in_scope_stages", ["unknown"]), ("stage_order", ["S2", "S2"])):
+            policy = {**self.policy, "pipeline": {**self.policy["pipeline"], key: value}}
+            with self.assertRaises(ValueError):
+                hygiene.evaluate([], [], [], policy, as_of=self.as_of)
+
+    def test_cli_returns_nonzero_and_preserves_json_diagnostics(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            for name, value in (("policy", self.policy), ("opps", [self.opp]), ("tasks", [None])):
+                (root / (name + ".json")).write_text(json.dumps(value))
+            proc = subprocess.run([sys.executable, str(Path(hygiene.__file__)), str(root / "opps.json"), "--tasks", str(root / "tasks.json"), "--policy", str(root / "policy.json"), "--as-of", self.as_of.isoformat(), "--json"], capture_output=True, text=True, env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
+            self.assertEqual(proc.returncode, 1)
+            self.assertTrue(json.loads(proc.stdout)[0]["errors"])
+            self.assertNotIn("Traceback", proc.stderr)
+
+
+class HistoryPreservationTests(unittest.TestCase):
+    def setUp(self):
+        self.first = "9/22/26 SELLER - Follow up on 9/24.\n"
+        self.history = "\n9/20/26 SELLER - Buyer replied.  \n9/18/26 SELLER - Initial call.\n"
+        self.before = self.first + self.history
+        self.new = "9/23/26 SELLER - Send proposal by 9/25.\n"
+
+    def test_exact_supported_constructions(self):
+        cases = [
+            (self.before, self.new + self.before, "prepend"),
+            ("Next: Old action · Seller · 9/23/26\n" + self.history, self.new + self.history, "replace_legacy"),
+            (self.before, self.first + "9/23/26 SELLER - Buyer confirmed scope.\n" + self.history, "insert_history"),
+            (self.before, self.before, "unchanged"),
+            (None, self.new, "prepend"),
+        ]
+        for before, after, operation in cases:
+            self.assertEqual(hygiene.validate_next_steps_change(before, after, operation), [])
+
+    def test_history_edits_and_reordering_are_rejected(self):
+        for changed in (self.before.replace("  \n", "\n"), self.first, self.before.replace("replied", "signed"), self.history + self.first):
+            self.assertTrue(hygiene.validate_next_steps_change(self.before, self.new + changed, "prepend"))
+
+    def test_legacy_replacement_cannot_remove_dated_current_entry(self):
+        self.assertTrue(hygiene.validate_next_steps_change(self.before, self.new + self.history, "replace_legacy"))
+
+    def test_history_insertion_cannot_change_current_entry(self):
+        self.assertTrue(hygiene.validate_next_steps_change(self.before, self.new + self.history, "insert_history"))
+
+    def test_boundaries_invalid_dates_and_lossy_markup_rejected(self):
+        self.assertTrue(hygiene.validate_next_steps_change(self.before, self.new.rstrip() + self.before, "prepend"))
+        self.assertTrue(hygiene.validate_next_steps_change(self.before, "9/31/26 SELLER - Note.\n" + self.before, "prepend"))
+        self.assertTrue(hygiene.validate_next_steps_change("<p>old</p>", self.new + "old", "prepend"))
+        self.assertTrue(hygiene.validate_next_steps_change(self.before, self.before, "rewrite"))
 
 
 if __name__ == "__main__":

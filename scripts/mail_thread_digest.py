@@ -25,7 +25,10 @@ def main():
     args = ap.parse_args()
     if args.chars < 0:
         ap.error("--chars must be non-negative")
-    messages = load_messages(args.outputs)
+    try:
+        messages = load_messages(args.outputs)
+    except (ValueError, OSError) as exc:
+        ap.error(str(exc))
     for message in reversed(messages):
         print(f"{message['date']} | {message['email_id']} | {message['thread_id']} | from {message['from_']}")
         print("  " + clean(message.get("subject"), args.chars))
@@ -33,7 +36,7 @@ def main():
         names = [a.get("filename", "") for a in message.get("attachments") or []]
         if names:
             print("  attachments: " + ", ".join(names))
-    print(f"{len(messages)} emails; digest is truncated evidence, read full relevant bodies before drafting")
+    print(f"{len(messages)} emails; digest is truncated evidence; read full relevant bodies before decisions or drafting")
 
 
 if __name__ == "__main__":

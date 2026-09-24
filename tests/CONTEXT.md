@@ -7,5 +7,5 @@ Human check: inspect failures and their effect on run isolation, review invalida
 These tests never call live connectors or prove provider success.
 
 Coverage: review dependencies, complete source receipts, date and event timing,
-mail direction and replies, and rejected inputs. All checks use the Python
-standard library.
+mail direction and replies, exact forecast/triage calculations, Git worktrees,
+clean exports, and rejected inputs. All checks use the Python standard library.

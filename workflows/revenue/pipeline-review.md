@@ -4,7 +4,7 @@ Review opportunity hygiene and propose evidence-supported next-step and field up
 
 ## Load / Skip
 
-- Load [shared rules](../../_shared/rules.md), [run lifecycle](../run.md), the configured policy and adapters, and this procedure.
+- Load [shared rules](../../_shared/rules.md), this procedure and the policy sections named below. In the [run lifecycle](../run.md), read Start/Prepare/Status for review; read Exact effects/Apply only when proposing or executing changes.
 - Read [adapter data contract](../../_shared/adapter-contract.md) only for the sources used in this run. Collection requirements use logical field names; map them through the adapter before calling a provider.
 - Load the linked reference only at its named step. Keep raw source receipts and derived artifacts in this run.
 - Skip sibling workflows, other runs, unrelated accounts, and unused adapter sections. Missing capabilities are named gaps or block their dependent effects.
@@ -15,7 +15,7 @@ One run, one list. Each run flags deals in policy.pipeline.in_scope_stages whose
 
 ### 1. Load policy
 
-Read the configured `_shared/policy.json` and `_shared/adapters.md`. Make the reusable workspace files available through the configured host before starting. Record the selected scope and daily/extended mode in the run request. An explicit mode wins; otherwise use policy.cadence.extended_review_weekday in policy.identity.timezone. Weekdays use 0=Monday through 6=Sunday; working_days describes the configured business week, without creating a schedule. Record one run-start ISO datetime with the user's local timezone offset for `coverage_check --calls <run>/calls --since` and `hygiene_check --as-of`.
+From `_shared/policy.json`, load identity, pipeline, reporting, cadence, tooling, crm.record_url and forecast fiscal-quarter settings. Load the relevant CRM/mail/calendar adapter sections; skip engagement and research policy. Record scope, mode and one offset-aware run start. Explicit daily/extended mode wins; otherwise use policy.cadence.extended_review_weekday in policy.identity.timezone. Weekdays are Monday=0 through Sunday=6; working_days does not create a schedule.
 
 ### 2. Collect
 
@@ -23,9 +23,9 @@ Read and execute [references/pipeline-review-collect.md](references/pipeline-rev
 
 ### 3. Propose
 
-Read [references/pipeline-review-report-format.md](references/pipeline-review-report-format.md) and fill its fixed template in the final chat answer. Use it unchanged for manual and configured scheduled runs, including its pre-posting checks. For each flagged deal in `policy.pipeline.in_scope_stages`, show either one numbered, evidence-supported change or a needs-input finding with no proposed write. Format new or revised next-step entries per `policy.pipeline.note_next_line`; handle history and existing entries per `policy.pipeline.note_history_line` and `next_steps_format`. Apply `next_steps_review` before date-based proposals. Every clause traces to CRM, mail, or Calendar evidence. No inferred buyer intent. Deals with no trigger are counted, not listed. Stages outside the configured scope are counted with their Amount sum on the header line.
+Read [the report format](references/pipeline-review-report-format.md) for the fixed layout and exceptions. Daily candidates are in-scope deals with hygiene triggers. Extended candidates are their union with in-scope `task_gap` deals; the gap remains separate from hygiene triggers. Deduplicate by Opportunity ID. Other reviewed deals are counted, not listed. Unknown stages are unresolved scope, not exclusions. For each candidate show an evidence-supported proposal or needs-input finding. Gap-only Tasks belong in extended Record proposals. Apply the pipeline NextSteps formats/review rules; every changed clause requires a source, with no inferred buyer intent.
 
-In extended mode, add three sections. Rollup: count and Amount by stage and ForecastCategory, the configured fiscal quarter versus later. Delta since the previous configured extended review day from provider-backed record history: new, stage moves, CloseDate moves, closed. Per record: CloseDate move per `close_date_basis`; StageName forward when `stage_entry` for the target stage is in evidence, quoted, or a `stage_rules` line applies; backward when the current stage's criterion is not in evidence; Closed Lost only after `closed_lost_silence_days` of silence with no upcoming Event or a stated buyer no; Amount only from a buyer-confirmed or user-supplied figure. A follow-up Task only where `hygiene_check` reports `task_gap`, due the verified action deadline, the adapter-mapped open Task state, linked to Contact and Opportunity.
+In extended mode, add Rollup (stage/category and fiscal quarter versus later), provider-backed Delta since the previous extended review date, and Record proposals. CloseDate follows `close_date_basis`; forward StageName needs the target criterion or an applicable stage_rules line. Regression needs affirmative evidence that a necessary current-stage condition no longer holds and a supported destination. Missing older evidence or silence alone is needs-input. A request to reassess permits investigation, not regression or a write; an exact user-directed stage change is a separately attributed proposal basis. Closed Lost needs a stated buyer no or verified silence for closed_lost_silence_days with no upcoming Event; widen evidence if the configured collection window is shorter. Amount needs buyer-confirmed/user-supplied evidence. A Task create requires task_gap, a verified action/deadline and record links; an unresolved date never supports it.
 
 Then wait. Notes and field fills approve as one batch: `approve all`, `approve all except <Accounts>`, or `skip`. StageName, CloseDate, Amount, Closed Lost, and Task creates are one record per approval. No reply writes nothing; the next run re-proposes from current CRM state.
 
@@ -43,7 +43,7 @@ Drafting or sending email. Marking deals won. Deleting or merging records. Chang
 
 ## Outputs and readiness
 
-Save the deliverable and exact proposals in `output/{run-id}/01_review.md`; show the complete report in the final chat answer. Retain full write payloads under the run's effect IDs and map numbered proposals to those IDs. Declare every source receipt and proposed artifact in its `artifacts` list. A read-only run has no effects. Readiness requires the checks above and explicit source gaps; unsupported effects stay withheld. Record the actual conversation review in `review.json`, and applied, pending, failed, or skipped effects in `02_result.json` through the shared run lifecycle.
+Save the deliverable and exact proposals in `output/{run-id}/01_review.md`; show the complete report in the final chat answer. Retain full write payloads under the run's effect IDs and map numbered proposals to those IDs. Bind source files and exact proposals in inputs.json; use the review’s `artifacts` list only for additional deliverables. A read-only run has no effects. Readiness requires the checks above and explicit source gaps; unsupported effects stay withheld. Record the actual conversation review in `review.json`, and applied, pending, failed, or skipped effects in `02_result.json` through the shared run lifecycle.
 
 ## Human check
 

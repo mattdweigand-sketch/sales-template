@@ -26,7 +26,7 @@ paired normalized receipts under the selected run. Page every search completely.
    Review unresolved dates before proposing a change.
 4. **Daily review.** Request inbound mail since yesterday in the reporting timezone,
    excluding policy.identity.internal_domains, with no account narrowing. Reduce
-   saved results using policy.tooling.scripts.mail_digest. Search calendar by each
+   saved results using policy.tooling.scripts.mail_digest for navigation only. Search calendar by each
    in-scope Account name or verified Contact email from yesterday through
    policy.tooling.calendar_lookahead_days. Match returned senders/attendees to
    verified account domains. Upcoming meetings do not establish new buyer activity.
@@ -36,7 +36,13 @@ paired normalized receipts under the selected run. Page every search completely.
    the preceding configured extended review day (or the run's explicit comparison
    date), including new deals, stage/date changes and closures. If history is
    unavailable, label the delta unavailable; never infer it from present values.
-6. **Coverage.** Run `policy.tooling.scripts.coverage_check --calls <run>/calls
+6. **Read decisive evidence.** Fully inspect each assessed deal's newest substantive
+   buyer message and any additional full message needed to support or qualify a
+   finding/proposal. A digest, subject or preview cannot establish timing, stage
+   evidence, outcomes or absence of blockers. Preserve full bodies in the run;
+   missing/truncated bodies are gaps. Work by account/batch rather than loading
+   every mailbox body into one context.
+7. **Coverage.** Run `policy.tooling.scripts.coverage_check --calls <run>/calls
    --scope pipeline-daily --since <run-start> --policy _shared/policy.json` for daily
    review, or `--scope pipeline` for extended review. Use its result in the
    [report header](pipeline-review-report-format.md). On exit 1, resolve missing
