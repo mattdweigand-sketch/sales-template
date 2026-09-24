@@ -12,6 +12,5 @@ Do not load the other families.
 | `task-triage-speed-run` | [engagement](workflows/engagement/CONTEXT.md) | Review due CRM tasks, prepare contextual follow-ups, and apply approved changes. |
 | `pipeline-review` | [revenue](workflows/revenue/CONTEXT.md) | Review opportunity hygiene and propose evidence-supported next-step and field updates. |
 | `forecast-weekly` | [revenue](workflows/revenue/CONTEXT.md) | Build an evidence-backed quarterly forecast and propose explicit CRM corrections. |
-| `pilot-usage` | [revenue](workflows/revenue/CONTEXT.md) | Summarize one pilot's adoption from a configured analytics source. |
 
 Setup: [setup/CONTEXT.md](setup/CONTEXT.md). Run state: [workflows/run.md](workflows/run.md).

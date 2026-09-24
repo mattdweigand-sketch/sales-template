@@ -40,19 +40,15 @@ Skip this step when the CRM email log in step 3 already contains the attendees' 
 
 Use the configured transcript adapter. Search the Account and attendee names over `policy.call_prep.history_days` days. Take: date, attendees, buyer-stated facts as short quotes, commitments by either side, open questions. If unavailable, write `Prior call transcripts not checked.`
 
-### 6. Product footprint
-
-Use the configured adoption lookup for each external attendee email. Report the configured product or service footprint fields when returned. If absent, write `No footprint found for <email>.` If the lookup errors, write `Footprint lookup unavailable.` Do not infer usage from quantity requests or booking forms.
-
-### 7. Public research
+### 6. Public research
 
 Web search the company and each external attendee. Keep at most `policy.research.max_sources` dated sources per company: the configured topics from policy.research.topics. Person: current title, tenure, public statements. Cite each with a link and date. Drop anything you cannot date.
 
-### 8. Call type and gaps
+### 7. Call type and gaps
 
 Infer the call type per `policy.call_prep.call_type`. State the type and the evidence for it. Discovery gaps are the items in `policy.call_prep.expected_information[type]` not established by any source. Write `not established` for each.
 
-### 9. Write the brief
+### 8. Write the brief
 
 Read [references/sales-call-prep-brief-formats.md](references/sales-call-prep-brief-formats.md) and use the single-call or multi-call format. Return the brief itself, not a source list with commentary. End with `CRM notes` if any, then one line: `Say "log this call" after the meeting and I will hand off to interaction-sync.`
 

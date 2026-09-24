@@ -24,7 +24,7 @@ Draft creation, draft identity lookup and independent readback: unconfigured.
 Internal domains come from policy.identity; do not repeat them here.
 
 ## Optional capabilities
-Transcript retrieval and speaker attribution; customer product/service footprint; pilot scope, participant IDs, activity grain, metric unit, precision and optional allocation definitions.
+Transcript retrieval and speaker attribution.
 Each enabled adapter must name its tool, input mapping, output fields,
 completeness criteria, permitted audience and verification read. Keep disabled
 capabilities unavailable until configured and tested with synthetic data.
@@ -33,6 +33,5 @@ capabilities unavailable until configured and tested with synthetic data.
 Read [adapter-contract.md](adapter-contract.md). Record the normalization mapping,
 raw receipt location, complete-page evidence and source timezone for each adapter.
 For coverage, identify the actual unfiltered owned-open query and scoped secondary
-queries. For pilot analytics, map the roster, activities and optional allocations from
-the analytics contract. Preserve verified scope filters, units, reporting timezone,
-window and terminal success for database, API or export sources alike.
+queries. Preserve scope filters, reporting timezone and terminal success for
+every configured source.

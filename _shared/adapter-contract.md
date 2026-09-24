@@ -115,12 +115,6 @@ subjects support metadata only, event times support scheduling only.
 - Transcripts: lookup by stable meeting ID, account, attendee or date; return
   date, attendees, speakers and source-linked text. If unavailable, disclose it
   and use user-supplied notes. No installed organization skill is assumed.
-- Adoption: lookup by verified attendee email or CRM organization ID; return
-  explicit not-found, unavailable/error, or configured product/service footprint
-  fields. No name guessing.
-- Analytics: map the datasets in the [pilot analytics contract](../workflows/revenue/references/pilot-usage-queries.md).
-  Preserve scope, units, dates, terminal state and all pages. Database queries are
-  read-only; API and reviewed-export sources follow the same evidence boundary.
 
 ## Writes and artifacts
 

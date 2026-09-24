@@ -17,7 +17,7 @@ configured and reviewed. No command here installs a connector or creates
 a schedule. Missing private adapters remain explicit unavailable capabilities.
 Read the [adapter contract](../_shared/adapter-contract.md) and review the example
 stage/forecast definitions. Fill native field mappings, owner ID, record URLs,
-targets and any selected pilot capabilities before switching to live.
+targets and the selected workflow capabilities before switching to live.
 
 Codex-compatible skill pointers are tracked in .agents/skills/; Claude slash
 command pointers are tracked in .claude/commands/. Work from this repo root.
@@ -60,19 +60,5 @@ Follow the workflow selected by [the root router](../CONTEXT.md), then the
 [run contract](../workflows/run.md). No external action follows merely from
 creating the starter. An example claim cannot be used in live outreach.
 
-## Optional pilot PDF tools
-
-Install `scripts/pilot_usage/requirements.txt` into a virtual environment and
-provide an installed Chromium-compatible renderer. Keep its binary path in local
-configuration. System fonts work by default; optional custom fonts must be
-available locally and match any configured hashes.
-
-```bash
-python3 -m venv .venv
-.venv/bin/pip install -r scripts/pilot_usage/requirements.txt
-```
-
-The synthetic [pilot fixture](../examples/pilot-usage/CONTEXT.md) exercises the
-full assemble-to-PDF path without any customer data or external business effects.
-The six pointer skills are complete only with this repository's workflows,
-references, policy and helper files. Do not distribute pointer-only ZIPs.
+The five pointer skills require this repository's workflows, references, policy
+and helper files. Do not distribute pointer-only ZIPs.

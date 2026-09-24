@@ -15,7 +15,6 @@ Choose one row and follow [the run lifecycle](../run.md). Skip sibling procedure
 |---|---|---|
 | `pipeline-review` | [pipeline-review.md](pipeline-review.md) | Review opportunity hygiene and propose evidence-supported next-step and field updates. |
 | `forecast-weekly` | [forecast-weekly.md](forecast-weekly.md) | Build an evidence-backed quarterly forecast and propose explicit CRM corrections. |
-| `pilot-usage` | [pilot-usage.md](pilot-usage.md) | Summarize one pilot's adoption from a configured analytics source. |
 
 ## Outputs
 The chosen workflow defines output/{run-id}/01_review.md, any declared artifacts, and 02_result.json.

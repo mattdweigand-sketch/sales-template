@@ -27,7 +27,7 @@ def check(root=ROOT):
     if len((root / "AGENTS.md").read_text().splitlines()) >= 60:
         errors.append("AGENTS.md should stay below 60 lines")
     contracts = {"workflows", "_shared", "_templates", "_templates/run", "setup", "scripts", "tests", "examples"}
-    contracts |= {"workflows/engagement/references", "workflows/revenue/references", "scripts/pilot_usage", "examples/pilot-usage"}
+    contracts |= {"workflows/engagement/references", "workflows/revenue/references"}
     contracts |= {str(Path(r["workspace"]).parent) for r in routes.values()}
     for folder in contracts:
         if not (root / folder / "CONTEXT.md").is_file():

@@ -60,24 +60,6 @@
         "scripts/mail_evidence.py",
         "workflows/revenue/references/pipeline-review-collect.md"
       ]
-    },
-    "pilot-usage": {
-      "description": "Summarize one pilot's adoption from a configured analytics source.",
-      "workspace": "workflows/revenue/CONTEXT.md",
-      "workflow": "workflows/revenue/pilot-usage.md",
-      "review_inputs": [
-        "_shared/adapter-contract.md",
-        "workflows/revenue/references/pilot-usage-pdf-format.md",
-        "workflows/revenue/references/pilot-usage-queries.md",
-        "workflows/revenue/references/pilot-usage-report-format.md",
-        "scripts/pilot_usage/assemble_pilot_usage_input.py",
-        "scripts/pilot_usage/compute_pilot_usage_report.py",
-        "scripts/pilot_usage/pilot_usage_local_storage.py",
-        "scripts/pilot_usage/pilot_usage_policy.py",
-        "scripts/pilot_usage/print_pilot_usage_pdf.py",
-        "scripts/pilot_usage/render_pilot_usage_report.py",
-        "scripts/pilot_usage/validate_pilot_usage_report.py"
-      ]
     }
   }
 }

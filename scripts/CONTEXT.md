@@ -12,7 +12,6 @@ Process and ownership:
 | hygiene_check.py | Calculate next-step dates, required-field gaps, linked activity and mechanical triggers |
 | mail_contact_stats.py | Count sent, inbound and unanswered messages from explicit saved mail results |
 | mail_thread_digest.py | Reduce newest message bodies without quoted history or signed URL parameters |
-| [pilot_usage/](pilot_usage/CONTEXT.md) | Assemble, compute, validate, render and print a reviewed pilot report |
 
 Read the relevant [adapter data contract](../_shared/adapter-contract.md) before
 normalizing inputs. Helpers operate on explicit run files. Their output is
@@ -24,4 +23,3 @@ Outputs: generated wrappers or output/{run-id}/ artifacts, according to the invo
 Human check: review the diff; a passing static check does not approve external actions.
 Run `python3 scripts/check_repo.py` and `python3 -m unittest discover -s tests -v`.
 Core tools use Python 3.9+ standard library and make no network requests.
-PDF printing additionally uses pypdf and a locally installed Chromium binary.

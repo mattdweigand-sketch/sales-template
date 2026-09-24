@@ -1,11 +1,11 @@
 # Portability and scope
 
-Six canonical workflows define sales procedures, with shared configuration,
-evidence helpers and an optional pilot PDF pipeline. Generated pointers are
-optional entrypoints; the canonical procedures work from any host that can read
+Five canonical workflows define sales procedures, with shared configuration
+and local evidence helpers. Generated pointers are optional entrypoints;
+the canonical procedures work from any host that can read
 the workspace and present review artifacts. Local tools need Python 3.9+ and a
 private writable run directory. Provider reads and approved effects additionally
-need configured adapters. No host, CRM, mail service or analytics provider is
+need configured adapters. No host, CRM, mail service or calendar provider is
 installed or authenticated by this repository.
 
 Configure identity, timezone, native object/field/status mappings, activity
@@ -29,16 +29,6 @@ target keys by quarter start date, not an ambiguous fiscal-year label. Normalize
 Amount into `reporting.currency` only with a reviewed conversion source and date;
 do not sum incompatible currencies or revenue measures.
 
-Pilot analytics are optional and disabled until configured. The
-[analytics contract](../workflows/revenue/references/pilot-usage-queries.md)
-accepts stable scope and participant IDs, activities and a configured quantity.
-No credit system, grant, AI model, organization UUID or paid-trial CRM type is
-required. The PDF covers participant activity and one additive non-negative
-metric per run; use the chat report for other permitted metrics and name gaps.
-Its local pipeline assembles, computes, validates, renders and prints without
-connector calls. Printing requires pypdf and installed Chromium. System fonts
-are the default; optional local fonts are hash checked.
-
 Coverage checks use paired current-run normalized receipts and pagination.
 They verify represented scope, success and counts; they cannot authenticate
 provider responses or reveal records hidden by permissions. Synthetic validation
@@ -52,9 +42,8 @@ fulfillment belongs to the deployment's business process. Remove local close
 configuration and any externally installed close pointer or schedule.
 
 Compare existing local policy/adapters with the examples; never overwrite private
-configuration wholesale. Mail helper names now use `mail_`; normalize Task Direction from provider metadata,
-and add reporting,
-cadence, fiscal-calendar and pilot metric settings. Pilot normalized input/report
-schema is version 2: regenerate it from the new analytics contract, preserve old
-run evidence, and obtain review again when scope, measurements or prose change.
-Old pilot rows must not be relabeled without unit conversion and reconciliation.
+configuration wholesale. Remove local configuration, external skill pointers and
+schedules for capabilities absent from the current task router. Mail helper names
+use `mail_`; normalize Task Direction from provider metadata and configure
+reporting, cadence and fiscal-calendar settings. Preserve old run evidence and
+obtain review again when scope, evidence or proposals change.

@@ -30,7 +30,6 @@
       "hygiene_check": "scripts/hygiene_check.py",
       "coverage_check": "scripts/coverage_check.py",
       "mail_contact_stats": "scripts/mail_contact_stats.py",
-      "pilot_usage_pdf": "scripts/pilot_usage/",
       "mail_digest": "scripts/mail_thread_digest.py"
     },
     "mail_search_max_addresses": 3
@@ -38,8 +37,8 @@
   "call_prep": {
     "history_days": 90,
     "call_type": {
-      "customer": "Closed Won or active pilot",
-      "proposal": "a proposal or pilot was sent",
+      "customer": "an existing customer relationship is established in CRM",
+      "proposal": "a written proposal was sent",
       "demo": "a demo was promised or scheduled",
       "discovery": "one or more completed calls, no proposal",
       "intro": "no completed live call"
@@ -78,7 +77,7 @@
         "decision authority"
       ],
       "customer": [
-        "adoption by team",
+        "progress against agreed customer outcomes",
         "blockers",
         "expansion owner",
         "renewal date",
@@ -117,7 +116,7 @@
       "S5": []
     },
     "conditional_fields": [],
-    "close_date_basis": "a buyer-named signature or decision date from any source, or a passed CloseDate with no such date (move to the next buyer-owned date). A trial or pilot end date alone is a milestone, never a CloseDate basis.",
+    "close_date_basis": "a buyer-named signature or decision date from any source, or a passed CloseDate with no such date (move to the next buyer-owned date). An evaluation milestone alone is a milestone, never a CloseDate basis.",
     "stage_entry": {
       "S2": "Need, relevant stakeholders and evaluation criteria confirmed.",
       "S3": "Proposed solution and commercial scope under active buyer evaluation.",
@@ -180,51 +179,6 @@
     "category_mapping": {
       "commit": "Commit",
       "upside": "Best Case"
-    }
-  },
-  "pilot_usage": {
-    "scope": "One named pilot or evaluation, selected by deployment criteria and a verified stable scope ID; resolve ambiguity before analytics collection.",
-    "window_days": 60,
-    "statement_timeout_minutes": null,
-    "top_users": 5,
-    "use_case_sample": 40,
-    "writes": "none",
-    "pdf": {
-      "report_title": "Pilot Usage Report",
-      "week_one_length_days": 7,
-      "uncategorized_category_id": "uncategorized",
-      "category_palette": [
-        "#20808D",
-        "#A84B2F",
-        "#1B474D",
-        "#BCE2E7",
-        "#944454",
-        "#FFC553"
-      ],
-      "page_count": 2,
-      "page_size": "Letter",
-      "page_width_points": 612,
-      "page_height_points": 792,
-      "metadata_title": "Pilot Usage Report",
-      "metadata_author": "Seller",
-      "chromium_timeout_seconds": 120,
-      "output_dir": "output/{run-id}/pilot-usage",
-      "fonts": {}
-    },
-    "enabled": false,
-    "permitted_metrics": [
-      "roster",
-      "activity",
-      "feature_mix",
-      "reviewed_use_cases",
-      "usage_quantity"
-    ],
-    "audience": null,
-    "metric": {
-      "activity_label": "activities",
-      "unit": "units",
-      "decimal_places": 0,
-      "enforce_allocation_limit": false
     }
   },
   "mode": "example",
