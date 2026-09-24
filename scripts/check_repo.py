@@ -14,7 +14,8 @@ PRIVATE = {"_shared/policy.json", "_shared/adapters.md"}
 def public_files(root):
     if (root / ".git").is_dir():
         proc = subprocess.run(["git", "ls-files", "--cached", "--others", "--exclude-standard", "-z"], cwd=root, capture_output=True, check=True)
-        return sorted({Path(p) for p in proc.stdout.decode().split("\0") if p})
+        return sorted({Path(p) for p in proc.stdout.decode().split("\0")
+                       if p and ((root / p).exists() or (root / p).is_symlink())})
     return sorted(p.relative_to(root) for p in root.rglob("*") if p.is_file()
                   and not any(x in (".git", "output", "__pycache__", ".venv") for x in p.relative_to(root).parts)
                   and str(p.relative_to(root)) not in PRIVATE)

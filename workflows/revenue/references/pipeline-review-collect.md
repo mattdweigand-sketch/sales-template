@@ -1,10 +1,48 @@
-# Collect
+# Pipeline collection
 
-Read at step 2. Save each query result to a file. Deduplicate SELECT fields before querying. For pagination, use only a cursor returned by that same search; a missing or null `next_cursor` means stop.
+Use the configured CRM/mail/calendar adapters. These are logical selection
+requirements, not native query text. Save issued requests, raw responses and
+paired normalized receipts under the selected run. Page every search completely.
 
-1. Opportunities: `SELECT Id, OwnerId, IsClosed, Name, StageName, Amount, CloseDate, NextSteps, LastActivityDate, ForecastCategoryName, Type, Account.Name, AccountId, <each field name listed under every stage of policy.pipeline.required_fields, plus each conditional_fields.field> FROM Opportunity WHERE OwnerId = '<userId>' AND IsClosed = false ORDER BY CloseDate`. Record the count.
-2. Tasks: `SELECT Id, Subject, ActivityDate, Status, IsClosed, TaskSubtype, WhatId, AccountId, Who.Name FROM Task WHERE (WhatId IN (<opp ids>) OR AccountId IN (<account ids>)) AND ActivityDate != null AND (IsClosed = false OR ActivityDate = LAST_N_DAYS:<policy.pipeline.activity_days>)`. Undated Tasks are `task-triage-speed-run` scope, not activity. Last touch uses both Opportunity and Account linkage. Email Tasks (`>>` sent, `<<` received) come from the org email sync and are already logged. Events: `SELECT Id, Subject, ActivityDate, StartDateTime, EndDateTime, WhatId, AccountId FROM Event WHERE (WhatId IN (<opp ids>) OR AccountId IN (<account ids>)) AND (ActivityDate = LAST_N_DAYS:<activity_days> OR ActivityDate >= TODAY)`. Contacts: `SELECT Id, Email, AccountId FROM Contact WHERE AccountId IN (<account ids>) AND Email != null`; the Account's domains are its Contacts' email domains.
-3. Run `policy.tooling.scripts.hygiene_check <opps> --tasks <tasks> --events <events> --as-of <run start with local offset> --json`. Retain its source receipts and use them for last touch and triggers, not a separate Opportunity-only lookup. Its output owns mechanical triggers and field checks. Elapsed events are candidates for verification, not proof a meeting happened. For event-only activity, require completion evidence from a completed call Task, transcript, or explicit user confirmation before claiming a held meeting. Otherwise withhold that proposal. Future, ongoing, and timing-unknown events are never completed touches. Resolve contradictory evidence before proposing a write.
-4. Monday to Thursday: one inbox search, `after:<yesterday>` minus `-from:<domain>` for each `policy.identity.internal_domains`, reduced with `policy.tooling.scripts.gmail_digest`, and Calendar searched by in-scope Account name from yesterday through `policy.tooling.calendar_lookahead_days`. Page every mail and Calendar search until no `next_cursor`. Keep only senders and attendees whose domain matches an in-scope Account. An inbound message or a held meeting dated after the deal's newest note is `new_activity`; an upcoming meeting only clears `stale`. Friday: one mail search per in-scope Account, `from:@<domain> after:<activity_days ago>`, Calendar searched by Account name over `policy.tooling.calendar_lookback_days` to `calendar_lookahead_days`, plus `SELECT OpportunityId, Opportunity.Name, Opportunity.Account.Name, Field, OldValue, NewValue, CreatedDate FROM OpportunityFieldHistory WHERE Opportunity.OwnerId = '<userId>' AND CreatedDate = LAST_N_DAYS:7`; then run `policy.tooling.scripts.coverage_check --calls <run>/calls --scope pipeline --since <run start>` and use its result in the coverage header defined by [the report format](pipeline-review-report-format.md); exit 1 means the report is not ready. Follow the script's instructions.
-5. Monday to Thursday, run `policy.tooling.scripts.coverage_check --calls <run>/calls --scope pipeline-daily --since <run start with local offset>`. It verifies paired call results, returned pagination cursors, required Event timestamps, every in-scope Account's calendar search, and the actual Contact-domain match. Use its matched receipts to assess new activity. Use its result in the coverage header defined by [the report format](pipeline-review-report-format.md). On exit 1, finish missing checks and rerun. If a gap cannot be resolved, label the report incomplete, disclose the gap, and withhold affected proposals rather than claiming full coverage. Do not silently exclude test-looking records or invent missing domains.
-6. `not checked` per `policy.tooling.not_checked_means`. Preserve original errors and reconciliation evidence. Subjects alone support metadata-only notes, not email-body conclusions. Proposed count equals numbered, supported changes, never the trigger count.
+1. **Owned-open snapshot.** Retrieve every Opportunity owned by the selected user
+   with IsClosed=false, ordered by CloseDate. Include Id, OwnerId, IsClosed, Name,
+   StageName, Amount, CloseDate, NextSteps, LastActivityDate, ForecastCategoryName,
+   Type, Account.Name, AccountId, every field in policy.pipeline.required_fields
+   and each conditional field and condition key. Preserve the original count;
+   derive policy.pipeline.in_scope_stages locally. Do not hide test-looking rows.
+2. **Linked CRM sources.** For all in-scope Opportunity and Account IDs, retrieve:
+   - Tasks with a date, either open or within policy.pipeline.activity_days:
+     Id, Subject, ActivityDate, Status, IsClosed, TaskSubtype, Direction, WhatId,
+     AccountId and Who.Name. Undated Tasks belong to task triage. Direction comes
+     from verified adapter metadata, never a universal subject-prefix rule.
+   - Events within the activity window or upcoming: Id, Subject, ActivityDate,
+     StartDateTime, EndDateTime, WhatId and AccountId. An elapsed event does not
+     prove attendance. Retain both timestamps for coverage and hygiene checks.
+   - Contacts on those Accounts: Id, Email and AccountId. Derive external domains
+     from returned addresses; missing domains remain explicit gaps.
+3. **Hygiene.** Run `policy.tooling.scripts.hygiene_check <opps> --tasks <tasks>
+   --events <events> --today <local-date> --as-of <run-start> --policy _shared/policy.json`.
+   Use the computed action deadline, newest note, activity receipts and flags.
+   Review unresolved dates before proposing a change.
+4. **Daily review.** Request inbound mail since yesterday in the reporting timezone,
+   excluding policy.identity.internal_domains, with no account narrowing. Reduce
+   saved results using policy.tooling.scripts.mail_digest. Search calendar by each
+   in-scope Account name or verified Contact email from yesterday through
+   policy.tooling.calendar_lookahead_days. Match returned senders/attendees to
+   verified account domains. Upcoming meetings do not establish new buyer activity.
+5. **Extended review.** Request inbound mail per in-scope Account domain since
+   policy.pipeline.activity_days ago, and calendar records across configured
+   lookback/lookahead windows. Retrieve provider-backed record change history since
+   the preceding configured extended review day (or the run's explicit comparison
+   date), including new deals, stage/date changes and closures. If history is
+   unavailable, label the delta unavailable; never infer it from present values.
+6. **Coverage.** Run `policy.tooling.scripts.coverage_check --calls <run>/calls
+   --scope pipeline-daily --since <run-start> --policy _shared/policy.json` for daily
+   review, or `--scope pipeline` for extended review. Use its result in the
+   [report header](pipeline-review-report-format.md). On exit 1, resolve missing
+   checks and rerun; if unresolved, label coverage incomplete and withhold affected
+   proposals. No claim of complete coverage without the successful receipts.
+
+Cadence comes from policy.cadence or an explicit daily/extended selection in this
+run. Native provider query syntax and pagination belong in adapters.md. Source
+failures are gaps, not empty result sets. Do not silently drop failed sources.

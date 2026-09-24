@@ -7,9 +7,6 @@ Process: open only the reference named at that step; these files do not grant ap
 Outputs: formatting, collection, or field requirements applied to that run.
 Human check: review evidence and payloads through the parent workflow.
 
-- [close-fields](close-fields.md)
-- [close-paths](close-paths.md)
-- [close-setup-trial](close-setup-trial.md)
 - [forecast-weekly-report-format](forecast-weekly-report-format.md)
 - [pilot-usage-pdf-format](pilot-usage-pdf-format.md)
 - [pilot-usage-queries](pilot-usage-queries.md)

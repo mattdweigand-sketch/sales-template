@@ -1,207 +1,207 @@
 {
-  "q1_roster": [
+  "roster": [
     {
-      "user_email": "alex@example.org",
-      "window_queries": 15
+      "user_id": "alex@example.org",
+      "email": "alex@example.org"
     },
     {
-      "user_email": "blair@example.org",
-      "window_queries": 15
+      "user_id": "blair@example.org",
+      "email": "blair@example.org"
     },
     {
-      "user_email": "casey@example.org",
-      "window_queries": 15
+      "user_id": "casey@example.org",
+      "email": "casey@example.org"
     },
     {
-      "user_email": "drew@example.org",
-      "window_queries": 15
+      "user_id": "drew@example.org",
+      "email": "drew@example.org"
     },
     {
-      "user_email": "ellis@example.org",
-      "window_queries": 15
+      "user_id": "ellis@example.org",
+      "email": "ellis@example.org"
     },
     {
-      "user_email": "frankie@example.org",
-      "window_queries": 0
+      "user_id": "frankie@example.org",
+      "email": "frankie@example.org"
     }
   ],
-  "q4_grants": [
+  "allocations": [
     {
-      "user_email": null,
-      "amount_dollars": "100",
+      "user_id": null,
+      "quantity": "10000",
       "effective_at": "2026-09-01",
       "expires_at": "2026-10-01",
       "voided_at": null
     }
   ],
-  "q5_tasks": [
+  "activities": [
     {
-      "context_uuid": "task-1",
-      "user_email": "alex@example.org",
-      "first_date": "2026-09-01",
-      "amount_cents": "20.5",
-      "task_title": "Prepare a sourced market brief"
+      "activity_id": "task-1",
+      "user_id": "alex@example.org",
+      "date": "2026-09-01",
+      "quantity": "20.5",
+      "activity_title": "Prepare a sourced market brief"
     },
     {
-      "context_uuid": "task-2",
-      "user_email": "blair@example.org",
-      "first_date": "2026-09-02",
-      "amount_cents": "25.5",
-      "task_title": "Compare evaluation requirements"
+      "activity_id": "task-2",
+      "user_id": "blair@example.org",
+      "date": "2026-09-02",
+      "quantity": "25.5",
+      "activity_title": "Compare evaluation requirements"
     },
     {
-      "context_uuid": "task-3",
-      "user_email": "casey@example.org",
-      "first_date": "2026-09-03",
-      "amount_cents": "30.5",
-      "task_title": "Draft an implementation plan"
+      "activity_id": "task-3",
+      "user_id": "casey@example.org",
+      "date": "2026-09-03",
+      "quantity": "30.5",
+      "activity_title": "Draft an implementation plan"
     },
     {
-      "context_uuid": "task-4",
-      "user_email": "drew@example.org",
-      "first_date": "2026-09-04",
-      "amount_cents": "35.5",
-      "task_title": "Review a sample data workflow"
+      "activity_id": "task-4",
+      "user_id": "drew@example.org",
+      "date": "2026-09-04",
+      "quantity": "35.5",
+      "activity_title": "Review a sample data workflow"
     },
     {
-      "context_uuid": "task-5",
-      "user_email": "ellis@example.org",
-      "first_date": "2026-09-05",
-      "amount_cents": "40.5",
-      "task_title": "Prepare a sourced market brief"
+      "activity_id": "task-5",
+      "user_id": "ellis@example.org",
+      "date": "2026-09-05",
+      "quantity": "40.5",
+      "activity_title": "Prepare a sourced market brief"
     },
     {
-      "context_uuid": "task-6",
-      "user_email": "alex@example.org",
-      "first_date": "2026-09-06",
-      "amount_cents": "45.5",
-      "task_title": "Compare evaluation requirements"
+      "activity_id": "task-6",
+      "user_id": "alex@example.org",
+      "date": "2026-09-06",
+      "quantity": "45.5",
+      "activity_title": "Compare evaluation requirements"
     },
     {
-      "context_uuid": "task-7",
-      "user_email": "blair@example.org",
-      "first_date": "2026-09-07",
-      "amount_cents": "50.5",
-      "task_title": "Draft an implementation plan"
+      "activity_id": "task-7",
+      "user_id": "blair@example.org",
+      "date": "2026-09-07",
+      "quantity": "50.5",
+      "activity_title": "Draft an implementation plan"
     },
     {
-      "context_uuid": "task-8",
-      "user_email": "casey@example.org",
-      "first_date": "2026-09-08",
-      "amount_cents": "55.5",
-      "task_title": "Review a sample data workflow"
+      "activity_id": "task-8",
+      "user_id": "casey@example.org",
+      "date": "2026-09-08",
+      "quantity": "55.5",
+      "activity_title": "Review a sample data workflow"
     },
     {
-      "context_uuid": "task-9",
-      "user_email": "drew@example.org",
-      "first_date": "2026-09-09",
-      "amount_cents": "60.5",
-      "task_title": "Prepare a sourced market brief"
+      "activity_id": "task-9",
+      "user_id": "drew@example.org",
+      "date": "2026-09-09",
+      "quantity": "60.5",
+      "activity_title": "Prepare a sourced market brief"
     },
     {
-      "context_uuid": "task-10",
-      "user_email": "ellis@example.org",
-      "first_date": "2026-09-10",
-      "amount_cents": "65.5",
-      "task_title": "Compare evaluation requirements"
+      "activity_id": "task-10",
+      "user_id": "ellis@example.org",
+      "date": "2026-09-10",
+      "quantity": "65.5",
+      "activity_title": "Compare evaluation requirements"
     },
     {
-      "context_uuid": "task-11",
-      "user_email": "alex@example.org",
-      "first_date": "2026-09-11",
-      "amount_cents": "70.5",
-      "task_title": "Draft an implementation plan"
+      "activity_id": "task-11",
+      "user_id": "alex@example.org",
+      "date": "2026-09-11",
+      "quantity": "70.5",
+      "activity_title": "Draft an implementation plan"
     },
     {
-      "context_uuid": "task-12",
-      "user_email": "blair@example.org",
-      "first_date": "2026-09-12",
-      "amount_cents": "75.5",
-      "task_title": "Review a sample data workflow"
+      "activity_id": "task-12",
+      "user_id": "blair@example.org",
+      "date": "2026-09-12",
+      "quantity": "75.5",
+      "activity_title": "Review a sample data workflow"
     },
     {
-      "context_uuid": "task-13",
-      "user_email": "casey@example.org",
-      "first_date": "2026-09-13",
-      "amount_cents": "80.5",
-      "task_title": "Prepare a sourced market brief"
+      "activity_id": "task-13",
+      "user_id": "casey@example.org",
+      "date": "2026-09-13",
+      "quantity": "80.5",
+      "activity_title": "Prepare a sourced market brief"
     },
     {
-      "context_uuid": "task-14",
-      "user_email": "drew@example.org",
-      "first_date": "2026-09-14",
-      "amount_cents": "85.5",
-      "task_title": "Compare evaluation requirements"
+      "activity_id": "task-14",
+      "user_id": "drew@example.org",
+      "date": "2026-09-14",
+      "quantity": "85.5",
+      "activity_title": "Compare evaluation requirements"
     },
     {
-      "context_uuid": "task-15",
-      "user_email": "ellis@example.org",
-      "first_date": "2026-09-15",
-      "amount_cents": "90.5",
-      "task_title": "Draft an implementation plan"
+      "activity_id": "task-15",
+      "user_id": "ellis@example.org",
+      "date": "2026-09-15",
+      "quantity": "90.5",
+      "activity_title": "Draft an implementation plan"
     },
     {
-      "context_uuid": "task-16",
-      "user_email": "alex@example.org",
-      "first_date": "2026-09-16",
-      "amount_cents": "95.5",
-      "task_title": "Review a sample data workflow"
+      "activity_id": "task-16",
+      "user_id": "alex@example.org",
+      "date": "2026-09-16",
+      "quantity": "95.5",
+      "activity_title": "Review a sample data workflow"
     },
     {
-      "context_uuid": "task-17",
-      "user_email": "blair@example.org",
-      "first_date": "2026-09-17",
-      "amount_cents": "100.5",
-      "task_title": "Prepare a sourced market brief"
+      "activity_id": "task-17",
+      "user_id": "blair@example.org",
+      "date": "2026-09-17",
+      "quantity": "100.5",
+      "activity_title": "Prepare a sourced market brief"
     },
     {
-      "context_uuid": "task-18",
-      "user_email": "casey@example.org",
-      "first_date": "2026-09-18",
-      "amount_cents": "105.5",
-      "task_title": "Compare evaluation requirements"
+      "activity_id": "task-18",
+      "user_id": "casey@example.org",
+      "date": "2026-09-18",
+      "quantity": "105.5",
+      "activity_title": "Compare evaluation requirements"
     },
     {
-      "context_uuid": "task-19",
-      "user_email": "drew@example.org",
-      "first_date": "2026-09-19",
-      "amount_cents": "110.5",
-      "task_title": "Draft an implementation plan"
+      "activity_id": "task-19",
+      "user_id": "drew@example.org",
+      "date": "2026-09-19",
+      "quantity": "110.5",
+      "activity_title": "Draft an implementation plan"
     },
     {
-      "context_uuid": "task-20",
-      "user_email": "ellis@example.org",
-      "first_date": "2026-09-01",
-      "amount_cents": "115.5",
-      "task_title": "Review a sample data workflow"
+      "activity_id": "task-20",
+      "user_id": "ellis@example.org",
+      "date": "2026-09-01",
+      "quantity": "115.5",
+      "activity_title": "Review a sample data workflow"
     },
     {
-      "context_uuid": "task-21",
-      "user_email": "alex@example.org",
-      "first_date": "2026-09-02",
-      "amount_cents": "120.5",
-      "task_title": "Prepare a sourced market brief"
+      "activity_id": "task-21",
+      "user_id": "alex@example.org",
+      "date": "2026-09-02",
+      "quantity": "120.5",
+      "activity_title": "Prepare a sourced market brief"
     },
     {
-      "context_uuid": "task-22",
-      "user_email": "blair@example.org",
-      "first_date": "2026-09-03",
-      "amount_cents": "125.5",
-      "task_title": "Compare evaluation requirements"
+      "activity_id": "task-22",
+      "user_id": "blair@example.org",
+      "date": "2026-09-03",
+      "quantity": "125.5",
+      "activity_title": "Compare evaluation requirements"
     },
     {
-      "context_uuid": "task-23",
-      "user_email": "casey@example.org",
-      "first_date": "2026-09-04",
-      "amount_cents": "130.5",
-      "task_title": "Draft an implementation plan"
+      "activity_id": "task-23",
+      "user_id": "casey@example.org",
+      "date": "2026-09-04",
+      "quantity": "130.5",
+      "activity_title": "Draft an implementation plan"
     },
     {
-      "context_uuid": "task-24",
-      "user_email": "drew@example.org",
-      "first_date": "2026-09-05",
-      "amount_cents": "135.5",
-      "task_title": "Review a sample data workflow"
+      "activity_id": "task-24",
+      "user_id": "drew@example.org",
+      "date": "2026-09-05",
+      "quantity": "135.5",
+      "activity_title": "Review a sample data workflow"
     }
   ]
 }

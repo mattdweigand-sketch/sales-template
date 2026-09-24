@@ -11,6 +11,7 @@ from datetime import date, datetime, timedelta
 from email.utils import parseaddr
 import json
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 
 def stamp(value):
@@ -20,8 +21,24 @@ def stamp(value):
     return value
 
 
-def quarter_bounds(today):
-    start = date(today.year, (today.month - 1) // 3 * 3 + 1, 1)
+def quarter_bounds(today, forecast=None):
+    """Current and next quarter boundaries in the deployment's reporting calendar."""
+    forecast = forecast or {}
+    boundaries = forecast.get("quarter_boundaries", [])
+    if boundaries:
+        days = [date.fromisoformat(value) for value in boundaries]
+        if days != sorted(set(days)):
+            raise ValueError("quarter_boundaries must be unique, ascending ISO dates")
+        for index in range(len(days) - 2):
+            if days[index] <= today < days[index + 1]:
+                return tuple(days[index:index + 3])
+        raise ValueError("quarter_boundaries must cover the current and next quarter")
+    first_month = forecast.get("fiscal_year_start_month", 1)
+    if type(first_month) is not int or not 1 <= first_month <= 12:
+        raise ValueError("fiscal_year_start_month must be an integer from 1 to 12")
+    month_index = today.year * 12 + today.month - 1
+    start_index = month_index - (today.month - first_month) % 3
+    start = date(start_index // 12, start_index % 12 + 1, 1)
     def add(months):
         month = start.month - 1 + months
         return date(start.year + month // 12, month % 12 + 1, 1)
@@ -101,6 +118,7 @@ def check(calls, policy, since, scope):
     if not owner:
         errors.append("policy.identity.owner_id must identify the CRM owner")
     queries = [q for q in queries if q["owner_id"] == owner]
+    run_day = since.astimezone(ZoneInfo(policy["identity"].get("timezone", "UTC"))).date()
     pp = policy["pipeline"]
     crm = [q for q in queries if q["source"] == "crm"]
     snapshots = [q for q in crm if q.get("object") == "Opportunity" and q.get("selection") == "all_owned_open"]
@@ -110,7 +128,8 @@ def check(calls, policy, since, scope):
     if any(o.get("IsClosed") is not False or o.get("OwnerId") != owner for o in opps):
         errors.append("open snapshot contains a closed or differently owned opportunity")
     stages = set(pp["in_scope_stages"])
-    current, next_q, end = quarter_bounds(since.date())
+    # Pipeline modes do not depend on the forecasting calendar.
+    current, next_q, end = quarter_bounds(run_day, policy.get("forecast") if scope == "forecast" else None)
     scoped = []
     for opp in opps:
         if opp.get("StageName", "").split(" - ", 1)[0] not in stages:
@@ -143,8 +162,8 @@ def check(calls, policy, since, scope):
         if len(booked) != 1:
             errors.append("missing complete booked-in-quarter snapshot")
     internal = set(policy["identity"]["internal_domains"])
-    start = since.date() - timedelta(days=1 if scope == "pipeline-daily" else policy["tooling"]["calendar_lookback_days"])
-    end_date = since.date() + timedelta(days=policy["tooling"]["calendar_lookahead_days"])
+    start = run_day - timedelta(days=1 if scope == "pipeline-daily" else policy["tooling"]["calendar_lookback_days"])
+    end_date = run_day + timedelta(days=policy["tooling"]["calendar_lookahead_days"])
     def covers_dates(q, beginning, ending=None):
         try:
             return date.fromisoformat(q["start_date"]) <= beginning and (ending is None or date.fromisoformat(q["end_date"]) >= ending)
@@ -163,7 +182,7 @@ def check(calls, policy, since, scope):
         domains = {a.rsplit("@", 1)[-1] for a in addresses} - internal
         if not domains:
             errors.append(f"{opp['Id']}: no external Contact domain")
-        mail_start = current if scope == "forecast" else since.date() - timedelta(days=pp["activity_days"])
+        mail_start = current if scope == "forecast" else run_day - timedelta(days=pp["activity_days"])
         searches = inbox if scope == "pipeline-daily" else [q for q in mail if q.get("selection") == "account_inbound"
             and domains <= set(q.get("domains", [])) and covers_dates(q, mail_start)]
         if searches and domains:

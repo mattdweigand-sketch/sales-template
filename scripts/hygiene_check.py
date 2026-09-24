@@ -8,7 +8,7 @@ Usage: hygiene_check.py <opps.json> [--tasks tasks.json] [--events events.json]
 Inputs are saved CRM query outputs (Opportunity, Task, Event). For every
 open deal in policy.pipeline.in_scope_stages it emits one line:
   triggers it can compute from CRM (policy.pipeline.triggers): next_passed,
-    new_activity (inbound 'Email: <<' Task or elapsed Event after the newest note),
+    new_activity (verified inbound Task or elapsed Event after the newest note),
     blank_field, date_at_risk, stale
   blank required and conditional fields, next-step status, newest note date,
   last activity, next upcoming Event, open Tasks
@@ -40,7 +40,6 @@ NEXT_STEP_DUE_DATE_RE = re.compile(
     r"\b(?:on|by)\s+(?P<date>\d{1,2}/\d{1,2}(?:/\d{2,4})?)(?![\d/])",
     re.I,
 )
-INBOUND = "Email: <<"
 
 
 @dataclass(frozen=True)
@@ -235,7 +234,7 @@ def check(rec, pol, acts, today, as_of=None):
     out["newest_note"] = newest_note.isoformat() if newest_note else None
 
     # activity
-    # Activity linked to the Opportunity or to its Account. The org email sync logs most Email Tasks on the Account.
+    # Activity linked to the Opportunity or to its Account. Adapters preserve both activity links.
     items, seen = [], set()
     for a in acts.get(rec.get("Id"), []) + acts.get(rec.get("AccountId"), []):
         k = a.get("id") or (a["date"], a["subject"], a["kind"])
@@ -300,7 +299,7 @@ def index_activity(tasks, events, timezone=dt.timezone.utc):
         subj = t.get("Subject") or ""
         if not t.get("IsClosed", t.get("Status") == "Completed") and t.get("Status") != "Completed":
             kind = "open_task"
-        elif subj.startswith(INBOUND):
+        elif t.get("Direction") == "inbound":
             kind = "inbound"
         else:
             kind = "task"

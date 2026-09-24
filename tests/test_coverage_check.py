@@ -1,4 +1,4 @@
-"""Source coverage checks for daily, Friday and forecast runs."""
+"""Source coverage checks for daily, extended and forecast runs."""
 from pathlib import Path
 from datetime import datetime
 import json
@@ -51,7 +51,7 @@ class CoverageTests(unittest.TestCase):
     def result(self, scope="pipeline-daily"):
         return check(self.calls,self.policy,self.since,scope)
 
-    def test_complete_daily_friday_forecast(self):
+    def test_complete_daily_extended_forecast(self):
         for scope in ("pipeline-daily","pipeline","forecast"):
             self.ready(scope)
             result = self.result(scope)

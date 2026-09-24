@@ -8,8 +8,8 @@
       "review_inputs": [
         "_shared/adapter-contract.md",
         "workflows/engagement/references/sales-call-prep-brief-formats.md",
-        "scripts/gmail_contact_stats.py",
-        "scripts/gmail_thread_digest.py",
+        "scripts/mail_contact_stats.py",
+        "scripts/mail_thread_digest.py",
         "scripts/mail_evidence.py"
       ]
     },
@@ -28,8 +28,8 @@
       "review_inputs": [
         "_shared/adapter-contract.md",
         "workflows/engagement/references/task-triage-speed-run-crm-corrections.md",
-        "scripts/gmail_contact_stats.py",
-        "scripts/gmail_thread_digest.py",
+        "scripts/mail_contact_stats.py",
+        "scripts/mail_thread_digest.py",
         "scripts/mail_evidence.py"
       ]
     },
@@ -43,7 +43,7 @@
         "workflows/revenue/references/pipeline-review-report-format.md",
         "scripts/coverage_check.py",
         "scripts/hygiene_check.py",
-        "scripts/gmail_thread_digest.py",
+        "scripts/mail_thread_digest.py",
         "scripts/mail_evidence.py"
       ]
     },
@@ -56,7 +56,7 @@
         "workflows/revenue/references/forecast-weekly-report-format.md",
         "scripts/coverage_check.py",
         "scripts/hygiene_check.py",
-        "scripts/gmail_thread_digest.py",
+        "scripts/mail_thread_digest.py",
         "scripts/mail_evidence.py",
         "workflows/revenue/references/pipeline-review-collect.md"
       ]
@@ -77,17 +77,6 @@
         "scripts/pilot_usage/print_pilot_usage_pdf.py",
         "scripts/pilot_usage/render_pilot_usage_report.py",
         "scripts/pilot_usage/validate_pilot_usage_report.py"
-      ]
-    },
-    "close": {
-      "description": "Review a signed opportunity's close and track approved downstream handoff effects.",
-      "workspace": "workflows/revenue/CONTEXT.md",
-      "workflow": "workflows/revenue/close.md",
-      "review_inputs": [
-        "_shared/adapter-contract.md",
-        "workflows/revenue/references/close-fields.md",
-        "workflows/revenue/references/close-paths.md",
-        "workflows/revenue/references/close-setup-trial.md"
       ]
     }
   }

@@ -15,10 +15,10 @@ from pathlib import Path
 from typing import NewType, TypedDict, cast
 
 from pilot_usage_local_storage import require_local_only_output_path
-from pilot_usage_policy import load_pilot_usage_policy
+from pilot_usage_policy import load_pilot_usage_policy, validate_metric
 
 PilotUserId = NewType("PilotUserId", str)
-ProductContextUuid = NewType("ProductContextUuid", str)
+PilotActivityId = NewType("PilotActivityId", str)
 PilotUsageCategoryId = NewType("PilotUsageCategoryId", str)
 
 
@@ -29,13 +29,13 @@ class PilotReportMetadata(TypedDict):
     pilot_start: str
     pilot_end: str
     data_through: str
-    total_granted_credits: int
+    allocated_units: int | None
     confidentiality_label: str
 
 
-class PilotOrganizationScope(TypedDict):
-    organization_uuid: str
-    workspace_role: str
+class PilotScope(TypedDict):
+    scope_id: str
+    scope_role: str
     reviewed: bool
 
 
@@ -52,31 +52,31 @@ class PilotUsageCategory(TypedDict):
     description: str
 
 
-class PilotDatedSession(TypedDict):
-    context_uuid: str
+class PilotDatedActivity(TypedDict):
+    activity_id: str
     user_id: str
     date: str
-    credits: int
+    usage_units: int
     category_id: str
-    task_title: str
+    activity_title: str
     classification_reviewed: bool
 
 
-class PilotUndatedSession(TypedDict):
-    context_uuid: str
+class PilotUndatedActivity(TypedDict):
+    activity_id: str
     user_id: str
-    credits: int
+    usage_units: int
     category_id: str
-    task_title: str
+    activity_title: str
     classification_reviewed: bool
     reviewed: bool
     review_note: str
 
 
 class PilotSourceReconciliation(TypedDict):
-    eligible_context_count: int
-    billed_amount_cents: int
-    billed_amount_cents_raw: str
+    activity_count: int
+    usage_units: int
+    quantity_raw: str
 
 
 class LabeledNarrative(TypedDict):
@@ -102,12 +102,13 @@ class PilotReviewedNarratives(TypedDict):
 
 class PilotUsageInput(TypedDict):
     schema_version: int
+    metric: dict
     report: PilotReportMetadata
-    organization_scopes: list[PilotOrganizationScope]
+    scopes: list[PilotScope]
     roster: list[PilotRosterUser]
     categories: list[PilotUsageCategory]
-    sessions: list[PilotDatedSession]
-    supplemental_undated_sessions: list[PilotUndatedSession]
+    activities: list[PilotDatedActivity]
+    undated_activities: list[PilotUndatedActivity]
     source_reconciliation: PilotSourceReconciliation
     reviewed_narratives: PilotReviewedNarratives
 
@@ -116,9 +117,7 @@ class PilotUsagePolicy(TypedDict):
     schema_version: int
     report_title: str
     week_one_length_days: int
-    task_grain: str
-    credit_unit: str
-    credit_display_rule: str
+    metric: dict
     uncategorized_category_id: str
     category_palette: list[str]
     report_page_count: int
@@ -152,26 +151,26 @@ class PilotUsagePdfPolicy(TypedDict):
 class PilotUsageUserRow(TypedDict):
     user_id: str
     display_name: str
-    task_count: int
-    week_one_tasks: int
-    week_two_tasks: int
-    undated_tasks: int
-    credits: int
+    activity_count: int
+    initial_period_activities: int
+    later_activities: int
+    undated_activities: int
+    usage_units: int
     active_days: int
     participation_note: str
 
 
-class PilotDailyTaskRow(TypedDict):
+class PilotDailyActivityRow(TypedDict):
     date: str
-    task_count: int
+    activity_count: int
 
 
 class PilotUsageCategoryRow(TypedDict):
     category_id: str
     label: str
     description: str
-    task_count: int
-    credits: int
+    activity_count: int
+    usage_units: int
     share_percent: int
     share_percent_precise: str
     color: str
@@ -179,13 +178,13 @@ class PilotUsageCategoryRow(TypedDict):
 
 class PilotHeadlineMetrics(TypedDict):
     active_users: int
-    seat_count: int
-    task_count: int
-    credits_used: int
+    participant_count: int
+    activity_count: int
+    usage_units: int
     active_days: int
     elapsed_days: int
-    granted_credits: int
-    remaining_credits: int
+    allocated_units: int | None
+    remaining_units: int | None
 
 
 class PilotUsagePeriods(TypedDict):
@@ -199,31 +198,32 @@ class PilotUsagePeriods(TypedDict):
 
 class PilotComputedHighlights(TypedDict):
     top_user_count: int
-    top_user_credit_share_percent: int
+    top_user_usage_share_percent: int
     most_consistent_user_id: str | None
     most_consistent_active_days: int
     inactive_user_count: int
     day_one_only_user_count: int
-    undated_task_count: int
-    undated_credits: int
+    undated_activity_count: int
+    undated_units: int
 
 
 class PilotReconciliation(TypedDict):
-    tasks_match: bool
-    credits_match: bool
-    grants_match: bool
-    category_tasks_match: bool
-    category_credits_match: bool
+    counts_match: bool
+    units_match: bool
+    allocation_matches: bool
+    category_counts_match: bool
+    category_units_match: bool
 
 
 class PilotUsageReport(TypedDict):
     schema_version: int
+    metric: dict
     report_title: str
     report: PilotReportMetadata
     headline: PilotHeadlineMetrics
     periods: PilotUsagePeriods
     users: list[PilotUsageUserRow]
-    daily_tasks: list[PilotDailyTaskRow]
+    daily_activities: list[PilotDailyActivityRow]
     categories: list[PilotUsageCategoryRow]
     computed_highlights: PilotComputedHighlights
     reviewed_narratives: PilotReviewedNarratives
@@ -244,20 +244,20 @@ def _require_non_empty(value: str, field_name: str) -> None:
 
 
 def _validate_reviewed_pilot_input(normalized_input: PilotUsageInput) -> None:
-    if normalized_input["schema_version"] != 1:
-        raise ValueError("schema_version must be 1")
-    if not normalized_input["organization_scopes"]:
-        raise ValueError("organization_scopes must not be empty")
-    for scope in normalized_input["organization_scopes"]:
-        _require_non_empty(scope["organization_uuid"], "organization_uuid")
+    if normalized_input["schema_version"] != 2:
+        raise ValueError("schema_version must be 2")
+    if not normalized_input["scopes"]:
+        raise ValueError("scopes must not be empty")
+    for scope in normalized_input["scopes"]:
+        _require_non_empty(scope["scope_id"], "scope_id")
         if scope["reviewed"] is not True:
-            raise ValueError("every organization scope must be explicitly reviewed")
+            raise ValueError("every pilot scope must be explicitly reviewed")
     if normalized_input["reviewed_narratives"]["reviewed"] is not True:
         raise ValueError("reviewed_narratives must be explicitly reviewed")
 
     report = normalized_input["report"]
-    if type(report["total_granted_credits"]) is not int or report["total_granted_credits"] < 0:
-        raise ValueError("granted credits must be a non-negative integer")
+    if report["allocated_units"] is not None and (type(report["allocated_units"]) is not int or report["allocated_units"] < 0):
+        raise ValueError("allocated_units must be null or a non-negative integer")
     pilot_start = parse_pilot_iso_date(report["pilot_start"], "pilot_start")
     pilot_end = parse_pilot_iso_date(report["pilot_end"], "pilot_end")
     data_through = parse_pilot_iso_date(report["data_through"], "data_through")
@@ -278,12 +278,13 @@ def _validate_reviewed_pilot_input(normalized_input: PilotUsageInput) -> None:
 
     known_users = set(roster_ids)
     known_categories = set(category_ids)
-    contexts: set[ProductContextUuid] = set()
-    for session in normalized_input["sessions"]:
-        context_uuid = ProductContextUuid(session["context_uuid"])
-        if context_uuid in contexts:
-            raise ValueError(f"duplicate context_uuid: {context_uuid}")
-        contexts.add(context_uuid)
+    contexts: set[PilotActivityId] = set()
+    for session in normalized_input["activities"]:
+        activity_id = PilotActivityId(session["activity_id"])
+        _require_non_empty(activity_id, "activity_id")
+        if activity_id in contexts:
+            raise ValueError(f"duplicate activity_id: {activity_id}")
+        contexts.add(activity_id)
         if PilotUserId(session["user_id"]) not in known_users:
             raise ValueError(
                 f"session references unknown user_id: {session['user_id']}"
@@ -293,20 +294,21 @@ def _validate_reviewed_pilot_input(normalized_input: PilotUsageInput) -> None:
                 f"session references unknown category_id: {session['category_id']}"
             )
         if session["classification_reviewed"] is not True:
-            raise ValueError(f"session classification is not reviewed: {context_uuid}")
+            raise ValueError(f"session classification is not reviewed: {activity_id}")
         session_date = parse_pilot_iso_date(session["date"], "session date")
         if not pilot_start <= session_date <= data_through:
             raise ValueError(
-                f"session date is outside the report window: {context_uuid}"
+                f"session date is outside the report window: {activity_id}"
             )
-        if type(session["credits"]) is not int or session["credits"] < 0:
-            raise ValueError(f"session credits must be non-negative: {context_uuid}")
+        if type(session["usage_units"]) is not int or session["usage_units"] < 0:
+            raise ValueError(f"session usage_units must be non-negative: {activity_id}")
 
-    for session in normalized_input["supplemental_undated_sessions"]:
-        context_uuid = ProductContextUuid(session["context_uuid"])
-        if context_uuid in contexts:
-            raise ValueError(f"duplicate context_uuid: {context_uuid}")
-        contexts.add(context_uuid)
+    for session in normalized_input["undated_activities"]:
+        activity_id = PilotActivityId(session["activity_id"])
+        _require_non_empty(activity_id, "activity_id")
+        if activity_id in contexts:
+            raise ValueError(f"duplicate activity_id: {activity_id}")
+        contexts.add(activity_id)
         if PilotUserId(session["user_id"]) not in known_users:
             raise ValueError(
                 f"undated session references unknown user_id: {session['user_id']}"
@@ -317,15 +319,15 @@ def _validate_reviewed_pilot_input(normalized_input: PilotUsageInput) -> None:
             )
         if session["classification_reviewed"] is not True:
             raise ValueError(
-                f"undated session classification is not reviewed: {context_uuid}"
+                f"undated session classification is not reviewed: {activity_id}"
             )
         if session["reviewed"] is not True or not session["review_note"].strip():
             raise ValueError(
-                f"undated session requires explicit review: {context_uuid}"
+                f"undated session requires explicit review: {activity_id}"
             )
-        if type(session["credits"]) is not int or session["credits"] < 0:
+        if type(session["usage_units"]) is not int or session["usage_units"] < 0:
             raise ValueError(
-                f"undated session credits must be non-negative: {context_uuid}"
+                f"undated session usage_units must be non-negative: {activity_id}"
             )
 
     for card in normalized_input["reviewed_narratives"]["representative_work"]:
@@ -336,17 +338,17 @@ def _validate_reviewed_pilot_input(normalized_input: PilotUsageInput) -> None:
             )
 
 
-def _rounded_share_percent(credits: int, credits_used: int) -> int:
-    if credits_used == 0:
+def _rounded_share_percent(usage_units: int, total_units: int) -> int:
+    if total_units == 0:
         return 0
-    share = Decimal(credits) * Decimal(100) / Decimal(credits_used)
+    share = Decimal(usage_units) * Decimal(100) / Decimal(total_units)
     return int(share.quantize(Decimal(1), rounding=ROUND_HALF_UP))
 
 
-def _precise_share_percent(credits: int, credits_used: int) -> str:
-    if credits_used == 0:
+def _precise_share_percent(usage_units: int, total_units: int) -> str:
+    if total_units == 0:
         return "0.0"
-    share = Decimal(credits) * Decimal(100) / Decimal(credits_used)
+    share = Decimal(usage_units) * Decimal(100) / Decimal(total_units)
     return str(share.quantize(Decimal("0.1"), rounding=ROUND_HALF_UP))
 
 
@@ -356,14 +358,9 @@ def compute_pilot_usage_report(
 ) -> PilotUsageReport:
     """Compute all report metrics and fail closed on source or review mismatches."""
     _validate_reviewed_pilot_input(normalized_input)
-    if policy["task_grain"] != "context_uuid":
-        raise ValueError("policy task_grain must be context_uuid")
-    if policy["credit_unit"] != "cent":
-        raise ValueError("policy credit_unit must be cent")
-    if policy["credit_display_rule"] != "round_half_up_per_context_then_sum":
-        raise ValueError(
-            "policy credit_display_rule must be round_half_up_per_context_then_sum"
-        )
+    validate_metric(policy["metric"])
+    if normalized_input["metric"] != policy["metric"]:
+        raise ValueError("input metric differs from policy; reassemble and review")
     if not policy["category_palette"]:
         raise ValueError("policy category_palette must not be empty")
 
@@ -377,49 +374,49 @@ def compute_pilot_usage_report(
     )
     week_two_start = week_one_end + timedelta(days=1)
 
-    dated_sessions = normalized_input["sessions"]
-    undated_sessions = normalized_input["supplemental_undated_sessions"]
-    all_sessions: list[PilotDatedSession | PilotUndatedSession] = [
-        *dated_sessions,
-        *undated_sessions,
+    dated_activities = normalized_input["activities"]
+    undated_activities = normalized_input["undated_activities"]
+    all_activities: list[PilotDatedActivity | PilotUndatedActivity] = [
+        *dated_activities,
+        *undated_activities,
     ]
-    task_count = len(all_sessions)
-    credits_used = sum(session["credits"] for session in all_sessions)
+    activity_count = len(all_activities)
+    usage_units = sum(session["usage_units"] for session in all_activities)
     source = normalized_input["source_reconciliation"]
-    granted_credits = report["total_granted_credits"]
-    if source["eligible_context_count"] != task_count:
-        raise ValueError("eligible context count does not match normalized sessions")
-    if source["billed_amount_cents"] != credits_used:
+    allocated_units = report["allocated_units"]
+    if source["activity_count"] != activity_count:
+        raise ValueError("source activity count does not match normalized activities")
+    if source["usage_units"] != usage_units:
         raise ValueError(
-            "billed AMOUNT_CENTS does not match normalized session credits"
+            "source usage units does not match normalized session usage_units"
         )
-    if credits_used > granted_credits:
-        raise ValueError("credits used cannot exceed granted credits")
+    if policy["metric"]["enforce_allocation_limit"] and (allocated_units is None or usage_units > allocated_units):
+        raise ValueError("usage exceeds or lacks the required allocation")
 
-    sessions_by_user: dict[
-        PilotUserId, list[PilotDatedSession | PilotUndatedSession]
+    activities_by_user: dict[
+        PilotUserId, list[PilotDatedActivity | PilotUndatedActivity]
     ] = defaultdict(list)
-    dated_by_user: dict[PilotUserId, list[PilotDatedSession]] = defaultdict(list)
-    for session in all_sessions:
-        sessions_by_user[PilotUserId(session["user_id"])].append(session)
-    for session in dated_sessions:
+    dated_by_user: dict[PilotUserId, list[PilotDatedActivity]] = defaultdict(list)
+    for session in all_activities:
+        activities_by_user[PilotUserId(session["user_id"])].append(session)
+    for session in dated_activities:
         dated_by_user[PilotUserId(session["user_id"])].append(session)
 
     users: list[PilotUsageUserRow] = []
     for roster_user in normalized_input["roster"]:
         user_id = PilotUserId(roster_user["user_id"])
-        user_sessions = sessions_by_user[user_id]
-        user_dated_sessions = dated_by_user[user_id]
-        week_one_tasks = sum(
+        user_activities = activities_by_user[user_id]
+        user_dated_activities = dated_by_user[user_id]
+        initial_period_activities = sum(
             1
-            for session in user_dated_sessions
+            for session in user_dated_activities
             if pilot_start
             <= parse_pilot_iso_date(session["date"], "date")
             <= week_one_end
         )
-        week_two_tasks = sum(
+        later_activities = sum(
             1
-            for session in user_dated_sessions
+            for session in user_dated_activities
             if week_two_start
             <= parse_pilot_iso_date(session["date"], "date")
             <= data_through
@@ -428,65 +425,65 @@ def compute_pilot_usage_report(
             {
                 "user_id": str(user_id),
                 "display_name": roster_user["display_name"],
-                "task_count": len(user_sessions),
-                "week_one_tasks": week_one_tasks,
-                "week_two_tasks": week_two_tasks,
-                "undated_tasks": len(user_sessions) - len(user_dated_sessions),
-                "credits": sum(session["credits"] for session in user_sessions),
+                "activity_count": len(user_activities),
+                "initial_period_activities": initial_period_activities,
+                "later_activities": later_activities,
+                "undated_activities": len(user_activities) - len(user_dated_activities),
+                "usage_units": sum(session["usage_units"] for session in user_activities),
                 "active_days": len(
-                    {session["date"] for session in user_dated_sessions}
+                    {session["date"] for session in user_dated_activities}
                 ),
                 "participation_note": roster_user.get("participation_note", ""),
             }
         )
     users.sort(
-        key=lambda user: (-user["credits"], -user["task_count"], user["display_name"])
+        key=lambda user: (-user["usage_units"], -user["activity_count"], user["display_name"])
     )
 
-    daily_counts = Counter(session["date"] for session in dated_sessions)
+    daily_counts = Counter(session["date"] for session in dated_activities)
     elapsed_days = (data_through - pilot_start).days + 1
-    daily_tasks = [
+    daily_activities = [
         {
             "date": (pilot_start + timedelta(days=offset)).isoformat(),
-            "task_count": daily_counts[
+            "activity_count": daily_counts[
                 (pilot_start + timedelta(days=offset)).isoformat()
             ],
         }
         for offset in range(elapsed_days)
     ]
 
-    category_task_counts = Counter(session["category_id"] for session in all_sessions)
-    category_credit_counts: dict[str, int] = defaultdict(int)
-    for session in all_sessions:
-        category_credit_counts[session["category_id"]] += session["credits"]
+    category_activity_counts = Counter(session["category_id"] for session in all_activities)
+    category_unit_counts: dict[str, int] = defaultdict(int)
+    for session in all_activities:
+        category_unit_counts[session["category_id"]] += session["usage_units"]
     palette = policy["category_palette"]
     categories = [
         {
             "category_id": category["category_id"],
             "label": category["label"],
             "description": category["description"],
-            "task_count": category_task_counts[category["category_id"]],
-            "credits": category_credit_counts[category["category_id"]],
+            "activity_count": category_activity_counts[category["category_id"]],
+            "usage_units": category_unit_counts[category["category_id"]],
             "share_percent": _rounded_share_percent(
-                category_credit_counts[category["category_id"]], credits_used
+                category_unit_counts[category["category_id"]], usage_units
             ),
             "share_percent_precise": _precise_share_percent(
-                category_credit_counts[category["category_id"]], credits_used
+                category_unit_counts[category["category_id"]], usage_units
             ),
             "color": palette[index % len(palette)],
         }
         for index, category in enumerate(normalized_input["categories"])
     ]
-    categories.sort(key=lambda category: (-category["credits"], category["label"]))
+    categories.sort(key=lambda category: (-category["usage_units"], category["label"]))
 
-    active_users = [user for user in users if user["task_count"] > 0]
+    active_users = [user for user in users if user["activity_count"] > 0]
     most_consistent = max(
         active_users,
-        key=lambda user: (user["active_days"], user["task_count"], user["credits"]),
+        key=lambda user: (user["active_days"], user["activity_count"], user["usage_units"]),
         default=None,
     )
     top_user_count = min(4, len(active_users))
-    top_user_credits = sum(user["credits"] for user in active_users[:top_user_count])
+    top_user_usage_units = sum(user["usage_units"] for user in active_users[:top_user_count])
     day_one_only_user_count = sum(
         1
         for user in active_users
@@ -494,35 +491,36 @@ def compute_pilot_usage_report(
         == {pilot_start.isoformat()}
     )
 
-    category_tasks_match = (
-        sum(category["task_count"] for category in categories) == task_count
+    category_counts_match = (
+        sum(category["activity_count"] for category in categories) == activity_count
     )
-    category_credits_match = (
-        sum(category["credits"] for category in categories) == credits_used
+    category_units_match = (
+        sum(category["usage_units"] for category in categories) == usage_units
     )
     reconciliation: PilotReconciliation = {
-        "tasks_match": sum(user["task_count"] for user in users) == task_count,
-        "credits_match": sum(user["credits"] for user in users) == credits_used,
-        "grants_match": granted_credits == report["total_granted_credits"],
-        "category_tasks_match": category_tasks_match,
-        "category_credits_match": category_credits_match,
+        "counts_match": sum(user["activity_count"] for user in users) == activity_count,
+        "units_match": sum(user["usage_units"] for user in users) == usage_units,
+        "allocation_matches": allocated_units == report["allocated_units"],
+        "category_counts_match": category_counts_match,
+        "category_units_match": category_units_match,
     }
     if not all(reconciliation.values()):
         raise ValueError("computed report failed deterministic reconciliation")
 
     return {
-        "schema_version": 1,
+        "schema_version": 2,
+        "metric": dict(policy["metric"]),
         "report_title": policy["report_title"],
         "report": report,
         "headline": {
             "active_users": len(active_users),
-            "seat_count": len(users),
-            "task_count": task_count,
-            "credits_used": credits_used,
-            "active_days": sum(1 for row in daily_tasks if row["task_count"] > 0),
+            "participant_count": len(users),
+            "activity_count": activity_count,
+            "usage_units": usage_units,
+            "active_days": sum(1 for row in daily_activities if row["activity_count"] > 0),
             "elapsed_days": elapsed_days,
-            "granted_credits": granted_credits,
-            "remaining_credits": granted_credits - credits_used,
+            "allocated_units": allocated_units,
+            "remaining_units": None if allocated_units is None else allocated_units - usage_units,
         },
         "periods": {
             "week_one_start": pilot_start.isoformat(),
@@ -533,12 +531,12 @@ def compute_pilot_usage_report(
             "pilot_total_days": (pilot_end - pilot_start).days + 1,
         },
         "users": users,
-        "daily_tasks": daily_tasks,
+        "daily_activities": daily_activities,
         "categories": categories,
         "computed_highlights": {
             "top_user_count": top_user_count,
-            "top_user_credit_share_percent": _rounded_share_percent(
-                top_user_credits, credits_used
+            "top_user_usage_share_percent": _rounded_share_percent(
+                top_user_usage_units, usage_units
             ),
             "most_consistent_user_id": (
                 most_consistent["user_id"] if most_consistent else None
@@ -548,8 +546,8 @@ def compute_pilot_usage_report(
             ),
             "inactive_user_count": len(users) - len(active_users),
             "day_one_only_user_count": day_one_only_user_count,
-            "undated_task_count": len(undated_sessions),
-            "undated_credits": sum(session["credits"] for session in undated_sessions),
+            "undated_activity_count": len(undated_activities),
+            "undated_units": sum(session["usage_units"] for session in undated_activities),
         },
         "reviewed_narratives": normalized_input["reviewed_narratives"],
         "reconciliation": reconciliation,

@@ -11,7 +11,7 @@ Read when the CRM corrections group of `task-triage-speed-run` has at least one 
 
 1. Fresh read of the Task and any Contact involved.
 2. Duplicate search before any create or re-parent:
-   `SELECT Id, Name, Email, AccountId, Account.Name, OwnerId FROM Contact WHERE Email = '<email>' OR (FirstName = '<first>' AND LastName = '<last>')`
+   Retrieve Id, Name, Email, AccountId, Account.Name and OwnerId for Contacts matching the verified email or both given/family names through the configured adapter.
    and the same on `Lead`. A hit means update or link that record, never create a second.
 3. If the only hit sits on a different Account, show it and propose an `AccountId` update with the employment evidence. Preserve `OwnerId` unless the seller approves a transfer in the same message.
 4. Show the exact change: record ID, each field, current value, proposed value. For a create, list every field to be written and the Account ID. For a Task `Subject`, replace only the person's name and keep everything else byte for byte.

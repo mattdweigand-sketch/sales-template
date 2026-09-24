@@ -1,159 +1,83 @@
-# Pilot usage queries
+# Pilot analytics collection
 
-Read-only Snowflake-style reference SQL against adapter-provided logical views. These are schema templates, not claims that a deployment already has these tables. Map or implement the views before executing; use bound values or the provider's safe parameter mechanism. Substitute `<org_uuid>` from CRM, `<window_days>` and `<use_case_sample>` from `policy.pilot_usage`, `<pilot_start>` from the report window. Return dates as ISO date text; the adapter must normalize any native date encoding.
+This contract describes data, not a SQL dialect or product schema. The configured
+analytics adapter may use a database, API or reviewed export. Record the exact
+native request, stable pilot scope, reporting timezone, window, terminal success
+and every page alongside the normalized results. Never infer a scope from a name
+match. Use safe provider parameters for IDs and dates.
 
-Keep the first-line marker comment on queries 1, 4, and 5 unchanged. `assemble_pilot_usage_input.py` finds each saved result by that marker.
+## Scope and metrics
 
-Check warehouse costs and timeouts with the configured adapter, especially for queries 2, 3, and 5 against `usage_queries`. When asynchronous execution is supported, submit all statements before polling their handles; otherwise use the adapter's synchronous operation.
+Resolve one verified `scope_id` and explicit `pilot_start`, `pilot_end` and
+`data_through` dates. A scope can be an account, project, site, subscription or
+other deployment-defined pilot boundary. Configure the activity grain and unit
+in `policy.pilot_usage.metric`; describe how the adapter identifies one activity,
+attributed participant and quantity. IDs are opaque strings, not UUIDs or emails.
 
-Report mode runs 1, 1b, 2, 3. PDF mode runs 1, 4, 5 and, when the two page narratives need a query sample, 3.
+Each activity belongs to one participant; aggregate duplicate source rows to that
+grain before normalization and retain the reconciliation evidence. `quantity`
+is a non-negative decimal in the configured unit (for example hours, transactions
+or calls). For an activity-count metric use one per observed activity. Do not
+turn missing measurements into zero. Use separate runs for incompatible units.
 
-## 1. Roster and activity
+## PDF datasets
 
-```sql
--- pilot_usage q1_roster
-WITH roster AS (
-  SELECT DISTINCT user_id, user_email
-  FROM usage_roster_daily
-  WHERE organization_uuid = '<org_uuid>' AND date_pt = CURRENT_DATE - 1 AND is_organization_user
-),
-a AS (
-  SELECT user_id, date_pt, daily_query_count, daily_computer_query_count, l7_query_count
-  FROM usage_activity_daily
-  WHERE organization_uuid = '<org_uuid>' AND date_pt BETWEEN CURRENT_DATE - <window_days> AND CURRENT_DATE - 1
-    AND user_id IN (SELECT user_id FROM roster)
-)
-SELECT r.user_email,
-       TO_VARCHAR(MIN(CASE WHEN a.daily_query_count > 0 THEN a.date_pt END)) AS first_query,
-       TO_VARCHAR(MAX(CASE WHEN a.daily_query_count > 0 THEN a.date_pt END)) AS last_query,
-       MAX(CASE WHEN a.date_pt = CURRENT_DATE - 1 THEN a.l7_query_count END) AS l7_queries,
-       SUM(a.daily_query_count) AS window_queries,
-       SUM(a.daily_computer_query_count) AS window_computer_queries
-FROM roster r
-LEFT JOIN a ON a.user_id = r.user_id
-GROUP BY 1
-ORDER BY window_queries DESC NULLS LAST, r.user_email
-```
+Write one `results.json` object with these keys:
 
-Seats provisioned = row count. Active = `window_queries > 0`. Idle = null or 0. Task-product share = sum of `window_computer_queries` over sum of `window_queries`.
+| Dataset | Columns and meaning |
+|---|---|
+| `roster` | `user_id`; optional `email` and `display_name`. One row per in-scope participant, including inactive participants. |
+| `activities` | `activity_id`, `user_id`, `date` (ISO date in the reporting timezone), `quantity` (decimal or decimal string), optional `activity_title`. One row per activity inside the reviewed window. |
+| `allocations` (optional) | `quantity` in the same unit, `effective_at` (reporting-local ISO date/time), optional `voided_at`. Include the applicable pilot allocation changes effective through the report date. Omit this dataset when no allocation applies; an empty array means a verified zero allocation. |
 
-## 1b. Weekly trend
+Internal participants are excluded by roster `email` against
+`policy.identity.internal_domains`, with their activities excluded by `user_id`.
+When email is unavailable, the adapter must establish external scope through
+other verified membership evidence. Never guess membership from an opaque ID.
 
-```sql
-WITH roster AS (
-  SELECT DISTINCT user_id
-  FROM usage_roster_daily
-  WHERE organization_uuid = '<org_uuid>' AND date_pt = CURRENT_DATE - 1 AND is_organization_user
-)
-SELECT TO_VARCHAR(DATE_TRUNC('week', date_pt)) AS week_start,
-       COUNT(DISTINCT CASE WHEN daily_query_count > 0 THEN user_id END) AS active_users,
-       SUM(daily_query_count) AS queries
-FROM usage_activity_daily
-WHERE organization_uuid = '<org_uuid>' AND date_pt BETWEEN CURRENT_DATE - <window_days> AND CURRENT_DATE - 1
-  AND user_id IN (SELECT user_id FROM roster)
-GROUP BY 1 ORDER BY 1
-```
+The assembler quantizes each activity and each eligible allocation half up to
+`metric.decimal_places`, then sums integer `usage_units`. Thus 1.25 hours at two
+decimal places becomes 125 internal units; the report displays 1.25 hours. This
+is fixed-precision arithmetic, with no currency conversion. Raw quantities and
+native receipts remain available for review. `enforce_allocation_limit` controls
+whether usage above an allocation stops the report. Allocation dates never
+define the pilot start. An allocation is a cumulative allowance for this window;
+expiring balances or refunds require adapter reconciliation, not guessed arithmetic.
 
-## 2. Feature mix and models
+## Optional report sections
 
-```sql
-WITH roster AS (
-  SELECT DISTINCT user_id
-  FROM usage_roster_daily
-  WHERE organization_uuid = '<org_uuid>' AND date_pt = CURRENT_DATE - 1 AND is_organization_user
-)
-SELECT CASE WHEN GROUPING(product_mode) = 0 THEN 'mode' ELSE 'model' END AS kind,
-       COALESCE(product_mode, display_model) AS value,
-       COUNT(*) AS queries, COUNT(DISTINCT user_id) AS users
-FROM usage_queries
-WHERE organization_uuid = '<org_uuid>' AND date_pt BETWEEN CURRENT_DATE - <window_days> AND CURRENT_DATE - 1
-  AND user_id IN (SELECT user_id FROM roster)
-GROUP BY GROUPING SETS ((product_mode), (display_model))
-QUALIFY kind = 'mode' OR ROW_NUMBER() OVER (PARTITION BY kind ORDER BY queries DESC) <= 5
-ORDER BY kind DESC, queries DESC
-```
+For chat reports, request only the configured permitted metrics:
 
-`mode` rows are complete, so the mix sums to 100 percent. `model` rows are the top five. `product_mode` legend: asi = the configured task product; search_mode = Search; chat_mode = Chat; study_mode, research_mode, scheduled_tasks, pro, and NULL roll into Other; display_model is the model. If this query is not available, report task-product share from query 1 and omit models.
+- Roster and activity: the datasets above; active participants have at least one
+  activity. Compute last-seven-day and weekly counts in the reporting timezone.
+- Feature mix: complete counts by deployment-defined feature label and grain.
+  Describe the denominator; do not force Search, Chat, AI model or product enums.
+- Reviewed use cases: up to `use_case_sample` recent activity descriptions. Retain
+  source IDs, group into supported themes, and show only audience-permitted text.
 
-## 3. Use-case sample
+A missing optional section is unavailable with its reason. PDF roster/activity
+failures stop the build. With a required allocation limit, allocation failures
+also stop the build. A failed configured query cannot be relabeled as absent.
 
-```sql
-WITH roster AS (
-  SELECT DISTINCT user_id, user_email
-  FROM usage_roster_daily
-  WHERE organization_uuid = '<org_uuid>' AND date_pt = CURRENT_DATE - 1 AND is_organization_user
-),
-recent AS (
-  SELECT q.date_pt, q.query_submitted_at_utc, r.user_id, r.user_email, q.product_mode, q.query_string
-  FROM usage_queries q
-  JOIN roster r ON r.user_id = q.user_id
-  WHERE q.organization_uuid = '<org_uuid>' AND q.date_pt BETWEEN CURRENT_DATE - <window_days> AND CURRENT_DATE - 1
-    AND q.query_string IS NOT NULL
-    AND LENGTH(q.query_string) BETWEEN 15 AND 2000
-    AND q.query_string NOT LIKE '{%'
-  ORDER BY q.date_pt DESC, q.query_submitted_at_utc DESC
-  LIMIT 2000
-)
-SELECT TO_VARCHAR(date_pt) AS day, user_email, product_mode, LEFT(query_string, 120) AS query_text
-FROM recent
-QUALIFY ROW_NUMBER() OVER (PARTITION BY LEFT(query_string, 60) ORDER BY date_pt DESC) = 1
-   AND ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY date_pt DESC, query_submitted_at_utc DESC) <= 8
-ORDER BY date_pt DESC
-LIMIT <use_case_sample>
-```
+## Optional saved-call import
 
-The `recent` CTE caps the scan at the newest 2000 rows before the window functions run; this bounds the sampling window before the per-user and duplicate limits. At most 8 rows per user, so one heavy session cannot fill the sample. Cluster into at most five themes. Quote one example per theme, verbatim, at most 120 characters. Skip file names, JSON, and single words.
+`--results` is the provider-neutral entrypoint. `--tool-calls` accepts this
+normalized columnar receipt interface when an adapter emits saved query pages:
 
-## 4. Credit grants (pdf mode)
+- `input_<id>.json`: `arguments.dataset` is `roster`, `activities` or
+  `allocations`; matching `output_<id>.json` contains `result.query_id`.
+- Result pages use `result.query_id`, `status`, `columns` (objects with `name`),
+  `rows` (arrays in column order), `page_index` (zero-based), `page_count` and
+  `total_count`. Column names match the dataset contract. The first page carries
+  column metadata. A single page may omit page fields; its row count is complete.
+- `status` is `success` or `succeeded` only after provider terminal success.
+  Pending/queued/running/submitted pages do not supply rows. Explicit errors,
+  missing pages or count mismatches stop assembly even if some rows are present.
+- Keep one selected query per dataset in a run. When multiple saved queries are
+  present, the latest saved submission selects the query; a newer failed query
+  never falls back to old successful rows. Native timestamps, scope filters and
+  terminal evidence must still be reviewed; file times cannot prove freshness.
 
-```sql
--- pilot_usage q4_grants
-SELECT user_email, billing_credit_name, billing_credit_category_enriched,
-       TO_VARCHAR(effective_at_pt) AS effective_at, TO_VARCHAR(expires_at_pt) AS expires_at,
-       TO_VARCHAR(voided_at_pt) AS voided_at, billing_credit_amount_dollars AS amount_dollars
-FROM usage_credit_grants
-WHERE organization_uuid = '<org_uuid>' AND credit_product_type = 'asi'
-ORDER BY effective_at_pt
-```
-
-One row per grant, seat and pool, including voided and future-dated rows. The assemble script keeps rows with `voided_at` null and `effective_at` on or before data-through, sums `amount_dollars`, and multiplies by 100 for credits. Pilot start defaults to the earliest kept `effective_at`.
-
-## 5. Tasks with credits (pdf mode)
-
-```sql
--- pilot_usage q5_tasks
-WITH roster AS (
-  SELECT DISTINCT user_id, user_email
-  FROM usage_roster_daily
-  WHERE organization_uuid = '<org_uuid>' AND date_pt = CURRENT_DATE - 1 AND is_organization_user
-),
-tasks AS (
-  SELECT b.context_uuid, b.user_id, MIN(b.date_pt) AS first_date, SUM(b.amount_cents) AS amount_cents
-  FROM usage_task_billing b
-  WHERE b.organization_uuid = '<org_uuid>' AND b.date_pt BETWEEN '<pilot_start>' AND CURRENT_DATE - 1
-    AND b.user_id IN (SELECT TO_VARCHAR(user_id) FROM roster)
-  GROUP BY 1, 2
-),
-first_q AS (
-  SELECT q.context_uuid, q.query_string
-  FROM usage_queries q
-  WHERE q.organization_uuid = '<org_uuid>' AND q.date_pt BETWEEN '<pilot_start>' AND CURRENT_DATE - 1
-    AND q.user_id IN (SELECT user_id FROM roster)
-    AND q.context_uuid IN (SELECT context_uuid FROM tasks)
-  QUALIFY ROW_NUMBER() OVER (PARTITION BY q.context_uuid ORDER BY q.query_submitted_at_utc) = 1
-)
-SELECT t.context_uuid, r.user_email, TO_VARCHAR(t.first_date) AS first_date,
-       TO_VARCHAR(t.amount_cents) AS amount_cents, LEFT(f.query_string, 120) AS task_title
-FROM tasks t
-JOIN roster r ON TO_VARCHAR(r.user_id) = t.user_id
-LEFT JOIN first_q f ON f.context_uuid = t.context_uuid
-ORDER BY t.first_date, t.amount_cents DESC
-```
-
-One row per task (`context_uuid`). `amount_cents` is the raw billed sum; the assemble script rounds half up per task, then sums. `task_title` is the first prompt, 120 characters, for the category review only; it never prints in the PDF. `usage_task_billing` must expose only the configured task-product meter rows, scoped to the organization. The adapter must filter any mixed-product source before providing this view.
-
-## View and date contract
-
-The five logical views expose exactly the columns selected above, including organization_uuid on activity, query and billing views. Preserve source timezone semantics for date_pt and *_pt dates; convert timestamps before deriving a date. `asi` is a normalized task-product enum, not an assumed native value. A query adapter maps native product modes and excludes internal domains consistently. `CURRENT_DATE - 1` means yesterday in the deployment reporting timezone; replace it with the explicit reviewed data-through date for a historical report. Never interpolate an untrusted org ID or date directly into SQL.
-
-Roster activity is a trailing-window report. PDF task credits are the reviewed pilot-start through data-through window. These scopes differ intentionally and must be labeled. A zero result requires a successful complete query. A failed or missing result is unavailable.
+These are normalized receipts, not assumed native provider responses. Keep the
+originals, pagination proof and scope mapping beside them. Local checks cannot
+prove that a provider exposed every record or that normalization was faithful.

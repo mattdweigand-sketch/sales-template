@@ -6,8 +6,8 @@ import tempfile
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from gmail_contact_stats import contact_stats
-from gmail_thread_digest import clean
+from mail_contact_stats import contact_stats
+from mail_thread_digest import clean
 from mail_evidence import load_messages
 
 

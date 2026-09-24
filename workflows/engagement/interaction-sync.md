@@ -5,7 +5,7 @@ Turn one completed customer interaction into reviewed CRM updates and an unsent 
 ## Load / Skip
 
 - Load [shared rules](../../_shared/rules.md), [run lifecycle](../run.md), the configured policy and adapters, and this procedure.
-- Read [adapter data contract](../../_shared/adapter-contract.md) only for the sources used in this run. Query sketches use logical field names; map them through the adapter before calling a provider.
+- Read [adapter data contract](../../_shared/adapter-contract.md) only for the sources used in this run. Collection requirements use logical field names; map them through the adapter before calling a provider.
 - Load the linked reference only at its named step. Keep raw source receipts and derived artifacts in this run.
 - Skip sibling workflows, other runs, unrelated accounts, and unused adapter sections. Missing capabilities are named gaps or block their dependent effects.
 
@@ -15,7 +15,7 @@ One call in, one set of numbered proposals out, writes only on exact approval. C
 
 ### 1. Load policy
 
-Read the configured `_shared/policy.json` and `_shared/adapters.md`. In a hosted project, sync the reusable files first. Record the selected scope in the run request.
+Read the configured `_shared/policy.json` and `_shared/adapters.md`. Make the reusable workspace files available through the configured host before starting. Record the selected scope in the run request.
 
 ### 2. Find the interaction
 
@@ -28,7 +28,7 @@ Read the configured `_shared/policy.json` and `_shared/adapters.md`. In a hosted
 From the transcript take, with speaker attribution:
 - Buyer-stated facts as short quotes, at most `policy.interaction.max_buyer_quotes`. Cost, incumbents, decision process, named stakeholders, timeline, requirements.
 - Commitments by each side, with any dates spoken.
-- Pricing or seat figures. Mark each `buyer_confirmed` or `seller_stated`.
+- Pricing, quantities or scope figures. Mark each `buyer_confirmed` or `seller_stated`.
 - Call type per `policy.call_prep.call_type`, then its `policy.call_prep.expected_information` items now answered, partially answered, or still open.
 
 ### 4. Reconcile
@@ -36,8 +36,8 @@ From the transcript take, with speaker attribution:
 1. Contacts by attendee email, then name. Unmatched external attendees become Contact-create proposals with the Account from the matched attendees' domain.
 2. Account and open Opportunities. If several are open, ask which one before proposing. If none, say so and propose nothing on the Opportunity; creation is the user's call.
 3. Opportunity Contact Roles for each matched attendee. Missing roles become proposals.
-4. Open Tasks: `SELECT Id, Subject, ActivityDate, Description FROM Task WHERE IsClosed = false AND (WhatId = '<OppId>' OR WhoId IN (<ContactIds>))`. Mark each as tied to this call or unrelated.
-5. Duplicate check: `SELECT Id, Subject, ActivityDate, Description FROM Task WHERE (WhatId = '<OppId>' OR WhoId IN (<ContactIds>)) AND ActivityDate = <date> AND TaskSubtype = 'Call'` and read Subject and Description for `policy.crm.call_marker`. A hit means the call is already logged. Report it, skip proposal A, and in B, C, and F propose only what that Task and the existing Next line do not already carry.
+4. Open Tasks: retrieve Id, Subject, ActivityDate and Description for all open Tasks linked to the selected Opportunity or matched Contacts. Mark each as tied to this call or unrelated.
+5. Duplicate check: retrieve those fields for all call activities on the interaction date linked to the Opportunity or matched Contacts and read Subject and Description for `policy.crm.call_marker`. A hit means the call is already logged. Report it, skip proposal A, and in B, C, and F propose only what that Task and the existing Next line do not already carry.
 
 ### 5. Propose
 
@@ -56,11 +56,11 @@ For each approval: fresh read, write, readback with the changed fields and recor
 
 ### 7. Close
 
-Summarize applied, skipped, and rejected in five lines or fewer. Recommend calling `close` if the user says the deal is won.
+Summarize applied, skipped, and rejected in five lines or fewer. Won-deal fulfillment is outside these workflows; use the deployment's business process.
 
 ### Refuse
 
-Sending email. Closed Won stage moves (route to `close`) or Closed Lost moves (route to `pipeline-review`). Deleting or merging records. Editing records not tied to this call. Inferring Amount or seats from booking forms. Saving transcripts or customer material to Project Files.
+Sending email. Won stage moves or Closed Lost moves (route to `pipeline-review`). Deleting or merging records. Editing records not tied to this call. Inferring Amount or quantities from booking forms. Saving transcripts or customer material to reusable workspace files.
 
 ## Outputs and readiness
 

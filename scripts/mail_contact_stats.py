@@ -23,7 +23,7 @@ def addrs(values):
 
 def kind_of(message):
     # Prefer the newest body; quoted history is not evidence of a current bounce/OOO.
-    from gmail_thread_digest import clean
+    from mail_thread_digest import clean
     text = str(message.get("subject", "")) + " " + clean(message.get("body_text") or message.get("body") or message.get("snippet"), 10000)
     if BOUNCE.search(text):
         return "bounce"

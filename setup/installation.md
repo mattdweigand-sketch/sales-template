@@ -17,14 +17,21 @@ configured and reviewed. No command here installs a connector or creates
 a schedule. Missing private adapters remain explicit unavailable capabilities.
 Read the [adapter contract](../_shared/adapter-contract.md) and review the example
 stage/forecast definitions. Fill native field mappings, owner ID, record URLs,
-targets and any selected pilot or close capabilities before switching to live.
+targets and any selected pilot capabilities before switching to live.
 
 Codex-compatible skill pointers are tracked in .agents/skills/; Claude slash
 command pointers are tracked in .claude/commands/. Work from this repo root.
 If a host does not discover those directories, explicitly read AGENTS.md
 and invoke the canonical workflow. The workflow remains the authority.
 
-## Perplexity Computer
+## Optional host integrations
+
+The canonical workflows require readable workspace files, private run storage,
+a review surface and the selected adapter capabilities. Hosts that cannot run
+Python can use a configured execution environment; report missing capabilities
+instead of assuming a tool is installed.
+
+### Perplexity Computer
 Install the canonical AGENTS.md, CONTEXT.md, workflows/, _shared/, _templates/
 and scripts/ into one new Project, preserving relative paths. Configure the
 local deployment files there. Before a run, sync Project Files into the
@@ -39,7 +46,7 @@ Perplexity output/{run-id}/ lives in the session sandbox and is shared for
 review in the thread. Do not sync it back into reusable Project Files.
 Persist or export a run privately only if resumption is required. Across
 sessions, pass the exact reviewed artifact explicitly; never assume sandbox
-files survive. Salesforce and Gmail retain external business state.
+files survive. The configured CRM and mail providers retain external business state.
 
 ## Start a run
 The task supplies a fresh ID. For example, after choosing `demo-001`:
@@ -67,5 +74,5 @@ python3 -m venv .venv
 
 The synthetic [pilot fixture](../examples/pilot-usage/CONTEXT.md) exercises the
 full assemble-to-PDF path without any customer data or external business effects.
-The seven pointer skills are complete only with this repository's workflows,
+The six pointer skills are complete only with this repository's workflows,
 references, policy and helper files. Do not distribute pointer-only ZIPs.

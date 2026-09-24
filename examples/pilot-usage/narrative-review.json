@@ -1,6 +1,6 @@
 {
   "customer_name": "Example Company",
-  "organization_uuid": "synthetic-organization",
+  "scope_id": "synthetic-organization",
   "prepared_by": "Example Seller",
   "pilot_start": "2026-09-01",
   "pilot_end": "2026-09-30",
@@ -36,7 +36,7 @@
       "description": "Structured workflow analysis."
     }
   ],
-  "task_categories": {
+  "activity_categories": {
     "task-1": "research",
     "task-2": "evaluation",
     "task-3": "planning",
@@ -63,7 +63,7 @@
     "task-24": "analysis"
   },
   "narratives": {
-    "scope_note": "Synthetic demonstration only. Six example seats in one simulated organization; this is not customer evidence.",
+    "scope_note": "Synthetic demonstration only. Six example participants in one simulated organization; this is not customer evidence.",
     "usage_highlights": [
       {
         "label": "Coverage",
@@ -73,28 +73,28 @@
     "representative_work": [
       {
         "title": "Research",
-        "user_emails": [
+        "user_ids": [
           "alex@example.org"
         ],
         "summary": "Prepared a sourced brief to support a market discussion."
       },
       {
         "title": "Evaluation",
-        "user_emails": [
+        "user_ids": [
           "blair@example.org"
         ],
         "summary": "Compared a set of evaluation requirements."
       },
       {
         "title": "Planning",
-        "user_emails": [
+        "user_ids": [
           "casey@example.org"
         ],
         "summary": "Drafted an implementation plan for review."
       },
       {
         "title": "Analysis",
-        "user_emails": [
+        "user_ids": [
           "drew@example.org"
         ],
         "summary": "Reviewed a sample workflow and its inputs."
@@ -102,7 +102,7 @@
     ],
     "work_interpretation": [
       "The synthetic activity spans four common workflows. Categories describe the reviewed example titles.",
-      "Task activity shows work started. It does not establish completion, adoption quality or financial return."
+      "Recorded activity shows participation. It does not establish completion, adoption quality or financial return."
     ],
     "business_value": [
       {
@@ -114,6 +114,6 @@
         "text": "The sample illustrates drafting material for human review."
       }
     ],
-    "source_note": "Synthetic fixture. One credit equals one cent, rounded half up per task before summing."
+    "source_note": "Synthetic fixture. Usage quantities are example units, rounded half up per activity before summing."
   }
 }

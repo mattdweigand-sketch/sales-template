@@ -5,30 +5,30 @@ Review due CRM tasks, prepare contextual follow-ups, and apply approved changes.
 ## Load / Skip
 
 - Load [shared rules](../../_shared/rules.md), [run lifecycle](../run.md), the configured policy and adapters, and this procedure.
-- Read [adapter data contract](../../_shared/adapter-contract.md) only for the sources used in this run. Query sketches use logical field names; map them through the adapter before calling a provider.
+- Read [adapter data contract](../../_shared/adapter-contract.md) only for the sources used in this run. Collection requirements use logical field names; map them through the adapter before calling a provider.
 - Load the linked reference only at its named step. Keep raw source receipts and derived artifacts in this run.
 - Skip sibling workflows, other runs, unrelated accounts, and unused adapter sections. Missing capabilities are named gaps or block their dependent effects.
 
 ## Process
 
-You act as the seller in CRM and mail. CRM is the authority for Tasks and Contacts. mail and Calendar are evidence. Work in chat as plain text with numbered lists. No forms, tables, or cards. Reusable Project Files never hold customer data; keep review artifacts in the private run.
+You act as the seller in CRM and mail. CRM is the authority for Tasks and Contacts. mail and Calendar are evidence. Work in chat as plain text with numbered lists. No forms, tables, or cards. Reusable reusable workspace files never hold customer data; keep review artifacts in the private run.
 
 ### 1. Load policy
 
-Read the configured `_shared/policy.json` and `_shared/adapters.md`. In a hosted project, sync the reusable files first. Record the selected scope in the run request.
+Read the configured `_shared/policy.json` and `_shared/adapters.md`. Make the reusable workspace files available through the configured host before starting. Record the selected scope in the run request.
 
 ### 2. Collect the run
 
 1. Get the current CRM user ID.
 2. Query every open Task the user owns due today, overdue, or undated. No count or date cap unless the user sets one in this run.
-   `SELECT Id, Subject, ActivityDate, Description, WhoId, WhatId, What.Name FROM Task WHERE OwnerId = '<userId>' AND IsClosed = false AND (ActivityDate <= TODAY OR ActivityDate = null) ORDER BY ActivityDate`
+   Required fields: Id, Subject, ActivityDate, Description, WhoId, WhatId, What.Name. Filter by owner, open state and due date at/before today or absent; order by due date through the configured adapter.
 3. One Contact query over the distinct `WhoId` values: `Id, FirstName, Name, Email, Description, Account.Name`. A Task with no Contact or no email is grouped by step 4 like any other and its gap is listed under `CRM corrections needed`.
 4. Report only the Tasks in this run. Never report total-queue or future-Task counts.
 
 ### 3. Gather evidence
 
-1. mail: search Contact addresses at most `policy.tooling.gmail_search_max_addresses` per call. On a timeout, retry once with a smaller batch.
-2. When the platform saves a result to a file, read only the script output. Run `policy.tooling.scripts.gmail_contact_stats <owner_email> <saved_output_json...> --only <addresses>` against the saved tool outputs. It prints per-address sent count, last sent date, last inbound date and type (`substantive`, `ooo`, `bounce`, `calendar`), unanswered count since the last substantive reply, and the newest non-bounce message and thread id. A `bounce` type means recipient unconfirmed.
+1. mail: search Contact addresses at most `policy.tooling.mail_search_max_addresses` per call. On a timeout, retry once with a smaller batch.
+2. When the platform saves a result to a file, read only the script output. Run `policy.tooling.scripts.mail_contact_stats <owner_email> <saved_output_json...> --only <addresses>` against the saved tool outputs. It prints per-address sent count, last sent date, last inbound date and type (`substantive`, `ooo`, `bounce`, `calendar`), unanswered count since the last substantive reply, and the newest non-bounce message and thread id. A `bounce` type means recipient unconfirmed.
 3. Calendar: for Tasks whose Subject or Description names a meeting, call, or session, run one calendar search from `policy.tooling.calendar_lookback_days` behind today to `policy.tooling.calendar_lookahead_days` ahead, with the account names as queries. Use it to decide whether the meeting happened or moved.
 4. Existing drafts: list drafts once. Match `thread_id` against the thread ids from step 2. Read a draft only when its thread id is unmatched and it is a new message.
 5. Read each Task Subject and Description for the intended ask.

@@ -10,8 +10,8 @@ Process and ownership:
 | check_repo.py | Check links, contract shape, wrapper parity and public-template hygiene |
 | coverage_check.py | Check complete paired current-run source receipts and pagination for pipeline and forecast |
 | hygiene_check.py | Calculate next-step dates, required-field gaps, linked activity and mechanical triggers |
-| gmail_contact_stats.py | Count sent, inbound and unanswered messages from explicit saved mail results |
-| gmail_thread_digest.py | Reduce newest message bodies without quoted history or signed URL parameters |
+| mail_contact_stats.py | Count sent, inbound and unanswered messages from explicit saved mail results |
+| mail_thread_digest.py | Reduce newest message bodies without quoted history or signed URL parameters |
 | [pilot_usage/](pilot_usage/CONTEXT.md) | Assemble, compute, validate, render and print a reviewed pilot report |
 
 Read the relevant [adapter data contract](../_shared/adapter-contract.md) before

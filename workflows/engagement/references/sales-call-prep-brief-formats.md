@@ -26,7 +26,7 @@ Two to four sentences. Where the deal stands, what this call must accomplish, th
 - Three to five bullets. Business lines, scale, current strategy signals, AI or data moves, incumbent tools. Each with a dated link.
 
 ## Product footprint
-One line per external email: org, tier, seats, or `No enterprise org for <email>.`
+One line per external attendee: configured product/service footprint fields, or `No footprint found for <email>.`
 
 ## Where to open
 - Two or three bullets. Facts first, then `Hypothesis:` lines.

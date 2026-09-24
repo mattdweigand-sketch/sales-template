@@ -36,15 +36,15 @@ def validate_computed_pilot_usage_report(
         problems.append("computed_report_differs_from_recomputed_report")
     reconciliation = computed_report.get("reconciliation", {})
     for key in (
-        "tasks_match",
-        "credits_match",
-        "grants_match",
-        "category_tasks_match",
-        "category_credits_match",
+        "counts_match",
+        "units_match",
+        "allocation_matches",
+        "category_counts_match",
+        "category_units_match",
     ):
         if reconciliation.get(key) is not True:
             problems.append(f"reconciliation_failed:{key}")
-    if computed_report.get("schema_version") != 1:
+    if computed_report.get("schema_version") != 2:
         problems.append("unsupported_report_schema_version")
     return problems
 

@@ -76,7 +76,7 @@ class WorkspaceTests(unittest.TestCase):
     def test_helper_edit_invalidates_review(self):
         self.ready()
         self.approve()
-        helper = self.root / "scripts/gmail_contact_stats.py"
+        helper = self.root / "scripts/mail_contact_stats.py"
         helper.write_text(helper.read_text() + "\n# changed\n")
         self.assertEqual(runs.status(self.root, self.path.name)["state"], "review_stale")
 

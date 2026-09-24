@@ -1,33 +1,33 @@
 # Forecast report
 
-Forecast layout. Plain text. Dollar figures with commas, no cents unless the record has them. Record links use `policy.crm.record_url`.
+Forecast layout. Plain text. Amounts use policy.reporting.currency and amount_decimal_places; dates use policy.reporting.date_format. Never combine currencies without reviewed conversion evidence. Record links use `policy.crm.record_url`.
 
 ```
-# <quarter> forecast · <M/D/YY>
+# <quarter> forecast · <report date>
 <Coverage line from coverage_check>
-Notes as of <M/D/YY>[. no notes written this week]
+Notes as of <report date>[. no notes written this week]
 
-Booked $<booked> (<n> deals)
+Booked <formatted booked> (<n> deals)
 Calling
-- <Account> $<amount>. <evidence clause: stage, buyer-named date, last touch>.
-Forecast call $<call>
-Gap to $<target> $<gap>
+- <Account> <formatted amount>. <evidence clause: stage, buyer-named date, last touch>.
+Forecast call <formatted call>
+Gap to <formatted target> <formatted gap>
 
-## Path to $<target>
-1. <Account> | $<amount>. <Next line action>. Buyer date: <M/D only if the buyer wrote it, else none stated, "<buyer's words>">.
+## Path to <formatted target>
+1. <Account> | <formatted amount>. <Next line action>. Buyer date: <date only if the buyer wrote it, else none stated, "<buyer's words>">.
 2. ...
-<Call plus these reaches $<sum>, a $<buffer> buffer.> | <Upside does not cover the gap by $<n>.>
+<Call plus these reaches <formatted sum>, a <formatted buffer> buffer.> | <Upside does not cover the gap by <formatted n>.>
 
 ## Pull-in scope (<n>)
-Every next-quarter S2+ deal with an Amount, one line each. No deal is omitted.
-- <Account> · $<amount> · close <M/D> · CANDIDATE · <proposal or order form out, buyer confirmed reviewing on M/D | buyer named M/D> (<source>) · <Next line action>
-- <Account> · $<amount> · close <M/D> · not · <failed condition> (<source>)
+Every next-quarter in-scope deal with an Amount, one line each. No deal is omitted.
+- <Account> · <formatted amount> · close <date> · CANDIDATE · <proposal or order form out, buyer confirmed reviewing on <date> | buyer named <date>> (<source>) · <Next line action>
+- <Account> · <formatted amount> · close <date> · not · <failed condition> (<source>)
 
 ## Not in the call (<n>)
-- <Account> · <stage> · $<amount or "not set"> · close <M/D> · <failed condition> (<source>)
+- <Account> · <stage> · <formatted amount or "not set"> · close <date> · <failed condition> (<source>)
 
 ## <next quarter> preview
-<n> deals, $<sum>. Top: <Account> $<amount>, <Account> $<amount>, <Account> $<amount>. Target <set|not set>.
+<n> deals, <formatted sum>. Top: <Account> <formatted amount>, <Account> <formatted amount>, <Account> <formatted amount>. Target <set|not set>.
 
 ## Asks
 - <who>: <what, for which deal, by when>
@@ -36,7 +36,7 @@ Every next-quarter S2+ deal with an Amount, one line each. No deal is omitted.
 ## CRM gaps (<n>)
 A. <Account> CloseDate <old> → <new>. Evidence: <source, date>.
 B. <Account> NextSteps current first entry → exact proposed dated sentence per policy.pipeline.note_next_line. Include a separate factual history entry only when proposed and supported. Preserve existing dated entries. Evidence: <source, date>.
-C. <Contact> Email <old> → <new>. Evidence: replies from <new> on <M/D>.
+C. <Contact> Email <old> → <new>. Evidence: replies from <new> on <date>.
 
 ## ForecastCategory sync (<n>)
 D. <Account> <current> → <proposed>

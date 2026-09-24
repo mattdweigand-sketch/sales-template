@@ -91,7 +91,7 @@ class PipelineTimingTests(unittest.TestCase):
         task = {
             "Id": "inbound-1", "WhatId": "account-1", "AccountId": "account-1",
             "ActivityDate": "2026-09-21", "IsClosed": True,
-            "Subject": "Email: << Credential request", "Who": {"Name": "Buyer"},
+            "Direction": "inbound", "Subject": "Credential request", "Who": {"Name": "Buyer"},
         }
         result = self.result([], [task])
         self.assertIn("new_activity", result["triggers"])
@@ -102,14 +102,14 @@ class PipelineTimingTests(unittest.TestCase):
     def test_open_inbound_task_is_not_a_completed_touch(self) -> None:
         task = {
             "Id": "task-1", "WhatId": "opp-1", "ActivityDate": "2026-09-21",
-            "IsClosed": False, "Subject": "Email: << Inbound",
+            "IsClosed": False, "Direction": "inbound", "Subject": "Inbound",
         }
         self.assertNotIn("new_activity", self.result([], [task])["triggers"])
 
     def test_outbound_is_last_touch_but_not_new_buyer_activity(self) -> None:
         task = {
             "Id": "task-1", "WhatId": "opp-1", "ActivityDate": "2026-09-21",
-            "IsClosed": True, "Subject": "Email: >> Sent",
+            "IsClosed": True, "Direction": "outbound", "Subject": "Sent",
         }
         result = self.result([], [task])
         self.assertNotIn("new_activity", result["triggers"])
