@@ -66,7 +66,7 @@ Approval covers only the listed records and named fields. A change to one row do
 
 ### 7. Drafts
 
-Follow `policy.email_voice`. Every follow-up continues the prior email read in step 3.6. It names or restates one specific claim, offer, or question from that email and moves it forward with one new fact or a sharper version of the same ask. A question the prior email did not set up is not a follow-up. Write for a cold read. Restate the referenced point in plain words instead of pointing at it. Short sentences, one idea each. If the ask is not clear in five seconds without the thread, rewrite. Reply in the existing thread when one exists. Use the adapter's supported reply-thread operation; the source connector used `thread_id` without a parent-message argument. Verify the exact recipients independently. Inspect automatically quoted text. If it contains internal notes, flag `Quoted internal note: remove before sending` in the readout. After creating, list drafts and read the new one back; confirm recipient, subject, and body match. Report `Draft ready`. Never send.
+Follow `policy.email_voice`. Every follow-up continues the prior email read in step 3.6. It names or restates one specific claim, offer, or question from that email and moves it forward with one new fact or a sharper version of the same ask. A question the prior email did not set up is not a follow-up. Write for a cold read. Restate the referenced point in plain words instead of pointing at it. Short sentences, one idea each. If the ask is not clear in five seconds without the thread, rewrite. Reply in the existing thread when one exists. Use the adapter's supported reply-thread operation. Verify the exact recipients independently. Inspect automatically quoted text. If it contains internal notes, flag `Quoted internal note: remove before sending` in the readout. After creating, list drafts and read the new one back; confirm recipient, subject, and body match. Report `Draft ready`. Never send.
 
 ### 8. Writes
 
@@ -91,8 +91,11 @@ Sending mail. Deleting or merging any record. Bulk updates outside the approved 
 
 ## Outputs and readiness
 
-Save the deliverable and exact proposals in `output/{run-id}/01_review.md`; show the relevant readout in the conversation. Declare every source receipt and proposed artifact in its `artifacts` list. A read-only run has no effects. Readiness requires the checks above and explicit source gaps; unsupported effects stay withheld. Record the actual conversation review in `review.json`, and applied, pending, failed, or skipped effects in `02_result.json` through the shared run lifecycle.
+Save the grouped readout, exact task changes and draft proposals in
+`output/{run-id}/01_review.md`; show the full readout in chat. Complete the checks
+above, name source gaps and use the [run lifecycle](../run.md) for review and effects.
 
 ## Human check
 
-Review the scope, evidence and exact payloads. Approval covers only the listed effects and revision. Fresh reads and independent provider readbacks are required for external effects.
+Review each section for task disposition, follow-up context, recipients and
+exact draft or CRM changes before approving its effects.

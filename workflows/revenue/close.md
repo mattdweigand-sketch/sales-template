@@ -71,8 +71,11 @@ Closed Lost (route to `pipeline-review`). Changing signed terms to fit the recor
 
 ## Outputs and readiness
 
-Save the deliverable and exact proposals in `output/{run-id}/01_review.md`; show the relevant readout in the conversation. Declare every source receipt and proposed artifact in its `artifacts` list. A read-only run has no effects. Readiness requires the checks above and explicit source gaps; unsupported effects stay withheld. Record the actual conversation review in `review.json`, and applied, pending, failed, or skipped effects in `02_result.json` through the shared run lifecycle.
+Save the signature evidence, selected close path and exact downstream proposals
+in `output/{run-id}/01_review.md`; show the review in chat. Resolve the preflight
+checks and name blocked effects before following the [run lifecycle](../run.md).
 
 ## Human check
 
-Review the scope, evidence and exact payloads. Approval covers only the listed effects and revision. Fresh reads and independent provider readbacks are required for external effects.
+Confirm the signed terms, organization, admin, provisioning payloads and any
+required paid-term restoration before approving the close effects.

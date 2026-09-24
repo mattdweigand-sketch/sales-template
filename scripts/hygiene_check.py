@@ -22,15 +22,12 @@ import argparse
 import datetime as dt
 import json
 import re
-import sys
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
 
-
-ORD = {"S0": 0, "S1": 1, "S2": 2, "S3": 3, "S4": 4, "S5": 5}
 # Deprecated write format; retained only to read existing CRM records.
 NEXT_RE = re.compile(
     r"^Next:\s*(?P<action>.+?)\s*\u00b7\s*(?P<owner>.+?)\s*\u00b7\s*(?P<date>\d{1,2}/\d{1,2}/\d{2,4})\.?\s*$"
@@ -172,10 +169,6 @@ def clean_text(s):
     s = re.sub(r"<br\s*/?>|</p>", "\n", s or "", flags=re.I)
     s = re.sub(r"<[^>]+>", "", s)
     return s.replace("&nbsp;", " ").replace("&amp;", "&").replace("&#39;", "'")
-
-
-def stage_ord(stage):
-    return ORD.get((stage or "")[:2], -1)
 
 
 def is_blank(v):

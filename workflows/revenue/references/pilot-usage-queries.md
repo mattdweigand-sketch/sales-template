@@ -1,10 +1,10 @@
 # Pilot usage queries
 
-Read-only Snowflake-style reference SQL against adapter-provided logical views. These are schema templates, not claims that a deployment already has these tables. Map or implement the views before executing; use bound values or the provider's safe parameter mechanism. Substitute `<org_uuid>` from CRM, `<window_days>` and `<use_case_sample>` from `policy.pilot_usage`, `<pilot_start>` from the report window. Dates are cast to text because the connector returns raw day numbers otherwise.
+Read-only Snowflake-style reference SQL against adapter-provided logical views. These are schema templates, not claims that a deployment already has these tables. Map or implement the views before executing; use bound values or the provider's safe parameter mechanism. Substitute `<org_uuid>` from CRM, `<window_days>` and `<use_case_sample>` from `policy.pilot_usage`, `<pilot_start>` from the report window. Return dates as ISO date text; the adapter must normalize any native date encoding.
 
 Keep the first-line marker comment on queries 1, 4, and 5 unchanged. `assemble_pilot_usage_input.py` finds each saved result by that marker.
 
-Cost rule. Queries 1, 1b, and 4 are cheap. Queries 2, 3, and 5 touch `fct_queries` and are the slow ones. Submit all of a run's statements at once with `async_exec: true`, then poll.
+Check warehouse costs and timeouts with the configured adapter, especially for queries 2, 3, and 5 against `usage_queries`. When asynchronous execution is supported, submit all statements before polling their handles; otherwise use the adapter's synchronous operation.
 
 Report mode runs 1, 1b, 2, 3. PDF mode runs 1, 4, 5 and, when the two page narratives need a query sample, 3.
 
@@ -35,7 +35,7 @@ GROUP BY 1
 ORDER BY window_queries DESC NULLS LAST, r.user_email
 ```
 
-Seats provisioned = row count. Active = `window_queries > 0`. Idle = null or 0. Computer share = sum of computer queries over sum of queries.
+Seats provisioned = row count. Active = `window_queries > 0`. Idle = null or 0. Task-product share = sum of `window_computer_queries` over sum of `window_queries`.
 
 ## 1b. Weekly trend
 
@@ -54,7 +54,7 @@ WHERE organization_uuid = '<org_uuid>' AND date_pt BETWEEN CURRENT_DATE - <windo
 GROUP BY 1 ORDER BY 1
 ```
 
-## 2. Feature mix and models (slow table)
+## 2. Feature mix and models
 
 ```sql
 WITH roster AS (
@@ -73,9 +73,9 @@ QUALIFY kind = 'mode' OR ROW_NUMBER() OVER (PARTITION BY kind ORDER BY queries D
 ORDER BY kind DESC, queries DESC
 ```
 
-`mode` rows are complete, so the mix sums to 100 percent. `model` rows are the top five. `product_mode` legend: asi = the configured task product; search_mode = Search; chat_mode = Chat; study_mode, research_mode, scheduled_tasks, pro, and NULL roll into Other; display_model is the model. If this query is not available, report Computer share from query 1 and omit models.
+`mode` rows are complete, so the mix sums to 100 percent. `model` rows are the top five. `product_mode` legend: asi = the configured task product; search_mode = Search; chat_mode = Chat; study_mode, research_mode, scheduled_tasks, pro, and NULL roll into Other; display_model is the model. If this query is not available, report task-product share from query 1 and omit models.
 
-## 3. Use-case sample (slow table)
+## 3. Use-case sample
 
 ```sql
 WITH roster AS (
@@ -104,7 +104,7 @@ LIMIT <use_case_sample>
 
 The `recent` CTE caps the scan at the newest 2000 rows before the window functions run; this bounds the sampling window before the per-user and duplicate limits. At most 8 rows per user, so one heavy session cannot fill the sample. Cluster into at most five themes. Quote one example per theme, verbatim, at most 120 characters. Skip file names, JSON, and single words.
 
-## 4. Credit grants (pdf mode, cheap)
+## 4. Credit grants (pdf mode)
 
 ```sql
 -- pilot_usage q4_grants
@@ -118,7 +118,7 @@ ORDER BY effective_at_pt
 
 One row per grant, seat and pool, including voided and future-dated rows. The assemble script keeps rows with `voided_at` null and `effective_at` on or before data-through, sums `amount_dollars`, and multiplies by 100 for credits. Pilot start defaults to the earliest kept `effective_at`.
 
-## 5. tasks with credits (pdf mode, slow table)
+## 5. Tasks with credits (pdf mode)
 
 ```sql
 -- pilot_usage q5_tasks

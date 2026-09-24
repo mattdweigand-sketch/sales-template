@@ -6,8 +6,6 @@ Built with the Interpretable Context Methodology: small routing files, explicit
 workflow contracts, shared configuration and editable, human-reviewed run outputs.
 
 Start with [setup](setup/CONTEXT.md). Agents enter through [AGENTS.md](AGENTS.md).
-This repository is independent of its Prospect companion.
-Cross-project handoffs pass explicit evidence, never shared mutable local state.
 
 ## Workflows
 See [the task router](CONTEXT.md) for all seven commands and their canonical owners.
@@ -18,9 +16,6 @@ See [the task router](CONTEXT.md) for all seven commands and their canonical own
 - `_templates/`: copied run starter; products live in ignored output/{run-id}/.
 - `.agents/skills/` and `.claude/commands/`: generated thin pointers.
 - `scripts/` and `tests/`: local checks, wrapper generation and run-state tooling.
-
-The [port record](setup/source-port.md) maps every downloaded skill, reference,
-helper and regression file to its destination and explains adaptations.
 
 ## Validate
 ```bash

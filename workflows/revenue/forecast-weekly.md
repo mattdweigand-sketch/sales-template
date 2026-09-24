@@ -61,8 +61,11 @@ Changing StageName or Amount (route to `pipeline-review`). Closed Won (route to 
 
 ## Outputs and readiness
 
-Save the deliverable and exact proposals in `output/{run-id}/01_review.md`; show the relevant readout in the conversation. Declare every source receipt and proposed artifact in its `artifacts` list. A read-only run has no effects. Readiness requires the checks above and explicit source gaps; unsupported effects stay withheld. Record the actual conversation review in `review.json`, and applied, pending, failed, or skipped effects in `02_result.json` through the shared run lifecycle.
+Save the forecast, source gaps and exact CRM corrections in
+`output/{run-id}/01_review.md`; show the report in chat. Complete coverage and
+calculation checks before following the [run lifecycle](../run.md).
 
 ## Human check
 
-Review the scope, evidence and exact payloads. Approval covers only the listed effects and revision. Fresh reads and independent provider readbacks are required for external effects.
+Review the evidence behind each forecast bucket, amount basis, target and
+proposed CRM correction before approving effects.

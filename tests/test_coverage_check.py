@@ -1,4 +1,4 @@
-"""Source-port coverage scenarios, extended to Friday and forecast failures."""
+"""Source coverage checks for daily, Friday and forecast runs."""
 from pathlib import Path
 from datetime import datetime
 import json
@@ -8,7 +8,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from coverage_check import check, load_queries
+from coverage_check import check
 
 
 class CoverageTests(unittest.TestCase):

@@ -38,10 +38,10 @@ effects if their contents could change; their paths alone are not identity.
 
 ## Reviewed local configuration changes
 
-For a workflow such as signal-refresh that changes factory inputs, the exact
-review includes the proposed complete file content or diff. Stage its new bytes
-inside the run and compute SHA-256. Add one frontmatter line after status:
-`expected_after: {"A1": {"_shared/claims.json": "64-character SHA-256"}}`.
+For a requested Sales policy revision, the exact review includes the proposed
+complete file content or diff. Stage its new bytes inside the run and compute
+SHA-256. Add one frontmatter line after status:
+`expected_after: {"A1": {"_shared/policy.json": "64-character SHA-256"}}`.
 The real value is the staged file hash, not the explanatory placeholder above.
 Only named shared inputs already in the review snapshot may be changed this way.
 The recorded approved IDs select which postimages are authorized. Changing a

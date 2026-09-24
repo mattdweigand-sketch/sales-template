@@ -3,7 +3,7 @@
 Forecast layout. Plain text. Dollar figures with commas, no cents unless the record has them. Record links use `policy.crm.record_url`.
 
 ```
-# <Q3 2026> forecast · <M/D/YY>
+# <quarter> forecast · <M/D/YY>
 <Coverage line from coverage_check>
 Notes as of <M/D/YY>[. no notes written this week]
 
@@ -26,7 +26,7 @@ Every next-quarter S2+ deal with an Amount, one line each. No deal is omitted.
 ## Not in the call (<n>)
 - <Account> · <stage> · $<amount or "not set"> · close <M/D> · <failed condition> (<source>)
 
-## <Q4 2026> preview
+## <next quarter> preview
 <n> deals, $<sum>. Top: <Account> $<amount>, <Account> $<amount>, <Account> $<amount>. Target <set|not set>.
 
 ## Asks

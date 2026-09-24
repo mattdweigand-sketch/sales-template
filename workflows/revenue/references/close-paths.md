@@ -2,7 +2,7 @@
 
 One path per run. The selecting fact comes from the record or the agreement, never from the deal name. Values referenced here live in `policy.close`.
 
-Use the configured sales operations playbook for field mappings, pricing and provisioner behavior. The source organization's private playbook and live examples are not deployment evidence.
+Use the configured sales operations playbook for field mappings, pricing and provisioner behavior.
 
 ## 1. Standard annual
 

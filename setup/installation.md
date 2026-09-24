@@ -57,7 +57,8 @@ creating the starter. An example claim cannot be used in live outreach.
 
 Install `scripts/pilot_usage/requirements.txt` into a virtual environment and
 provide an installed Chromium-compatible renderer. Keep its binary path in local
-configuration; do not assume the source project's fonts or browser exist.
+configuration. System fonts work by default; optional custom fonts must be
+available locally and match any configured hashes.
 
 ```bash
 python3 -m venv .venv

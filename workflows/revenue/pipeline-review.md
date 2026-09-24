@@ -47,4 +47,5 @@ Save the deliverable and exact proposals in `output/{run-id}/01_review.md`; show
 
 ## Human check
 
-Review the scope, evidence and exact payloads. Approval covers only the listed effects and revision. Fresh reads and independent provider readbacks are required for external effects.
+Review hygiene findings against their evidence and confirm that each numbered
+proposal maps to the exact effect payload before approving changes.

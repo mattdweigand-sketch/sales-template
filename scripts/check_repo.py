@@ -8,7 +8,7 @@ import sys
 
 from wrappers import ROOT, load_routes, render
 
-PRIVATE = {"_shared/policy.json", "_shared/adapters.md", "_shared/icp.md", "_shared/taxonomy.json", "_shared/claims.json"}
+PRIVATE = {"_shared/policy.json", "_shared/adapters.md"}
 
 
 def public_files(root):
@@ -37,17 +37,6 @@ def check(root=ROOT):
             if heading not in text:
                 errors.append(name + " missing " + heading)
     files = public_files(root)
-    manifest = json.loads((root / "setup/source-manifest.json").read_text())
-    sources = set()
-    for component in manifest["components"]:
-        source = component["source"]
-        if source in sources or not re.fullmatch(r"[0-9a-f]{64}", component["source_sha256"]):
-            errors.append("invalid/duplicate source component: " + source)
-        sources.add(source)
-        for destination in component["destinations"]:
-            rel = Path(destination)
-            if rel.is_absolute() or ".." in rel.parts or rel not in files:
-                errors.append("source destination missing from public template: " + destination)
     for rel in files:
         path = root / rel
         if path.is_symlink():

@@ -15,10 +15,10 @@ Process and ownership:
 | [pilot_usage/](pilot_usage/CONTEXT.md) | Assemble, compute, validate, render and print a reviewed pilot report |
 
 Read the relevant [adapter data contract](../_shared/adapter-contract.md) before
-normalizing inputs. Helpers operate on explicit run files, never an implicit
-Perplexity session directory. Their output is evidence for review, not permission
-to write. The route registry lists each workflow's review dependencies so changed
-references or helper code invalidate its recorded approval.
+normalizing inputs. Helpers operate on explicit run files. Their output is
+evidence for review, not permission to write. The route registry lists each
+workflow's review dependencies so changed references or helper code invalidate
+its recorded approval.
 
 Outputs: generated wrappers or output/{run-id}/ artifacts, according to the invoked command.
 Human check: review the diff; a passing static check does not approve external actions.

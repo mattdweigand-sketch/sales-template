@@ -62,8 +62,11 @@ Writing to CRM, mail, or Calendar. Sending anything. Saving customer material to
 
 ## Outputs and readiness
 
-Save the deliverable and exact proposals in `output/{run-id}/01_review.md`; show the relevant readout in the conversation. Declare every source receipt and proposed artifact in its `artifacts` list. A read-only run has no effects. Readiness requires the checks above and explicit source gaps; unsupported effects stay withheld. Record the actual conversation review in `review.json`, and applied, pending, failed, or skipped effects in `02_result.json` through the shared run lifecycle.
+Save the sourced brief and explicit coverage gaps in `output/{run-id}/01_review.md`
+and show the brief in chat. Complete the checks above and record this read-only
+review through the [run lifecycle](../run.md).
 
 ## Human check
 
-Review the scope, evidence and exact payloads. Approval covers only the listed effects and revision. Fresh reads and independent provider readbacks are required for external effects.
+Check the selected calls, source attribution, labeled hypotheses and discovery
+gaps before using the brief.

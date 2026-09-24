@@ -56,8 +56,13 @@ Any CRM or warehouse write. Emailing or drafting outreach. Resolving an org by n
 
 ## Outputs and readiness
 
-Save the deliverable and exact proposals in `output/{run-id}/01_review.md`; show the relevant readout in the conversation. Declare every source receipt and proposed artifact in its `artifacts` list. A read-only run has no effects. Readiness requires the checks above and explicit source gaps; unsupported effects stay withheld. Record the actual conversation review in `review.json`, and applied, pending, failed, or skipped effects in `02_result.json` through the shared run lifecycle.
+Save the pilot readout and source gaps in `output/{run-id}/01_review.md`, with
+PDF artifacts in the configured run output directory. Complete the mode-specific
+checks above, share the deliverable and record this read-only review through the
+[run lifecycle](../run.md).
 
 ## Human check
 
-Review the scope, evidence and exact payloads. Approval covers only the listed effects and revision. Fresh reads and independent provider readbacks are required for external effects.
+Check the pilot scope, reconciled totals and use-case interpretations. In PDF
+mode, approve the draft narratives and categories before building, then inspect
+both pages before sharing.

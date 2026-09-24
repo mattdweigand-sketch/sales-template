@@ -144,7 +144,6 @@ def _plural(count: int, singular: str, plural: str) -> str:
 
 
 def _font_css(policy: PilotUsagePolicy) -> str:
-    from pathlib import Path
     rules = []
     for role, asset in policy["pdf"]["font_assets"].items():
         name = asset["file_name"]
@@ -365,7 +364,7 @@ ul{{padding-left:17px;margin:4px 0}} li{{margin:0 0 7px}} li::marker{{color:var(
   <header class="header"><div class="eyebrow">{_escape(report_title)}</div><h1>{_escape(report["customer_name"])}</h1>
     <div class="header-meta">Prepared {_format_date(report["prepared_date"])}<br>Pilot window: {pilot_window}<br>Data through {_format_date(report["data_through"])} (Day {periods["pilot_day_number"]} of {periods["pilot_total_days"]})</div></header>
   <div class="cards">
-    <div class="metric"><b>{headline["active_users"]} of {headline["seat_count"]}</b><strong>users active</strong><span>seats with Product work</span></div>
+    <div class="metric"><b>{headline["active_users"]} of {headline["seat_count"]}</b><strong>users active</strong><span>seats with task activity</span></div>
     <div class="metric"><b>{headline["task_count"]}</b><strong>tasks</strong><span>tasks started to date</span></div>
     <div class="metric"><b>{_format_number(headline["credits_used"])}</b><strong>credits used</strong><span>across reviewed workspace scope</span></div>
     <div class="metric"><b>{headline["active_days"]} of {headline["elapsed_days"]}</b><strong>days with activity</strong><span>dated task activity</span></div>
@@ -376,10 +375,10 @@ ul{{padding-left:17px;margin:4px 0}} li{{margin:0 0 7px}} li::marker{{color:var(
     <tfoot><tr><td>Total ({headline["seat_count"]} seats)</td><td>{headline["task_count"]}</td><td></td><td></td><td>{_format_number(headline["credits_used"])}</td></tr></tfoot></table>
     <p class="fineprint">Wk 1 = {week_one_range}, After = {week_two_range}.{_escape(undated_note)}{user_table_note}<br>{participation_notes}</p></div>
     {side_column}</div>{full_width_chart}
-  <footer class="footer">Scope: Product task usage and credit consumption across all {headline["seat_count"]} seats, reviewed workspaces, {through_range}.<br>{footer} &nbsp;·&nbsp; Page 1 of 2</footer>
+  <footer class="footer">Scope: Task usage and credit consumption across all {headline["seat_count"]} seats, reviewed workspaces, {through_range}.<br>{footer} &nbsp;·&nbsp; Page 1 of 2</footer>
 </section>
 <section class="report-page page-two">
-  <header class="header"><div class="eyebrow">{_escape(report_title)}</div><h1>What the team is doing with Product</h1><div class="header-meta">{through_range}</div></header>
+  <header class="header"><div class="eyebrow">{_escape(report_title)}</div><h1>What the team is doing</h1><div class="header-meta">{through_range}</div></header>
   <section class="work-distribution"><h2>Where the work went <span class="section-title-note">(all {headline["task_count"]} tasks, by share of credits consumed)</span></h2>
     <div class="stacked">{category_segments}</div>{category_rows}<p class="fineprint">{_escape(uncategorized_note)}Shares are of the {_format_number(headline["credits_used"])} credits consumed to date.</p></section>
   <section><h2 style="margin-top:21px">Representative work</h2><div class="work-grid">{representative_cards}</div></section>

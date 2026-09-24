@@ -9,4 +9,4 @@ Ask only what the selected workflow needs; preserve answers in their owning file
 5. Which optional private-data adapters are actually available and approved for this audience? → adapters.md and their policy enabled fields.
 6. Which signature evidence and close paths are approved? → policy.close and adapters.md.
 
-The example values are starter defaults, not a representation of the original deployment or an approved configuration for your company.
+Review and approve the example values for your deployment before using them in live workflows.

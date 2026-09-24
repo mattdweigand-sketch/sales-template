@@ -23,7 +23,7 @@ Two to four sentences. Where the deal stands, what this call must accomplish, th
 - Repeat per external attendee.
 
 ## What the business does
-- Three to five bullets. Business lines, scale, 2026 strategy signals, AI or data moves, incumbent tools. Each with a dated link.
+- Three to five bullets. Business lines, scale, current strategy signals, AI or data moves, incumbent tools. Each with a dated link.
 
 ## Product footprint
 One line per external email: org, tier, seats, or `No enterprise org for <email>.`
