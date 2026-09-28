@@ -2,7 +2,8 @@
 
 Build an evidence-backed quarterly forecast and propose explicit CRM corrections.
 
-Apply rules#scheduled_runs.
+Apply rules#scheduled_runs. Pilot findings arrive only through corrected CRM state;
+do not load a pilot report or read analytics as part of this workflow.
 
 ## Load / Skip
 

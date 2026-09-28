@@ -1,28 +1,23 @@
-# Local helpers
+# Shared helpers
 
-Paths are owned by policy.tooling.scripts. Helpers check mechanics, not business
-truth or approval. Inputs and outputs remain in the external run directory.
+Deterministic helper paths live in policy.tooling.scripts. Load only the interface
+for the selected helper; outputs stay in the external run directory.
 
-| Helper | Contract |
-|---|---|
-| coverage_check | --calls, --scope pipeline-daily/pipeline/forecast, --since, --policy; validates paired logical selections, IDs, paging, windows and scope; --json emits structured readiness |
-| hygiene_check | Opportunity output plus --tasks, --events, --as-of and --policy; checks configured stages/fields, activity timing and next-step deadlines |
-| mail_digest | Saved full-body mail envelopes; navigation only, with truncated previews |
-| mail_contact_stats | Owner email, saved envelopes, --only addresses, --calls, --since, --policy; counts only sufficiently complete source-linked history and reviewed classifications |
-| forecast_math | Reviewed input path and --policy; decimal arithmetic, currencies, revenue bases, unknown amounts and selected path; reconcile inputs against source census independently |
-| forecast_notify | Explicit --calls, --since, --policy and process status; generates chat status only, never sends or schedules |
-| closeout_check | Fresh complete normalized Task output and --as-of; checks unresolved due/overdue/undated tasks |
-| triage_check | Reviewed disposition JSON and --policy; checks complete task accounting, required evidence, timing and unresolved dependencies |
-| pilot_usage | Explicit --run, --review, --roster-query, --activity-query, --output and --policy; verifies receipts, unit/window/linkage, computes JSON/HTML and optional --pdf |
+## Inputs
 
-Coverage supports the configured fiscal-year start or explicit quarter boundaries.
-Normalized field names are logical contracts, not provider API assumptions. See
-[the adapter contract](../adapter-contract.md). All-history unanswered claims require
-unbounded, complete relevant history and substantive-response classification.
+| Need | File/Location | Section/Scope |
+|---|---|---|
+| Helper arguments and guarantees | [interfaces.md](interfaces.md) | Opening guarantees and selected helper row |
+| Receipt and field meanings | [adapter contract](../adapter-contract.md) | Selected record/source section |
+| Interpreter and review | [interfaces.md](interfaces.md) | "Inputs, outputs and review" |
+| Exact CLI flags | Selected helper's --help | Full output |
 
-## Inputs, outputs and review
+## Process
 
-Inputs are the explicit policy and current-run evidence named in each helper's
-contract above. Run with the repo interpreter from the repo root. Outputs are
-mechanical findings or normalized summaries in the external run. Review those
-findings against the original evidence; helpers do not interpret approval.
+1. Resolve the helper path from policy and read only its interface and required data contract.
+2. Run it with explicit current-run files and the configured policy.
+3. Review its findings beside the underlying evidence; it cannot grant approval.
+
+## Outputs
+
+Mechanical findings or normalized summaries in the external run, as each interface states.

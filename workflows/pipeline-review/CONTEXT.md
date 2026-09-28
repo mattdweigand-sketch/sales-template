@@ -1,45 +1,60 @@
 ---
 cadence: daily
-reads: _shared/policy.yaml (cadence, crm, forecast, identity, pipeline, reporting, tooling), _shared/rules.md, setup/adapters.md, references/procedure.md
+reads: _shared/policy.yaml (cadence, crm, forecast, identity, pipeline, reporting, tooling), _shared/rules.md, _shared/adapters.json, setup/adapters.md, references/
 writes: exact approved CRM changes
 next: CRM and chat carry business state
 ---
 
 # pipeline-review
 
-Review pipeline evidence and propose record corrections.
+Review daily or extended pipeline evidence and propose exact record corrections.
 
 ## Inputs
 
-Paths beginning with `_shared/`, `setup/` or `_system/` resolve from the repo root.
-`<run>` is the unique external directory returned by the run initializer.
+Repository paths resolve from the root; `<run>` is the external run directory.
 
-| Source | File or location | Load |
-|---|---|---|
-| Request | Current chat; record scope in `<run>/request.md` | The owner, run date and daily or extended review scope. |
-| Run | `<run>/run.json`, `<run>/raw/`, `<run>/calls/` | This run's identity and evidence only |
-| Policy | `_shared/policy.yaml` | cadence, crm, forecast, identity, pipeline, reporting, tooling |
-| Providers | `_shared/adapters.json`; [adapter guide](../../setup/adapters.md) | Selected capabilities and logical mappings |
-| Shared rules | [rules](../../_shared/rules.md) | run_start and the anchors cited by the procedure |
-| Instructions | [procedure](references/procedure.md) | Full procedure; linked references only when that step needs them |
+| Source | File/Location | Section/Scope | Why |
+|---|---|---|---|
+| Policy | `_shared/policy.yaml` | cadence, crm, forecast, identity, pipeline, reporting, tooling | Configured values; examples are not deployment facts |
+| Providers | `_shared/adapters.json`; [adapter guide](../../setup/adapters.md) | Selected capabilities and their logical mappings; guide when needed | Translate records and verify available tools |
+| Shared rules | [rules](../../_shared/rules.md) | `rules#run_start`, `rules#evidence`, `rules#approval`, `rules#write_protocol`, `rules#next_steps`, `rules#scheduled_runs` | Evidence, scope and applicable approval boundaries |
+| Reference | [procedure.md](references/procedure.md) | Opening text, "Load / Skip", opening of "Process", "Refuse", "Outputs and readiness", "Human check"; numbered sections at matching steps below; "Pilot report input" only when supplied | Mode, proposals and verification |
+| Reference | [collect.md](references/collect.md) | Common items plus "Daily review" or "Extended review"; "Pilot report identity" only when supplied in extended mode | Required reads and mechanical coverage |
+| Reference | [report-format.md](references/report-format.md) | "All modes", "Approval and display rules", "Daily layout", "Exceptions and counts"; "Extended additions" in extended mode | Report and count identities |
+| Conditional rule | [rules](../../_shared/rules.md) | `rules#pilot_handoff`, supplied report in extended mode only | Bounded report acceptance |
+| Request | Current chat; `<run>/request.md` | Owner, date and explicit or configured daily/extended mode | Select this run |
+| Run evidence | `<run>/run.json`, `<run>/raw/`, `<run>/calls/` | This run only; original bytes and paired receipts | Source identity, scope and provenance |
+| Supplied pilot report | Report/source supplied in this run | Only in extended mode, per `rules#pilot_handoff` | Pilot evidence for the verified Account |
 
 ## Process
 
-1. Follow `rules#run_start` to check setup, confirm the request and initialize a run.
-2. Execute [the procedure](references/procedure.md) in its stated order, loading only
-   the evidence and references needed for the current step.
-3. Present the editable review and its gaps. Apply only effects permitted by the
-   procedure and the shared approval/write protocol; preserve independent readbacks.
+1. Start per `rules#run_start` and the procedure’s "1. Load policy"; resolve the configured mode.
+2. Collect per "2. Collect" and the selected collection branch; retain the original count.
+3. Prepare the report and exact proposals per "3. Propose"; use "Pilot report input" only when a report is supplied.
+4. Apply only approved effects per "4. Apply" and `rules#write_protocol`.
+5. Reconcile counts and close per "5. Close", reporting every pending, failed and skipped proposal.
+
+## Checkpoints
+
+| After Step | Agent Presents | Human Decides |
+|---|---|---|
+| 3 | Report, evidence, needs-input items and exact effects | Approve the displayed batch or individual record proposals as the procedure defines |
+
+## Audit
+
+| Check | Pass Condition |
+|---|---|
+| Coverage, before step 3 output | Actual coverage results are included; unresolved gaps label the report incomplete and withhold affected proposals |
+| Meaning, before step 3 | Every changed clause has a source; stage, date and activity claims satisfy the procedure and full evidence |
+| Pilot input, before step 3 | Extended mode only; the conditional Account read and `rules#pilot_handoff` checks pass, otherwise needs-input |
+| Effects, before steps 3 and 4 | Selected capability, exact approval and fresh-read requirements hold; no won-state or email action |
+| Verification, before step 5 | Readbacks and fresh hygiene checks pass for written records; counts reconcile to the original snapshot |
 
 ## Outputs
 
-| Artifact | Location | Ready when |
+| Artifact | Location | Format |
 |---|---|---|
-| Review | `<run>/outputs/review.md` and chat | Required procedure sections, evidence links and gaps are explicit |
-| Evidence | `<run>/raw/`, `<run>/calls/` | Source capture and applicable checks pass, or limitations are labeled |
-
-## Human check
-
-Compare each finding and exact proposal with its supporting evidence. Record the reviewed version and any exact approvals in the chat and
-`<run>/outputs/review.md`. Edits require review of the changed proposal. Output
-presence is not approval or proof that an external effect succeeded.
+| Review and proposals | `<run>/outputs/review.md` and chat | Editable Markdown with exact labeled effects, evidence and gaps |
+| Approved effects and receipts | Configured systems; readbacks in the external run | Exact approved payloads, preimages, provider results and independent readbacks |
+| Pipeline report and close counts | `<run>/outputs/review.md` and chat | Selected report layout with actual coverage results |
+| Evidence and receipts | `<run>/raw/`, `<run>/calls/` | Original source bytes and paired normalized JSON |

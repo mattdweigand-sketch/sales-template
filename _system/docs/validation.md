@@ -2,18 +2,31 @@
 
 The portable rebuild was checked on macOS with Python 3.12.14.
 
-- 184 synthetic tests passed. They cover source coverage and pagination, fiscal
+- 192 synthetic tests passed. They cover source coverage and pagination, fiscal
   quarters, activity/next-step hygiene, mail evidence, forecast arithmetic, task
   dispositions, setup, run isolation, receipt integrity, pilot metrics and PDF
   failure handling. The root/setup remediation added nine regression tests for
   migration privacy, configuration shapes, selected effects and declared dependencies.
   The ICM restructure added a check for unowned root files and missing folder contracts.
+- The scoped-contract update added eight regressions for table shape, section/path
+  resolution, checkpoint steps, reference sizes, retained global rules, relationship
+  meaning and the optional pilot-report handoff. All seven contracts name branch
+  inputs, concrete audits and output formats. Read-only call prep adds no approval turn.
 - The ICM layout groups setup, workflows, shared references and maintenance. The
-  17-line agent entry routes through the generated workflow map to seven explicit
+  small agent entry routes through the generated workflow map to seven explicit
   folder contracts. Procedures and their business rules remain intact in references.
 - All seven pointer skills passed the skill frontmatter validator. Registry,
   pointer parity, procedure references, policy references, links and public
-  packaging checks passed across 91 distributed files.
+  packaging checks passed across 95 distributed files.
+- Pilot handoffs use configured extended review or the completed call being logged.
+  Receivers preserve the supplied report, verify mapped source-to-CRM identity and
+  retain exact effect approval/readbacks. Extended pipeline proposals require an
+  in-scope target; missing identity mappings remain needs-input. Export-only pilot
+  reports retain no CRM prerequisite. Forecast reads corrected CRM state.
+- Contact status has one shared definition, preserving substantive-reply or held-
+  meeting evidence, unknown status for incomplete history and no active/unknown
+  recycling. Business helper code, example policy values and adapter defaults did
+  not change in this contract update.
 - Setup preserves existing private settings and blocks unconfigured workflows.
   Changed policy hashes invalidate configuration review. Write capabilities are
   checked separately. A supplied pilot export does not require CRM identity or

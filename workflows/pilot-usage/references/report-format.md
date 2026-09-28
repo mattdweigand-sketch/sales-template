@@ -25,3 +25,13 @@ activity count, total quantity with unit, per-user activity/quantity/observed da
 category quantities, reviewed interpretation and evidence limits. Avoid claims of
 completion, cost savings, available balance or business value without independent
 evidence. The helper rounds only display quantities after summing exact decimals.
+
+## Handoff companion
+
+In `<run>/outputs/review.md` and chat, include the fields required by
+rules#pilot_handoff alongside links to the report and preserved source receipts.
+Use the account_id from the reviewed source scope; record any verified CRM mapping
+separately. If no CRM linkage was checked, say `CRM linkage unverified` rather than
+treating the usage identifier as a CRM record ID. Record metric grain and limitations
+from the reviewed source, not a guessed conversion. This companion supports a later
+explicitly supplied handoff without adding CRM prerequisites to export-only reports.

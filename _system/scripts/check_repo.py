@@ -8,6 +8,7 @@ import sys
 import yaml
 from wrappers import ROOT, load_routes, render
 from configuration import CURRENT_PRIVATE, LEGACY_PRIVATE
+from contract_checks import contract_errors
 
 PRIVATE = CURRENT_PRIVATE
 SKIP = {'.git', '.venv', '__pycache__'}
@@ -53,6 +54,7 @@ def check(root=ROOT):
     errors = render(root, check=True)
     routes = load_routes(root)
     errors += dependency_errors(root, routes)
+    errors += contract_errors(root, routes)
     workflows = {p.name for p in (root / 'workflows').iterdir() if p.is_dir()}
     if set(routes) != workflows:
         errors.append('route/workflow mismatch')

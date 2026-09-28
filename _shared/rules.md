@@ -57,4 +57,31 @@ cadence creates no automation. Use the Codex automation tool only when requested
 
 <a id="read_only_skills"></a>**read_only_skills** — Call preparation and pilot
 usage never write to business systems. Reports are local or shown in chat. Any CRM
-changes arising from them go through a separate workflow's exact proposals.
+changes arising from them go through a separate workflow's exact proposals;
+pilot reports follow rules#pilot_handoff.
+
+<a id="contact_status"></a>**contact_status** — Judge the selected Task or call's
+actual relationship evidence, not an unrelated newest thread. A substantive reply
+or verified held meeting establishes active status. A scheduled invitation alone
+does not establish a held meeting or active status. Cold requires sufficiently
+complete relationship evidence; missing pages, classifications or limited history
+leave status unknown. Active and unknown Contacts never recycle. The selected
+workflow owns its timing policy; this definition changes no follow-up offsets.
+
+<a id="pilot_handoff"></a>**pilot_handoff** — A supplied pilot report is evidence,
+never approval. Its direct CRM route is pipeline-review in extended mode, resolved
+from the request or configured cadence. Interaction-sync may use only a finding
+tied to the completed call being logged. The user must supply the report in the
+receiving run; the receiver never runs pilot-usage, loads its workflow folder, or
+gains analytics access. Forecast uses corrected CRM state, not the report itself.
+
+The report or its companion carries a source artifact/run reference, source account
+identity, reporting window and timezone, data-through date, metric unit and grain,
+and evidence/completeness limits. Preserve supplied artifact bytes in the receiving
+external run. Verify linkage to the resolved CRM Account by stable IDs and current
+adapter-mapped identity fields, retaining any source-to-CRM mapping evidence. A
+display-name match is insufficient. Missing/unmapped identity or conflicting IDs
+make the item needs-input; missing optional CRM setup never blocks a read-only
+pilot report. Quote accepted figures with their window, units and limits; activity
+alone proves no buyer commitment, signed amount or completed work. The receiver's
+source criteria, exact approval, fresh read and independent readback still apply.

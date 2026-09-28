@@ -33,6 +33,7 @@ From the transcript take, with speaker attribution:
 - Commitments by each side, with any dates spoken.
 - Pricing, quantities or scope figures. Mark each `buyer_confirmed` or `seller_stated`.
 - Call type per `policy.call_prep.call_type`, then its `policy.call_prep.expected_information` items now answered, partially answered, or still open.
+- When describing relationship status, use rules#contact_status. Follow-up dates still use the existing rule in proposal C.
 
 ### 4. Reconcile
 
@@ -63,6 +64,15 @@ Resolve reported gaps and verify actual tools per rules#write_protocol.
 For each approval: fresh read, write, readback with the changed fields and record link. If the draft adapter returns no ID, confirm by listing drafts on the thread and reading the exact draft back. Report anything CRM rejects with the validation message and one corrected proposal.
 
 A dependent link to a new Contact or call Task waits for its verified returned ID and a separate exact proposal. A failed or pending prerequisite withholds that link; never fill it with a guessed ID. Record attempt results and recovery needs per rules#write_protocol.
+
+### Pilot finding
+
+Only when the user supplies a finding tied to this completed call, read the resolved
+CRM Account's stable Id and configured source-identity mapping fields through the
+CRM adapter. Preserve that current read and the supplied report in the run. Apply
+rules#pilot_handoff before including the finding in A's Description or B. Quote its
+window, unit and limitations; it cannot substitute for the configured Amount evidence.
+A finding unrelated to this call is listed without a proposed change.
 
 ### 7. Close
 

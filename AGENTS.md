@@ -1,7 +1,8 @@
 # sales-template
 
 A reusable Codex workspace for seven sales workflows. This file is the agent entry.
-Read the selected folder contract and only its declared dependencies.
+Read the selected folder contract, then only the Inputs rows and named sections
+needed for the current branch. Follow its Process, Checkpoints, Audit and Outputs.
 
 | Task | Start here |
 |---|---|

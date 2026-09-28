@@ -34,6 +34,17 @@ In extended mode, add Rollup (stage/category and fiscal quarter versus later), p
 
 Then wait. Notes and field fills approve as one batch: `approve all`, `approve all except <Accounts>`, or `skip`. StageName, CloseDate, Amount, Closed Lost, and Task creates are one record per approval. No reply writes nothing; the next run re-proposes from current CRM state.
 
+### Pilot report input
+
+Only when the user supplies a report in extended mode, use the current Account read
+from [Pilot report identity](collect.md#pilot-report-identity) and rules#pilot_handoff.
+An accepted report can support a separately labeled Record proposal for its verified
+Account and in-scope Opportunity, subject to the existing field/stage evidence criteria. It is not a hygiene
+trigger; keep it separate from flagged-deal counts and deduplicate effects on a record.
+A missing handoff field or identity conflict is needs-input. Daily mode lists the
+report as held for an extended review, with no pilot-based proposal or extra source
+read. No report grants approval or widens this workflow's analytics access.
+
 ### 4. Apply
 
 Run `.venv/bin/python _system/scripts/setup.py doctor --workflow pipeline-review --effect crm.write`

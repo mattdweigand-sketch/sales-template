@@ -3,6 +3,7 @@
 Read [contributing](contributing.md) to edit or check the template,
 [validation](validation.md) for verified behavior and limits, or
 [provenance](provenance.md) for the template's origins and distribution scope.
+Use [the workflow starter](workflow-context-template.md) when adding a workflow.
 
 Inputs: the requested maintenance task and current repository evidence.
 Process: use only the relevant document; keep each fact with its owning file.

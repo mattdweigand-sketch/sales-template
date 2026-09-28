@@ -1,5 +1,7 @@
 # Brief formats
 
+## All modes
+
 Plain text, numbered or bulleted, no tables. Facts carry a source in parentheses or a link. Hypotheses start with `Hypothesis:`.
 
 ## Single call

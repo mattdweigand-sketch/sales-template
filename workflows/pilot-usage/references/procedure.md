@@ -22,4 +22,6 @@ approved analytics adapter or a user-supplied export; no warehouse schema is ass
    of its content per rules#approval, generate it via the same helper with --pdf,
    then render and inspect every page before sharing. Use [PDF guidance](pdf-format.md).
 6. Report sources, window, unit and any missing data. A local PDF is not delivery;
-   do not upload, post, send or update CRM from this workflow.
+   do not upload, post, send or update CRM from this workflow. Add the report
+   companion specified in [the report format](report-format.md#handoff-companion)
+   for rules#pilot_handoff; unavailable CRM linkage is explicitly unverified.

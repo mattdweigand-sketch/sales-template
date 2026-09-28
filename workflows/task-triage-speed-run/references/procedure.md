@@ -37,7 +37,7 @@ From `_shared/policy.yaml`, load identity, followup, email_voice, crm and toolin
 
 ### 4. Group
 
-Establish the facts from the selected Task's actual thread, not the Contact's unrelated newest thread. A substantive reply or verified held meeting makes the Contact active; incomplete relationship evidence is unknown, not cold. Interpret reply meaning, meeting attendance and the intended ask with their full sources.
+Establish relationship status per rules#contact_status from the selected Task's actual thread. Interpret reply meaning, meeting attendance and the intended ask with their full sources.
 
 Save `triage-input.json` with a `tasks` array in the external run directory. Each row contains `task_id`, `mailbox`, `thread_id`, `existing_draft`, `mail_complete`, `relationship` (active/cold/unknown), `last_sent_at`, `last_reply_at`, `held_meeting_at`, `meeting_moved`, `internal_prep`, `unanswered_count`, `recipient` (confirmed/unconfirmed/unknown), `cooldown_until`, `channel` (email/linkedin_only/unknown), `bodies_complete`, and `source_refs`. Timestamps are offset-aware or null; dates are ISO; booleans/counts may be null when unknown. Null message dates mean confirmed absence only with complete supporting history. Source paths are relative to this run. Add `contact_email` when multiple external correspondents make the selected thread ambiguous; verify the selected person and message facts against saved mail before using the helper output.
 

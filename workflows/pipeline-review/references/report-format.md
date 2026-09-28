@@ -1,5 +1,7 @@
 # Report format
 
+## All modes
+
 The complete report appears in the final chat answer and the external review file for both manual and configured scheduled runs. Preserve the template headings and field wording; use policy.reporting for amounts/dates and verified record links. Source field text remains verbatim. The full approved payload is retained in the external run directory; the comparison below may omit unchanged history.
 
 ## Approval and display rules

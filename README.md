@@ -85,7 +85,8 @@ sales-template/
     └── .github/workflows/ # Automated checks
 ```
 
-Each workflow opens with `CONTEXT.md`: inputs, process, outputs and human check.
+Each workflow opens with `CONTEXT.md`: scoped inputs, process, review checkpoints,
+audit checks and outputs. Checkpoints preserve the workflow's existing approvals.
 Its `references/` holds the detailed procedure and supporting guidance; `scripts/`
 exists only where that workflow needs a helper. Choose a workflow by the task at
 hand. These seven workflows do not have one mandatory execution order.
