@@ -52,136 +52,37 @@ for raw evidence, normalized receipts and outputs. No customer data belongs here
 
 ## Repository map
 
-The tree below shows every tracked folder and file. Skill pointers live in
-`.agents/skills/`; their full procedures live in `workflows/`.
+Main folders and entry points:
 
 ```text
 sales-template/
-├── .agents/
-│   └── skills/
-│       ├── close/
-│       │   └── SKILL.md
-│       ├── forecast-weekly/
-│       │   └── SKILL.md
-│       ├── interaction-sync/
-│       │   └── SKILL.md
-│       ├── pilot-usage/
-│       │   └── SKILL.md
-│       ├── pipeline-review/
-│       │   └── SKILL.md
-│       ├── sales-call-prep/
-│       │   └── SKILL.md
-│       └── task-triage-speed-run/
-│           └── SKILL.md
-├── .github/
-│   └── workflows/
-│       └── validate.yml
-├── _shared/
-│   ├── collateral/
-│   │   └── README.md
-│   ├── scripts/
-│   │   ├── _saved_json.py
-│   │   ├── coverage_check.py
-│   │   ├── hygiene_check.py
-│   │   ├── mail_contact_stats.py
-│   │   ├── mail_evidence.py
-│   │   ├── mail_thread_digest.py
-│   │   └── README.md
-│   ├── adapter-contract.md
-│   ├── adapters.example.json
-│   ├── CONTEXT.md
-│   ├── policy.example.yaml
-│   └── rules.md
-├── _templates/
-│   └── workflow/
-│       └── procedure.md
-├── scripts/
-│   ├── check_repo.py
-│   ├── receipts.py
-│   ├── run.py
-│   ├── setup.py
-│   ├── wrapper-contract.json
-│   └── wrappers.py
-├── setup/
-│   ├── adapters.md
-│   ├── automations.md
-│   ├── CONTEXT.md
-│   ├── installation.md
-│   └── questionnaire.md
-├── tests/
-│   ├── test_closeout_check.py
-│   ├── test_codex_setup.py
-│   ├── test_coverage_check.py
-│   ├── test_evidence_helpers.py
-│   ├── test_forecast_math.py
-│   ├── test_forecast_notify.py
-│   ├── test_hygiene_check.py
-│   ├── test_pilot_usage.py
-│   ├── test_skill_procedures.py
-│   └── test_triage_check.py
-├── workflows/
-│   ├── close/
-│   │   ├── references/
-│   │   │   ├── fields.md
-│   │   │   ├── paths.md
-│   │   │   └── provisioning.md
-│   │   └── procedure.md
-│   ├── forecast-weekly/
-│   │   ├── references/
-│   │   │   ├── forecast-assessment.md
-│   │   │   └── report-format.md
-│   │   ├── scripts/
-│   │   │   ├── forecast_math.py
-│   │   │   └── forecast_notify.py
-│   │   └── procedure.md
-│   ├── interaction-sync/
-│   │   └── procedure.md
-│   ├── pilot-usage/
-│   │   ├── references/
-│   │   │   ├── data-contract.md
-│   │   │   ├── pdf-format.md
-│   │   │   └── report-format.md
-│   │   ├── scripts/
-│   │   │   └── pilot_usage.py
-│   │   └── procedure.md
-│   ├── pipeline-review/
-│   │   ├── references/
-│   │   │   ├── collect.md
-│   │   │   └── report-format.md
-│   │   └── procedure.md
+├── README.md              # Start here
+├── AGENTS.md              # Agent instructions
+├── CONTEXT.md             # Workflow routing
+├── setup/                 # Workspace setup
+├── .agents/skills/        # Slash-command pointers
+├── workflows/             # Sales procedures
 │   ├── sales-call-prep/
-│   │   ├── references/
-│   │   │   └── brief-formats.md
-│   │   └── procedure.md
-│   └── task-triage-speed-run/
-│       ├── references/
-│       │   └── crm-corrections.md
-│       ├── scripts/
-│       │   ├── closeout_check.py
-│       │   └── triage_check.py
-│       └── procedure.md
-├── .gitignore
-├── AGENTS.md
-├── CONTEXT.md
-├── LICENSE
-├── PROVENANCE.md
-├── README.md
-├── requirements.txt
-└── VALIDATION.md
+│   ├── interaction-sync/
+│   ├── task-triage-speed-run/
+│   ├── pipeline-review/
+│   ├── forecast-weekly/
+│   ├── pilot-usage/
+│   └── close/
+├── _shared/               # Shared rules and helpers
+├── _templates/workflow/   # Add a workflow
+├── scripts/               # Setup and run tools
+├── tests/                 # Automated checks
+└── .github/workflows/     # GitHub checks
 ```
+
+Each workflow folder contains a `procedure.md` and any supporting references or
+scripts. Private settings are ignored by Git; run evidence and reports stay outside
+the repo.
 
 **Navigate:** [Setup](setup/CONTEXT.md) · [Skills](.agents/skills/) ·
 [Workflows](workflows/) · [Shared rules](_shared/rules.md) ·
-[Helpers](_shared/scripts/README.md) · [Validation](VALIDATION.md)
-
-Setup creates private `_shared/policy.yaml` and `_shared/adapters.json`, which Git
-ignores. Each run stores evidence (`raw/`), normalized receipts (`calls/`) and
-reports (`outputs/`) in a separate directory outside the repo. These generated
-files are not part of the tree above.
-
-To add a workflow, start from [_templates/workflow/](_templates/workflow/), register
-it in [scripts/wrapper-contract.json](scripts/wrapper-contract.json), then run
-`python scripts/wrappers.py` to generate its skill pointer.
+[Validation](VALIDATION.md)
 
 ## What is configurable
 
