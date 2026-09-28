@@ -58,48 +58,42 @@ arrows show configuration, shared dependencies and maintenance.
 
 ```mermaid
 flowchart TB
-    subgraph SOURCE["sales-template · version-controlled files"]
-        direction TB
-        SETUP["SET UP<br/>setup/<br/>Interview and connector guidance"]
-        EXTEND["ADD A WORKFLOW<br/>_templates/workflow/<br/>scripts/wrapper-contract.json"]
-        SKILL["CHOOSE A COMMAND<br/>.agents/skills/<br/>Seven small skill pointers"]
-        ROUTE["LOAD THE RIGHT CONTEXT<br/>AGENTS.md · CONTEXT.md<br/>Routing, scope and boundaries"]
-        WORK["WORKFLOW INSTRUCTIONS<br/>workflows/<br/>procedure.md<br/>references/ + scripts/ as needed"]
-        SHARED["SHARED KNOWLEDGE<br/>_shared/<br/>Rules, data contracts and examples"]
-        TOOLS["EXECUTION HELPERS<br/>scripts/ · _shared/scripts/<br/>Setup, run receipts and data checks"]
-        CHECK["VERIFY THE TEMPLATE<br/>tests/ · .github/workflows/<br/>Local tests and GitHub checks"]
+    EXTEND["Add workflows<br/>_templates/workflow/"]
+    ENTRY["Choose and route<br/>.agents/skills/<br/>AGENTS.md<br/>CONTEXT.md"]
+    SHARED["Setup and shared rules<br/>setup/<br/>_shared/"]
+    WORK["Sales workflows<br/>workflows/"]
+    TOOLS["Execution helpers<br/>scripts/<br/>_shared/scripts/"]
+    CHECK["Validate the repo<br/>tests/<br/>.github/workflows/"]
+    RUN["Evidence and reports<br/>External run directory<br/>raw/ · calls/ · outputs/"]
 
-        SKILL --> ROUTE --> WORK
-        WORK -->|uses| TOOLS
-        SHARED -.->|rules and contracts| WORK
-        EXTEND -.->|generate pointers| SKILL
-        TOOLS -.->|checked by| CHECK
-    end
-
-    SETTINGS["LOCAL SETTINGS · IGNORED BY GIT<br/>_shared/policy.yaml<br/>_shared/adapters.json"]
-    RUN["OUTSIDE THE REPO<br/>One directory per run<br/>raw/ → calls/ → outputs/"]
-
-    SETUP -.->|creates and reviews| SETTINGS
-    SETTINGS -.->|configures| WORK
-    TOOLS -->|preserves evidence and results| RUN
+    EXTEND -.->|add a skill| ENTRY
+    ENTRY --> WORK
+    SHARED -.->|settings and rules| WORK
+    WORK --> TOOLS
+    TOOLS --> RUN
+    TOOLS -.->|checked by| CHECK
 
     classDef entry fill:#e8f0fe,stroke:#3566a8,color:#172b4d
     classDef workflow fill:#dff3e8,stroke:#28734f,color:#153d2d,stroke-width:2px
     classDef support fill:#f1eef9,stroke:#78639e,color:#33284a
-    classDef private fill:#fff3dc,stroke:#b98122,color:#583c0d
-    class SETUP,SKILL,ROUTE entry
+    classDef output fill:#fff3dc,stroke:#b98122,color:#583c0d
+    class ENTRY entry
     class WORK workflow
     class EXTEND,SHARED,TOOLS,CHECK support
-    class SETTINGS,RUN private
+    class RUN output
 ```
 
 **Navigate:** [Setup](setup/CONTEXT.md) · [Skills](.agents/skills/) ·
 [Workflows](workflows/) · [Shared rules](_shared/rules.md) ·
 [Helpers](_shared/scripts/README.md) · [Validation](VALIDATION.md)
 
-The two gold boxes are not published template content. Local settings stay inside
-`_shared/` but are ignored by Git; customer evidence and reports stay outside the
-repo. Credentials remain in your connector or credential manager.
+Each folder under `workflows/` owns one `procedure.md`, plus references and scripts
+where needed. The seven workflows are listed above.
+
+The gold box is **outside the repo**: one run directory holds original evidence
+(`raw/`), normalized receipts (`calls/`) and reports (`outputs/`). Setup creates
+private `_shared/policy.yaml` and `_shared/adapters.json`, which Git ignores.
+Credentials remain in your connector or credential manager.
 
 To add a workflow, start from [_templates/workflow/](_templates/workflow/), register
 it in [scripts/wrapper-contract.json](scripts/wrapper-contract.json), then run
