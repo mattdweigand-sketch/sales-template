@@ -1,0 +1,87 @@
+{
+  "version": 2,
+  "mode": "example",
+  "policy_sha256": null,
+  "capabilities": {
+    "calendar.read": {
+      "status": "unconfigured",
+      "provider": null,
+      "tool": null,
+      "contract": null,
+      "verified_at": null
+    },
+    "crm.read": {
+      "status": "unconfigured",
+      "provider": null,
+      "tool": null,
+      "contract": null,
+      "verified_at": null
+    },
+    "crm.write": {
+      "status": "unconfigured",
+      "provider": null,
+      "tool": null,
+      "contract": null,
+      "verified_at": null
+    },
+    "handoff.post": {
+      "status": "unconfigured",
+      "provider": null,
+      "tool": null,
+      "contract": null,
+      "verified_at": null
+    },
+    "mail.draft": {
+      "status": "unconfigured",
+      "provider": null,
+      "tool": null,
+      "contract": null,
+      "verified_at": null
+    },
+    "mail.read": {
+      "status": "unconfigured",
+      "provider": null,
+      "tool": null,
+      "contract": null,
+      "verified_at": null
+    },
+    "pdf.render": {
+      "status": "unconfigured",
+      "provider": null,
+      "tool": null,
+      "contract": null,
+      "verified_at": null
+    },
+    "provisioning.execute": {
+      "status": "unconfigured",
+      "provider": null,
+      "tool": null,
+      "contract": null,
+      "verified_at": null
+    },
+    "transcripts.read": {
+      "status": "unconfigured",
+      "provider": null,
+      "tool": null,
+      "contract": null,
+      "verified_at": null
+    },
+    "usage.read": {
+      "status": "unconfigured",
+      "provider": null,
+      "tool": null,
+      "contract": null,
+      "verified_at": null
+    },
+    "web.read": {
+      "status": "unconfigured",
+      "provider": null,
+      "tool": null,
+      "contract": null,
+      "verified_at": null
+    }
+  },
+  "field_mappings": {},
+  "state_mappings": {},
+  "data_contracts": {}
+}

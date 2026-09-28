@@ -1,0 +1,12 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+.env
+.env.*
+.venv/
+/_shared/policy.yaml
+/_shared/adapters.json
+/.codex/config.toml
+/output/
+/outputs/
+/runs/

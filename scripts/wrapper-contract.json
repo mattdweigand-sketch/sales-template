@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "commands": {
+    "sales-call-prep": {
+      "description": "Prepare an evidence-backed brief for an upcoming sales call. Use for account research, meeting preparation, or a read-only call brief.",
+      "workflow": "workflows/sales-call-prep/procedure.md",
+      "required": [
+        "crm.read",
+        "mail.read",
+        "calendar.read"
+      ],
+      "optional": [
+        "transcripts.read",
+        "web.read"
+      ],
+      "effects": []
+    },
+    "interaction-sync": {
+      "description": "Turn one completed sales call into reviewed CRM proposals and an unsent follow-up draft. Use to log a call or sync meeting outcomes.",
+      "workflow": "workflows/interaction-sync/procedure.md",
+      "required": [
+        "crm.read",
+        "mail.read",
+        "calendar.read"
+      ],
+      "optional": [
+        "transcripts.read"
+      ],
+      "effects": [
+        "crm.write",
+        "mail.draft"
+      ]
+    },
+    "task-triage-speed-run": {
+      "description": "Review due, overdue, and undated sales tasks, propose grouped dispositions, and prepare approved unsent follow-ups.",
+      "workflow": "workflows/task-triage-speed-run/procedure.md",
+      "required": [
+        "crm.read",
+        "mail.read",
+        "calendar.read"
+      ],
+      "optional": [],
+      "effects": [
+        "crm.write",
+        "mail.draft"
+      ]
+    },
+    "pipeline-review": {
+      "description": "Review pipeline evidence, stale records, stage criteria and next steps; propose exact CRM corrections for approval.",
+      "workflow": "workflows/pipeline-review/procedure.md",
+      "required": [
+        "crm.read",
+        "mail.read",
+        "calendar.read"
+      ],
+      "optional": [],
+      "effects": [
+        "crm.write"
+      ]
+    },
+    "forecast-weekly": {
+      "description": "Build a weekly evidence-backed sales forecast with reviewed buckets, target arithmetic and a ranked path to target.",
+      "workflow": "workflows/forecast-weekly/procedure.md",
+      "required": [
+        "crm.read",
+        "mail.read",
+        "calendar.read"
+      ],
+      "optional": [],
+      "effects": [
+        "crm.write"
+      ]
+    },
+    "pilot-usage": {
+      "description": "Analyze a pilot from configured usage data or supplied exports and prepare a reviewed usage report or PDF.",
+      "workflow": "workflows/pilot-usage/procedure.md",
+      "required": [
+        "usage.read"
+      ],
+      "optional": [
+        "crm.read",
+        "pdf.render"
+      ],
+      "effects": []
+    },
+    "close": {
+      "description": "Prepare a signed deal for Closed Won and review provisioning, commercial fields and downstream handoff proposals.",
+      "workflow": "workflows/close/procedure.md",
+      "required": [
+        "crm.read"
+      ],
+      "optional": [
+        "handoff.post",
+        "provisioning.execute"
+      ],
+      "effects": [
+        "crm.write"
+      ]
+    }
+  }
+}
