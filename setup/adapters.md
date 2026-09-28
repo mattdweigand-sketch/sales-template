@@ -40,7 +40,7 @@ stays unknown even when a local result is empty.
 
 ## Configuration shape
 
-Run `.venv/bin/python scripts/setup.py requirements --workflow <name>` from the
+Run `.venv/bin/python _system/scripts/setup.py requirements --workflow <name>` from the
 repo root for the exact required keys. Add `--effect crm.write`, `--effect
 mail.draft` or another supported effect to include its contract. The command uses
 your private policy when present, otherwise the example. Conditional fields in
@@ -80,7 +80,7 @@ are true. Confirm real schemas, permissions and bounded readbacks in this chat.
 
 ## Explicit evidence capture
 
-Initialize `.venv/bin/python scripts/run.py init <workflow>` and retain its printed external
+Initialize `.venv/bin/python _system/scripts/run.py init <workflow>` and retain its printed external
 path and started_at. Preserve actual request and response bytes, then prepare a
 normalized JSON file with exactly input and output objects. A synthetic example:
 
@@ -100,11 +100,11 @@ normalized JSON file with exactly input and output objects. A synthetic example:
 An empty example is never live evidence. Capture each successful read page using:
 
 ```sh
-.venv/bin/python scripts/receipts.py capture --run <run> --call-id crm-001 \
+.venv/bin/python _system/scripts/receipts.py capture --run <run> --call-id crm-001 \
   --raw-input <raw-request-file> --raw-output <raw-response-file> \
   --normalized <normalized-file> --provider <actual-tool-or-file-source> \
   --started-at <actual-offset-time> --completed-at <actual-offset-time>
-.venv/bin/python scripts/receipts.py verify --run <run>
+.venv/bin/python _system/scripts/receipts.py verify --run <run>
 ```
 
 Capture adds actual timestamps and the raw response reference, hashes all bytes and

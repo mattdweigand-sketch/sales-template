@@ -8,10 +8,10 @@ Do not use an older system Python. Verify that executable with `--version` first
 ```sh
 python3.12 --version
 python3.12 -m venv .venv
-.venv/bin/python -m pip install -r requirements.txt
-.venv/bin/python scripts/setup.py init
-.venv/bin/python scripts/check_repo.py
-.venv/bin/python -m unittest discover -s tests -v
+.venv/bin/python -m pip install -r _system/requirements.txt
+.venv/bin/python _system/scripts/setup.py init
+.venv/bin/python _system/scripts/check_repo.py
+.venv/bin/python -m unittest discover -s _system/tests -v
 ```
 
 Use `.venv/bin/python` for every later command, including policy helper paths.
@@ -24,15 +24,15 @@ without overwriting existing files. Ask Codex to set up the selected workflow; i
 follows [the questionnaire](questionnaire.md). Examples contain fictional identity,
 neutral stages, no targets and no live services. Review the defaults and mappings.
 
-Record the policy hash from `.venv/bin/python scripts/setup.py policy-hash` in adapters.json only
+Record the policy hash from `.venv/bin/python _system/scripts/setup.py policy-hash` in adapters.json only
 after review. Mark configured capabilities with actual tools, contracts and verification
 dates. Configure native CRM fields/states for workflows that need CRM. Run:
 
 ```sh
-.venv/bin/python scripts/setup.py doctor --workflow sales-call-prep
-.venv/bin/python scripts/setup.py requirements --workflow close --effect crm.write
-.venv/bin/python scripts/setup.py doctor --workflow close --effect crm.write
-.venv/bin/python scripts/run.py init sales-call-prep
+.venv/bin/python _system/scripts/setup.py doctor --workflow sales-call-prep
+.venv/bin/python _system/scripts/setup.py requirements --workflow close --effect crm.write
+.venv/bin/python _system/scripts/setup.py doctor --workflow close --effect crm.write
+.venv/bin/python _system/scripts/run.py init sales-call-prep
 ```
 
 Doctor checks configuration, never live access or business approval. It returns

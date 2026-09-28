@@ -19,7 +19,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / '_shared/scripts'))
-sys.path.insert(0, str(ROOT / 'scripts'))
+sys.path.insert(0, str(ROOT / '_system/scripts'))
 from coverage_check import load_queries, stamp
 from receipts import verify
 from run import external_path

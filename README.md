@@ -22,7 +22,7 @@ It does not install integrations or claim compatibility before those mappings wo
 | pilot-usage | Analyze configured usage data or supplied exports; prepare a report/PDF |
 | close | Review signed terms, won-state changes and configured downstream steps |
 
-Each small SKILL.md points to one procedure. Open the repository as a Codex project,
+Each small SKILL.md points to one workflow contract. Open the repository as a Codex project,
 type `/` and select a skill, or explicitly invoke `$sales-call-prep`, for example.
 
 ## Start here
@@ -34,10 +34,10 @@ repo virtual environment directly; shell activation is unnecessary.
 
 ```sh
 python3.12 -m venv .venv
-.venv/bin/python -m pip install -r requirements.txt
-.venv/bin/python scripts/setup.py init
-.venv/bin/python scripts/check_repo.py
-.venv/bin/python -m unittest discover -s tests -v
+.venv/bin/python -m pip install -r _system/requirements.txt
+.venv/bin/python _system/scripts/setup.py init
+.venv/bin/python _system/scripts/check_repo.py
+.venv/bin/python -m unittest discover -s _system/tests -v
 ```
 
 Then ask: **“Set up this sales workspace for the workflows I use.”** The
@@ -47,8 +47,8 @@ covers runtime, skill discovery, optional PDF support and clean exports.
 Upgrading an older workspace? Follow [migration](setup/migration.md) before setup.
 
 ```sh
-.venv/bin/python scripts/setup.py doctor --workflow sales-call-prep
-.venv/bin/python scripts/run.py init sales-call-prep
+.venv/bin/python _system/scripts/setup.py doctor --workflow sales-call-prep
+.venv/bin/python _system/scripts/run.py init sales-call-prep
 ```
 
 Doctor reports missing configuration. Verify actual tool availability and access in
@@ -58,17 +58,16 @@ for raw evidence, normalized receipts and outputs. No customer data belongs here
 
 ## Repository map
 
-Main folders and entry points:
+Four areas, each with one purpose:
 
 ```text
 sales-template/
     ├── README.md          # Start here
-    ├── AGENTS.md          # Agent instructions
-    ├── CONTEXT.md         # Workflow routing
-    ├── setup/             # Workspace setup
-    ├── .agents/
-    │   └── skills/        # Workflow shortcuts
-    ├── workflows/
+    ├── AGENTS.md          # Codex entry point
+    ├── CONTEXT.md         # Choose a workflow
+    ├── LICENSE
+    ├── setup/             # Configure your workspace
+    ├── workflows/         # Sales work
     │   ├── sales-call-prep/
     │   ├── interaction-sync/
     │   ├── task-triage-speed-run/
@@ -76,20 +75,29 @@ sales-template/
     │   ├── forecast-weekly/
     │   ├── pilot-usage/
     │   └── close/
-    ├── _shared/           # Shared rules and helpers
-    ├── scripts/           # Setup and run tools
-    ├── tests/             # Automated checks
-    └── .github/
-        └── workflows/    # GitHub checks
+    ├── _shared/           # Policy, rules and shared helpers
+    ├── _system/           # Template maintenance
+    │   ├── scripts/
+    │   ├── tests/
+    │   ├── docs/
+    │   └── requirements.txt
+    ├── .agents/skills/    # Codex command pointers
+    └── .github/workflows/ # Automated checks
 ```
 
-Each workflow folder contains a `procedure.md` and any supporting references or
-scripts. Private settings are ignored by Git; run evidence and reports stay outside
-the repo.
+Each workflow opens with `CONTEXT.md`: inputs, process, outputs and human check.
+Its `references/` holds the detailed procedure and supporting guidance; `scripts/`
+exists only where that workflow needs a helper. Choose a workflow by the task at
+hand. These seven workflows do not have one mandatory execution order.
 
-**Navigate:** [Setup](setup/CONTEXT.md) · [Skills](.agents/skills/) ·
-[Workflows](workflows/) · [Shared rules](_shared/rules.md) ·
-[Validation](VALIDATION.md)
+The structure follows ICM's layered context pattern: a small entry point, a routing
+map, folder contracts, then selected references and current-run evidence. Customer
+evidence and editable reports stay in the external run directory. Private settings
+remain in `_shared/` and are ignored by Git.
+
+**Navigate:** [Setup](setup/CONTEXT.md) · [Skills](.agents/skills) ·
+[Workflows](workflows) · [Shared rules](_shared/rules.md) ·
+[Validation](_system/docs/validation.md)
 
 ## What is configurable
 
@@ -102,5 +110,5 @@ Schedules are inert until requested through Codex.
 
 Tests use fictional data and check local mechanics. They cannot prove live access,
 source authenticity, buyer intent, human approval, message delivery or provisioning
-success. Unsupported required mappings remain gaps. See [validation](VALIDATION.md)
-and [provenance](PROVENANCE.md) for scope and limits.
+success. Unsupported required mappings remain gaps. See [validation](_system/docs/validation.md)
+and [provenance](_system/docs/provenance.md) for scope and limits.

@@ -7,7 +7,7 @@ Initialization reports them and preserves their bytes; it does not convert them,
 activate tools or carry approvals forward.
 
 1. Install the runtime in [installation](installation.md), then run
-   `.venv/bin/python scripts/setup.py init`. It creates only missing current files.
+   `.venv/bin/python _system/scripts/setup.py init`. It creates only missing current files.
 2. Inspect old private settings as configuration data. Review selected values with
    the user and transfer them into `_shared/policy.yaml` and version 2
    `_shared/adapters.json`. Do not copy old instructions, credentials, run state,
@@ -28,3 +28,20 @@ activate tools or carry approvals forward.
 
 The public template contains no organization-specific migration values. Setup is
 complete only for the workflows and effects actually configured and verified.
+
+## Repository layout update
+
+Private configuration and external run locations are unchanged. Command names in
+Codex are unchanged; regenerate their local pointers after a source update.
+
+| Previous path | Current home |
+|---|---|
+| `scripts/` | `_system/scripts/` |
+| `tests/` | `_system/tests/` |
+| `requirements.txt` | `_system/requirements.txt` |
+| Root provenance and validation documents | `_system/docs/` |
+| `workflows/<name>/procedure.md` | `workflows/<name>/references/procedure.md`, entered through `workflows/<name>/CONTEXT.md` |
+
+Update any external scripts, scheduled prompts or links that call the former paths.
+The repository's commands, CI and pointers use the current paths. Local checks cannot
+prove that an unlisted downstream consumer has been migrated.
