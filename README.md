@@ -56,24 +56,27 @@ Main folders and entry points:
 
 ```text
 sales-template/
-├── README.md              # Start here
-├── AGENTS.md              # Agent instructions
-├── CONTEXT.md             # Workflow routing
-├── setup/                 # Workspace setup
-├── .agents/skills/        # Slash-command pointers
-├── workflows/             # Sales procedures
-│   ├── sales-call-prep/
-│   ├── interaction-sync/
-│   ├── task-triage-speed-run/
-│   ├── pipeline-review/
-│   ├── forecast-weekly/
-│   ├── pilot-usage/
-│   └── close/
-├── _shared/               # Shared rules and helpers
-├── _templates/workflow/   # Add a workflow
-├── scripts/               # Setup and run tools
-├── tests/                 # Automated checks
-└── .github/workflows/     # GitHub checks
+    ├── README.md          # Start here
+    ├── AGENTS.md          # Agent instructions
+    ├── CONTEXT.md         # Workflow routing
+    ├── setup/             # Workspace setup
+    ├── .agents/
+    │   └── skills/        # Workflow shortcuts
+    ├── workflows/
+    │   ├── sales-call-prep/
+    │   ├── interaction-sync/
+    │   ├── task-triage-speed-run/
+    │   ├── pipeline-review/
+    │   ├── forecast-weekly/
+    │   ├── pilot-usage/
+    │   └── close/
+    ├── _shared/           # Shared rules and helpers
+    ├── _templates/
+    │   └── workflow/      # Starter for new workflows
+    ├── scripts/           # Setup and run tools
+    ├── tests/             # Automated checks
+    └── .github/
+        └── workflows/    # GitHub checks
 ```
 
 Each workflow folder contains a `procedure.md` and any supporting references or
