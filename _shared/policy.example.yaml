@@ -28,6 +28,7 @@ tooling:
   not_checked_means: 'A required source was not checked: name the unavailable adapter,
     scope gap, or exact provider error. Run length alone is not a reason to skip evidence.'
   scripts:
+    pipeline_render: workflows/pipeline-review/scripts/pipeline_render.py
     hygiene_check: _shared/scripts/hygiene_check.py
     coverage_check: _shared/scripts/coverage_check.py
     mail_contact_stats: _shared/scripts/mail_contact_stats.py
@@ -104,8 +105,9 @@ pipeline:
       due date has passed or is missing. A live next step is not stale. An unresolved
       next-step date requires review before a stale-based write.
   task_gap: a live next step with no open Task whose due date equals the action's
-    due date. Emitted by hygiene_check; not a trigger. The extended review proposes
-    the Task only on this flag. An unresolved due date never supports a Task create.
+    due date. Emitted by hygiene_check as an informational date match, not a trigger.
+    Review action identity and open Task candidates on every pipeline run; the flag
+    alone neither requires nor rules out a Task. An unresolved date never supports creation.
   required_fields:
     S2:
     - Amount

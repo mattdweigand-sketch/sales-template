@@ -91,6 +91,12 @@ Its `references/` holds the detailed procedure and supporting guidance; `scripts
 exists only where that workflow needs a helper. Choose a workflow by the task at
 hand. These seven workflows do not have one mandatory execution order.
 
+Pipeline review checks Task actions in daily and extended modes. It separates clear
+recommendations from questions, walks questions one at a time, and uses one renderer
+for reports, approval options and write receipts. Its labels and working data stay
+in the external run. The renderer formats reviewed facts; it does not approve or
+execute changes. Existing users should follow the [pipeline upgrade notes](setup/migration.md#pipeline-presentation-update).
+
 The structure follows ICM's layered context pattern: a small entry point, a routing
 map, folder contracts, then selected references and current-run evidence. Customer
 evidence and editable reports stay in the external run directory. Private settings

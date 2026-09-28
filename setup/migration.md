@@ -45,3 +45,16 @@ Codex are unchanged; regenerate their local pointers after a source update.
 Update any external scripts, scheduled prompts or links that call the former paths.
 The repository's commands, CI and pointers use the current paths. Local checks cannot
 prove that an unlisted downstream consumer has been migrated.
+
+## Pipeline presentation update
+
+Existing private policy is preserved. Add the `pipeline_render` helper path from
+`_shared/policy.example.yaml` to the private helper registry, and review the revised
+Task action-reuse meaning of `pipeline.task_gap`. Refresh configuration review/hash
+and run the pipeline doctor. No schedule or live provider mapping changes automatically.
+Task reads now include undated open candidates and verified Contact linkage fields.
+
+Keep this run's labels and outcomes in `outputs/pipeline-review.json` inside the
+external run, separate from its existing `run.json`. Old run approvals do not carry
+forward. Scheduled prompts should use the same saved coverage output for report
+and notification as described in [automations](automations.md).

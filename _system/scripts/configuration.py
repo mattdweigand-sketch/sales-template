@@ -56,8 +56,8 @@ CRM_FIELDS = {
     },
     'pipeline-review': {
         'Opportunity': 'Id OwnerId IsClosed Name StageName Amount CloseDate NextSteps LastActivityDate ForecastCategoryName Type Account.Name AccountId',
-        'Contact': 'Id Email AccountId',
-        'Task': 'Id Subject ActivityDate Status IsClosed TaskSubtype Direction WhatId AccountId Who.Name',
+        'Contact': 'Id Name Email AccountId',
+        'Task': 'Id Subject ActivityDate Status IsClosed TaskSubtype Direction WhatId AccountId WhoId Who.Name',
         'Event': 'Id Subject ActivityDate StartDateTime EndDateTime WhatId AccountId',
     },
     'forecast-weekly': {
@@ -265,7 +265,7 @@ def validate_policy(policy, example, workflow, root):
             'sales-call-prep': ['mail_contact_stats'],
             'interaction-sync': [],
             'task-triage-speed-run': ['mail_contact_stats', 'triage_check', 'closeout_check'],
-            'pipeline-review': ['hygiene_check', 'mail_digest', 'coverage_check'],
+            'pipeline-review': ['hygiene_check', 'mail_digest', 'coverage_check', 'pipeline_render'],
             'forecast-weekly': ['hygiene_check', 'mail_digest', 'coverage_check', 'forecast_math', 'forecast_notify'],
             'pilot-usage': ['pilot_usage'], 'close': [],
         }

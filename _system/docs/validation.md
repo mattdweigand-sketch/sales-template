@@ -2,12 +2,20 @@
 
 The portable rebuild was checked on macOS with Python 3.12.14.
 
-- 192 synthetic tests passed. They cover source coverage and pagination, fiscal
+- 221 synthetic tests passed. They cover source coverage and pagination, fiscal
   quarters, activity/next-step hygiene, mail evidence, forecast arithmetic, task
   dispositions, setup, run isolation, receipt integrity, pilot metrics and PDF
   failure handling. The root/setup remediation added nine regression tests for
   migration privacy, configuration shapes, selected effects and declared dependencies.
   The ICM restructure added a check for unowned root files and missing folder contracts.
+- The pipeline presentation update adds 29 tests for exact report output, portable
+  IDs/currency, daily Task review, coverage/count agreement, labels and alternatives,
+  approval boundaries, explicit history changes, complete/partial/unattempted writes,
+  create reconciliation, chat notification status and required setup mappings.
+  The existing source coverage CLI was exercised with synthetic paired receipts;
+  report and notification reused its saved JSON. The three reported renderer
+  regressions are covered: conflicting fields in one label, multiple creates under
+  one label and inconsistent partial-record totals. The public example is fictional.
 - The scoped-contract update added eight regressions for table shape, section/path
   resolution, checkpoint steps, reference sizes, retained global rules, relationship
   meaning and the optional pilot-report handoff. All seven contracts name branch
@@ -17,7 +25,7 @@ The portable rebuild was checked on macOS with Python 3.12.14.
   folder contracts. Procedures and their business rules remain intact in references.
 - All seven pointer skills passed the skill frontmatter validator. Registry,
   pointer parity, procedure references, policy references, links and public
-  packaging checks passed across 95 distributed files.
+  packaging checks passed across 100 distributed files.
 - Pilot handoffs use configured extended review or the completed call being logged.
   Receivers preserve the supplied report, verify mapped source-to-CRM identity and
   retain exact effect approval/readbacks. Extended pipeline proposals require an

@@ -48,6 +48,23 @@ class NativeSetupTests(unittest.TestCase):
     def test_missing_configuration_reports_gap(self):
         self.assertFalse(sales_setup.doctor(self.root)['ready'])
 
+    def test_pipeline_upgrade_requires_renderer_and_task_linkage_mapping(self):
+        policy = self.configured_policy()
+        self.configure(['crm.read', 'mail.read', 'calendar.read'], policy)
+        self.assertTrue(sales_setup.doctor(self.root, 'pipeline-review')['ready'])
+        path = self.root / '_shared/adapters.json'
+        adapters = json.loads(path.read_text())
+        del adapters['field_mappings']['Task']['WhoId']
+        path.write_text(json.dumps(adapters))
+        result = sales_setup.doctor(self.root, 'pipeline-review')
+        self.assertFalse(result['ready'])
+        self.assertIn('WhoId', json.dumps(result))
+        del policy['tooling']['scripts']['pipeline_render']
+        self.configure(['crm.read', 'mail.read', 'calendar.read'], policy)
+        result = sales_setup.doctor(self.root, 'pipeline-review')
+        self.assertFalse(result['ready'])
+        self.assertIn('pipeline_render', json.dumps(result))
+
     def test_policy_changes_invalidate_review_and_effects_are_separate(self):
         policy = self.configured_policy()
         self.configure(['crm.read','mail.read','calendar.read'], policy)

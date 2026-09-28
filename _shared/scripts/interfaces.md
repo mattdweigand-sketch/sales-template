@@ -9,6 +9,7 @@ truth or approval. Inputs and outputs remain in the external run directory.
 | hygiene_check | Opportunity output plus --tasks, --events, --as-of and --policy; checks configured stages/fields, activity timing and next-step deadlines |
 | mail_digest | Saved full-body mail envelopes; navigation only, with truncated previews |
 | mail_contact_stats | Owner email, saved envelopes, --only addresses, --calls, --since, --policy; counts only sufficiently complete source-linked history and reviewed classifications |
+| pipeline_render | report/question/receipt/notification; --run reviewed external JSON, --coverage saved coverage JSON, --policy; formats exact proposals and reconciled results; notification returns chat status only, never sends or schedules |
 | forecast_math | Reviewed input path and --policy; decimal arithmetic, currencies, revenue bases, unknown amounts and selected path; reconcile inputs against source census independently |
 | forecast_notify | Explicit --calls, --since, --policy and process status; generates chat status only, never sends or schedules |
 | closeout_check | Fresh complete normalized Task output and --as-of; checks unresolved due/overdue/undated tasks |

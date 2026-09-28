@@ -15,21 +15,22 @@ derive policy.pipeline.in_scope_stages locally. Do not hide test-looking rows.
 ## Linked CRM sources
 
 For all in-scope Opportunity and Account IDs, retrieve:
-- Tasks with a date, either open or within policy.pipeline.activity_days:
+- Tasks that are open (including undated) or dated within policy.pipeline.activity_days:
   Id, Subject, ActivityDate, Status, IsClosed, TaskSubtype, Direction, WhatId,
-  AccountId and Who.Name. Undated Tasks belong to task triage. Direction comes
+  AccountId, WhoId and Who.Name. Retain every open candidate for action-reuse review. Direction comes
   from verified adapter metadata, never a universal subject-prefix rule.
 - Events within the activity window or upcoming: Id, Subject, ActivityDate,
   StartDateTime, EndDateTime, WhatId and AccountId. An elapsed event does not
   prove attendance. Retain both timestamps for coverage and hygiene checks.
-- Contacts on those Accounts: Id, Email and AccountId. Derive external domains
+- Contacts on those Accounts: Id, Name, Email and AccountId. Derive external domains
   from returned addresses; missing domains remain explicit gaps.
 ## Hygiene
 
 Run `policy.tooling.scripts.hygiene_check <opps> --tasks <tasks>
 --events <events> --today <local-date> --as-of <run-start> --policy _shared/policy.yaml`.
 Use the computed action deadline, newest note, activity receipts and flags.
-Review unresolved dates before proposing a change.
+Review unresolved dates before proposing a change. Retain linked open Tasks; review
+what each Task is for rather than treating a matching date as the same action.
 ## Daily review
 
 Request inbound mail since yesterday in the reporting timezone,
@@ -48,8 +49,8 @@ date), including new deals, stage/date changes and closures. If history is
 unavailable, label the delta unavailable; never infer it from present values.
 ## Read decisive evidence
 
-Fully inspect each assessed deal's newest substantive
-buyer message and any additional full message needed to support or qualify a
+Fully inspect each assessed deal's newest message in either direction, newest
+substantive buyer message, and any additional full message needed to support or qualify a
 finding/proposal. A digest, subject or preview cannot establish timing, stage
 evidence, outcomes or absence of blockers. Preserve full bodies in the run;
 missing/truncated bodies are gaps. Work by account/batch rather than loading
@@ -57,9 +58,10 @@ every mailbox body into one context.
 ## Coverage
 
 Run `policy.tooling.scripts.coverage_check --calls <run>/calls
---scope pipeline-daily --since <run-start> --policy _shared/policy.yaml` for daily
+--scope pipeline-daily --since <run-start> --policy _shared/policy.yaml --json` for daily
 review, or `--scope pipeline` for extended review. Use its result in the
-[report header](report-format.md). On exit 1, resolve missing
+[report header](report-format.md). Save the final result to `<run>/outputs/coverage.json`;
+report and notification reuse that same result. On exit 1, resolve missing
 checks and rerun; if unresolved, label coverage incomplete and withhold affected
 proposals. No claim of complete coverage without the successful receipts.
 

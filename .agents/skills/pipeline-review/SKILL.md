@@ -1,6 +1,6 @@
 ---
 name: pipeline-review
-description: "Review pipeline evidence, stale records, stage criteria and next steps; propose exact CRM corrections for approval."
+description: "Review daily pipeline evidence and Task actions, present exact corrections and walk open questions one at a time. Extended reviews add rollups and commercial record proposals."
 ---
 
 Read [AGENTS.md](../../../AGENTS.md), then [the workflow contract](../../../workflows/pipeline-review/CONTEXT.md).

@@ -20,7 +20,9 @@ Repository paths resolve from the root; `<run>` is the external run directory.
 | Shared rules | [rules](../../_shared/rules.md) | `rules#run_start`, `rules#evidence`, `rules#approval`, `rules#write_protocol`, `rules#next_steps`, `rules#scheduled_runs` | Evidence, scope and applicable approval boundaries |
 | Reference | [procedure.md](references/procedure.md) | Opening text, "Load / Skip", opening of "Process", "Refuse", "Outputs and readiness", "Human check"; numbered sections at matching steps below; "Pilot report input" only when supplied | Mode, proposals and verification |
 | Reference | [collect.md](references/collect.md) | Common items plus "Daily review" or "Extended review"; "Pilot report identity" only when supplied in extended mode | Required reads and mechanical coverage |
-| Reference | [report-format.md](references/report-format.md) | "All modes", "Approval and display rules", "Daily layout", "Exceptions and counts"; "Extended additions" in extended mode | Report and count identities |
+| Reference | [report-format.md](references/report-format.md) | "All modes", "Run file", "Approval and display rules", "Exceptions and counts", "Notification"; "Extended additions" in extended mode | Report and count identities |
+| Reference | [proposals.md](references/proposals.md) | "Task review" every run; "Questions" and "Apply" when relevant | Action reuse, stable labels and exact writes |
+| Helper | [renderer](scripts/CONTEXT.md) | Full file | Deterministic reports, questions, receipts and notification status |
 | Conditional rule | [rules](../../_shared/rules.md) | `rules#pilot_handoff`, supplied report in extended mode only | Bounded report acceptance |
 | Request | Current chat; `<run>/request.md` | Owner, date and explicit or configured daily/extended mode | Select this run |
 | Run evidence | `<run>/run.json`, `<run>/raw/`, `<run>/calls/` | This run only; original bytes and paired receipts | Source identity, scope and provenance |
@@ -30,8 +32,8 @@ Repository paths resolve from the root; `<run>` is the external run directory.
 
 1. Start per `rules#run_start` and the procedure’s "1. Load policy"; resolve the configured mode.
 2. Collect per "2. Collect" and the selected collection branch; retain the original count.
-3. Prepare the report and exact proposals per "3. Propose"; use "Pilot report input" only when a report is supplied.
-4. Apply only approved effects per "4. Apply" and `rules#write_protocol`.
+3. Review Tasks and prepare the rendered report per "3. Propose" and report format; use "Pilot report input" only when a report is supplied.
+4. Walk questions one at a time per proposals "Questions"; apply only approved effects per "4. Apply", proposals "Apply" and `rules#write_protocol`.
 5. Reconcile counts and close per "5. Close", reporting every pending, failed and skipped proposal.
 
 ## Checkpoints
@@ -54,7 +56,8 @@ Repository paths resolve from the root; `<run>` is the external run directory.
 
 | Artifact | Location | Format |
 |---|---|---|
-| Review and proposals | `<run>/outputs/review.md` and chat | Editable Markdown with exact labeled effects, evidence and gaps |
+| Review and proposals | `<run>/outputs/review.md` and chat | Unchanged renderer output from `<run>/outputs/pipeline-review.json` |
+| Reviewed presentation data | `<run>/outputs/pipeline-review.json` | Labels, proposals and outcomes; separate from run identity and approval evidence |
 | Approved effects and receipts | Configured systems; readbacks in the external run | Exact approved payloads, preimages, provider results and independent readbacks |
-| Pipeline report and close counts | `<run>/outputs/review.md` and chat | Selected report layout with actual coverage results |
+| Pipeline report and close counts | `<run>/outputs/review.md` and chat | Renderer report and receipt with actual saved coverage results |
 | Evidence and receipts | `<run>/raw/`, `<run>/calls/` | Original source bytes and paired normalized JSON |

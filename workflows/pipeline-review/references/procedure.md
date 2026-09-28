@@ -28,11 +28,15 @@ Read and execute [references/collect.md](collect.md). Save the query outputs and
 
 ### 3. Propose
 
-Read [the report format](report-format.md) for the fixed layout and exceptions. Daily candidates are in-scope deals with hygiene triggers. Extended candidates are their union with in-scope `task_gap` deals; the gap remains separate from hygiene triggers. Deduplicate by Opportunity ID. Other reviewed deals are counted, not listed. Unknown stages are unresolved scope, not exclusions. For each candidate show an evidence-supported proposal or needs-input finding. Gap-only Tasks belong in extended Record proposals. Apply the pipeline NextSteps formats/review rules; every changed clause requires a source, with no inferred buyer intent.
+Read [the report format](report-format.md) for the fixed layout and exceptions. Every run reviews in-scope deals with hygiene triggers and the open Tasks supporting their live actions. Include an evidence-supported Task correction even without a hygiene trigger, with an empty flags list; `task_gap` is an informational date comparison, not a creation decision. Deduplicate by Opportunity ID. Other reviewed deals are counted, not listed. Unknown stages are unresolved scope, not exclusions. For each candidate show an evidence-supported proposal or needs-input finding. Apply the pipeline NextSteps formats/review rules; every changed clause requires a source, with no inferred buyer intent.
 
-In extended mode, add Rollup (stage/category and fiscal quarter versus later), provider-backed Delta since the previous extended review date, and Record proposals. CloseDate follows `close_date_basis`; forward StageName needs the target criterion or an applicable stage_rules line. Regression needs affirmative evidence that a necessary current-stage condition no longer holds and a supported destination. Missing older evidence or silence alone is needs-input. A request to reassess permits investigation, not regression or a write; an exact user-directed stage change is a separately attributed proposal basis. Closed Lost needs a stated buyer no or verified silence for closed_lost_silence_days with no upcoming Event; widen evidence if the configured collection window is shorter. Amount needs buyer-confirmed/user-supplied evidence. A Task create requires task_gap, a verified action/deadline and record links; an unresolved date never supports it.
+In extended mode, add Rollup (stage/category and fiscal quarter versus later), provider-backed Delta since the previous extended review date, and Record proposals. CloseDate follows `close_date_basis`; forward StageName needs the target criterion or an applicable stage_rules line. Regression needs affirmative evidence that a necessary current-stage condition no longer holds and a supported destination. Missing older evidence or silence alone is needs-input. A request to reassess permits investigation, not regression or a write; an exact user-directed stage change is a separately attributed proposal basis. Closed Lost needs a stated buyer no or verified silence for closed_lost_silence_days with no upcoming Event; widen evidence if the configured collection window is shorter. Amount needs buyer-confirmed/user-supplied evidence. Task proposals follow [proposals](proposals.md#task-review) in every mode; a verified action, deadline and record linkage are required.
 
-Then wait. Notes and field fills approve as one batch: `approve all`, `approve all except <Accounts>`, or `skip`. StageName, CloseDate, Amount, Closed Lost, and Task creates are one record per approval. No reply writes nothing; the next run re-proposes from current CRM state.
+Build the reviewed run file and render it per [report format](report-format.md).
+Wait for approval of the displayed numbered recommendations; `all` covers only
+those recommendations. Extended commercial proposals use separate letters.
+Walk unresolved questions one at a time per [proposals](proposals.md#questions).
+No reply writes nothing; the next run re-proposes from current CRM state.
 
 ### Pilot report input
 
@@ -55,7 +59,10 @@ Fresh read before each write. Write only the displayed, approved changes to Next
 
 ### 5. Close
 
-Counts: open, in scope, reviewed, flagged, proposed, written, skipped, not checked. Open must equal the step 2 count. Reconcile reviewed, skipped, and not checked to the in-scope count per the report format.
+Record each attempted field and verified outcome in the reviewed run file. Render
+`receipt --final`; do not handwrite completion totals. Report fully written records,
+partial field changes, failures and unattempted effects. Preserve successful writes.
+Reconcile scope counts to the original snapshot per the report format.
 
 ### Refuse
 

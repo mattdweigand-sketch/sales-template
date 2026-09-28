@@ -2,89 +2,87 @@
 
 ## All modes
 
-The complete report appears in the final chat answer and the external review file for both manual and configured scheduled runs. Preserve the template headings and field wording; use policy.reporting for amounts/dates and verified record links. Source field text remains verbatim. The full approved payload is retained in the external run directory; the comparison below may omit unchanged history.
+`policy.tooling.scripts.pipeline_render` owns the exact report, question, receipt,
+close and notification wording. This file owns content requirements. Correct the
+reviewed input and render again; never edit the rendered output by hand. Post the
+complete report in chat and save it to `<run>/outputs/review.md`.
+Logical fields and record URLs come from the configured adapter and policy.
+
+## Run file
+
+Keep one editable `<run>/outputs/pipeline-review.json` per run. Leave the existing
+`<run>/run.json` identity file intact. The helper docstring defines the input keys:
+run identity/mode, original counts, candidate deals, numbered blocks, questions,
+extended additions and write outcomes. Use `daily` or `extended`, not a hardcoded
+weekday. Keep full effect payloads, source bytes and independent readbacks in the
+same external run. The JSON records review status; it is not proof of approval.
+
+Retain every issued label, including superseded options. Never recycle labels or
+reuse an earlier run's approval. If the file is lost, reconstruct it from the
+versions and approvals in chat before continuing. Evidence source IDs stay in the
+run; use only returned source URLs in displayed evidence.
+
+Run `pipeline_render.py` from the repository root with the configured policy and
+explicit external paths. Its modes are:
+
+- `report --run <review.json> --coverage <coverage.json>`: report and proposals.
+- `question --run <review.json> --label Q1`: one question and its exact options.
+- `receipt --run <review.json> --labels 1,Q1-a --final`: outcomes and closing summary.
+- `notification --run <review.json> --coverage <coverage.json>`: chat status JSON.
+
+Use `.venv/bin/python` and the path in policy.tooling.scripts.pipeline_render.
 
 ## Approval and display rules
 
-- Number only exact, supported changes. Flags, missing evidence and contradictions belong in Needs your input; never create a note merely to make a record approvable.
-- Each next-step block uses Current next steps, Recommended next steps and Evidence. Normally compare exact first entries and state once that older history is omitted and unchanged. If proposing any history change, or showing a requested full field, show both complete fields and identify that exception. Empty fields display Empty.
-- The write uses policy.pipeline.note_next_line and next_steps_format. Include an explicitly proposed factual history addition inside Recommended next steps; preserve all retained history. Follow next_steps_review for unresolved deadlines/owners. A field-only finding says `No next-step change proposed. <precise field question>`.
-- Field contents are ordinary text with each stored line visually separate; no fences, inline code, quotations or boxes. Keep commentary outside field text. Evidence names the source, date, contact and supported fact, adding bullets only as needed. Use readable source links or returned IDs; never invent a URL.
-- Calendar timestamps establish scheduling only: say scheduled or elapsed, attendance unverified unless attendance is supported. A Task receipt establishes its metadata, not an email-body summary. Use the checker's Account-and-Opportunity scope; discrepancies with source evidence block the affected proposal.
+Number only exact supported changes. Unknowns, contradictions and missing evidence
+belong in questions or withheld items. A deal may have a clear recommendation and
+an independent question; never include a change that depends on the unanswered part.
+`all` covers the displayed numbered recommendations only, excluding letters and
+question options. Follow [proposals](proposals.md) for Task review and question labels.
 
-## Daily layout
+Current next steps preserve source text with HTML line breaks/entities made readable.
+Recommended next steps show the exact new first entry; older history stays unchanged.
+For any history exception, provide both `current_full` and `proposed_full`, identify
+it and compare the entire approved field. Preserve the configured note format and
+retained history. A field-only change has no invented next step.
 
-Fences below delimit the template; do not render them in chat.
-
-```text
-# Pipeline review · <report date>
-
-Only the latest stored entry is shown, with older history omitted and unchanged. Legacy `Next:` entries are reproduced as stored, not rewritten.
-
-<N> open · <k> in scope · <r> reviewed · <f> flagged · **<p> proposed changes** · <b> need input · 0 written
-<out-of-scope stages> excluded · <n> deals · <formatted sum>
-Coverage complete · Inbox, Calendar and contact domains checked
-
-## Proposed changes
-
-1. <Account link>
-
-### Current next steps
-<exact current first next-step entry>
-
-### Recommended next steps
-<exact short next-step sentence using policy.pipeline.note_next_line>
-
-### Evidence
-- <short dated explanation with supporting source link>
-
-- **Other fields** <field, old → new, evidence; omit if none>
-
-## Needs your input
-
-<Account link>
-
-### Current next steps
-<exact current first next-step entry>
-
-### Recommended next steps
-No proposal yet. <one precise question needed to propose a change>
-
-### Evidence
-- <short dated explanation with supporting source link>
-
-<z> reviewed deals had no trigger · <s> skipped · <u> not checked
-
-**Approve <number range>, individual numbers, or skip?**
-```
+Each effect identifies the record, logical field, current and proposed value.
+Evidence supplies date, source, person when known and supported fact. Calendar
+timestamps establish scheduling only; attendance requires evidence. Mail evidence
+is the retrieved set, not proof of full history. A helper cannot verify its meaning.
 
 ## Exceptions and counts
 
-- Repeat blocks with consecutive proposal numbers and unnumbered needs-input accounts. Recommendations are short action sentences; Current remains verbatim. Omit empty sections, Other fields and the legacy sentence when irrelevant. If no proposals exist, replace the approval question with `No CRM changes proposed.`
-- A fresh rerun starts `Fresh rerun replaces the earlier review.` Identify superseded drafts. When redisplaying an applied review, state that Current is the review-time snapshot and recommendations were applied; keep the same headings and do not pretend historical values are fresh reads.
-- Count distinct opportunities: in-scope k = reviewed r + skipped s + not-checked u, with disjoint statuses. z counts reviewed deals with no hygiene trigger; such a deal may still have an extended task_gap proposal. Flags, needs-input findings and supported proposals are separate counts.
-- The coverage line describes the actual check. On failure use `Coverage incomplete · <specific missing checks>` and withhold affected proposals. Extended mode names its actual mail/calendar scope instead of claiming a daily inbox check. Keep full receipts in the run.
-- Before posting, compare displayed fields with source and full effect payload, verify retained history, and confirm an actual supported difference. Reconcile counts to the original open snapshot. A scheduled/subject-only observation cannot support claimed discussion outcomes.
+Use the original owned-open snapshot. `in_scope = reviewed + skipped + not_checked`
+with disjoint statuses. Flags count reviewed deals with actual hygiene triggers;
+an independently reviewed Task or accepted pilot-report proposal can have no flag.
+Do not invent a trigger to include it. The helper checks counts against saved coverage.
+
+Save the final `coverage_check --json` result once and reuse it for the report and
+notification. Its scope must match daily/extended mode. On gaps, show the actual
+incomplete result and name affected withheld deals; those deals have no approvable
+changes. Keep unresolved process steps explicit, even if source coverage passes.
+
+Receipts reconcile every approved field against recorded results. Missing results
+are not attempted. A record is fully written only when all approved fields succeeded;
+partial field changes remain visible and must not be repeated. Status and totals in
+header, receipt and close use the same reconciliation. A fresh rerun uses a new
+external run and explicitly supersedes the earlier review in chat.
 
 ## Extended additions
 
-Append the following to the daily sections. Include task_gap-only candidates under Record proposals, without relabeling them hygiene triggers. Approve each record proposal separately.
+Supply the reviewed Rollup, provider-backed Delta and separately labeled commercial
+proposals. Categories and currency follow deployment configuration. Unknown amounts
+or missing history stay explicit gaps; never invent zero or say no changes without
+history evidence. Each letter names its Opportunity and exact changed record.
+Pilot-report proposals retain the existing conditional identity and evidence rules.
 
-```text
-## Rollup
-<stage from policy.pipeline.stage_order> <n> · <formatted sum> | ...
-<configured forecast category> <formatted sum> · ... · Unmapped <n>
-Closing this quarter <n>, <formatted sum>. Later <n>, <formatted sum>.
+## Notification
 
-## Since <comparison date>
-- New / Stage / Close date / Closed lines, or No changes.
-
-## Record proposals
-A. <Account> CloseDate <old> → <new>. <Evidence and basis>
-B. <Account> StageName <old> → <new>. <Entry criterion and evidence>
-C. <Account> Task "<Subject>" due <date>, linked to <Contact>. <task_gap evidence>
-D. <Account> StageName <old> → Closed Lost. <Silence or buyer-no evidence>
-E. <Account> Amount <old> → <new>. <Buyer-confirmed or user-supplied evidence>
-
-Approve each letter separately. Approve all covers numbered notes and field fills only.
-```
+The helper emits JSON status for chat; it never sends, writes, or schedules anything.
+Daily complete runs with no recommendations or open questions return `send: false`.
+Extended runs always return a status: ready for approval, complete, or incomplete.
+Use the same saved coverage result; no second coverage run just for notification.
+Only include a real thread URL when available. Authorized schedules follow
+[optional schedules](../../../setup/automations.md); a formatting failure is reported
+as incomplete, never replaced by a freehand ready notification.

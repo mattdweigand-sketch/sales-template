@@ -9,7 +9,7 @@ for each branch. Follow its Process, applicable Checkpoints, Audit and Outputs.
 | `sales-call-prep` | [workflows/sales-call-prep/CONTEXT.md](workflows/sales-call-prep/CONTEXT.md) | Prepare an evidence-backed brief for an upcoming sales call |
 | `interaction-sync` | [workflows/interaction-sync/CONTEXT.md](workflows/interaction-sync/CONTEXT.md) | Turn one completed sales call into reviewed CRM proposals and an unsent follow-up draft |
 | `task-triage-speed-run` | [workflows/task-triage-speed-run/CONTEXT.md](workflows/task-triage-speed-run/CONTEXT.md) | Review due, overdue, and undated sales tasks, propose grouped dispositions, and prepare approved unsent follow-ups |
-| `pipeline-review` | [workflows/pipeline-review/CONTEXT.md](workflows/pipeline-review/CONTEXT.md) | Review pipeline evidence, stale records, stage criteria and next steps; propose exact CRM corrections for approval |
+| `pipeline-review` | [workflows/pipeline-review/CONTEXT.md](workflows/pipeline-review/CONTEXT.md) | Review daily pipeline evidence and Task actions, present exact corrections and walk open questions one at a time. Extended reviews add rollups and commercial record proposals |
 | `forecast-weekly` | [workflows/forecast-weekly/CONTEXT.md](workflows/forecast-weekly/CONTEXT.md) | Build a weekly evidence-backed sales forecast with reviewed buckets, target arithmetic and a ranked path to target |
 | `pilot-usage` | [workflows/pilot-usage/CONTEXT.md](workflows/pilot-usage/CONTEXT.md) | Analyze a pilot from configured usage data or supplied exports and prepare a reviewed usage report or PDF |
 | `close` | [workflows/close/CONTEXT.md](workflows/close/CONTEXT.md) | Prepare a signed deal for Closed Won and review provisioning, commercial fields and downstream handoff proposals |

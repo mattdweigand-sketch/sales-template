@@ -18,7 +18,7 @@ receipt verifier before relying on helper output. A supplied file is a source wi
 its own provenance and limits, not proof of a live provider query.
 
 <a id="approval"></a>**approval** — Present each exact proposed effect with a
-stable label, target identity, current value, new value, evidence and any external
+stable label (including question options such as Q1-a), target identity, current value, new value, evidence and any external
 side effects. A reply naming its label approves only that displayed version. A
 batch covers only its explicitly listed rows. No reply or skip means no write.
 A changed target, payload, source-dependent premise or preimage requires a revised

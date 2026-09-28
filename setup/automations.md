@@ -19,3 +19,11 @@ The forecast status helper prints title/body JSON for the chat. It does not invo
 a notification API or create schedules. Render its status honestly, including
 incomplete coverage and process review needs. Use the actual chat link only when
 available; do not fabricate one.
+
+For pipeline-review, reuse the report's saved coverage JSON with
+`policy.tooling.scripts.pipeline_render notification`. Its daily mode stays quiet
+when complete with no action or open question; extended mode always returns ready,
+complete or incomplete status. Keep the configured daily/extended selection and
+timezone. A helper failure is incomplete. The helper returns chat status only;
+notification delivery follows the user's requested Codex automation settings.
+Do not install a source deployment's notification API or schedule automatically.
