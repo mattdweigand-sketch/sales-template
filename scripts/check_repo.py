@@ -5,12 +5,33 @@ from pathlib import Path
 import re
 import subprocess
 import sys
+import yaml
 from wrappers import ROOT, load_routes, render
+from configuration import CURRENT_PRIVATE, LEGACY_PRIVATE
 
-PRIVATE = {'_shared/policy.yaml', '_shared/adapters.json', '.codex/config.toml'}
+PRIVATE = CURRENT_PRIVATE
 SKIP = {'.git', '.venv', '__pycache__'}
 # Split source labels so the scanner's own definitions do not match its content scan.
 SOURCE_LABELS = ('perplex' + 'ity', 'ppl' + 'x', 'AGENTIC_' + 'WH')
+
+
+def dependency_errors(root, routes):
+    errors = []
+    for name, row in routes.items():
+        procedure = root / row['workflow']
+        parts = procedure.read_text().split('---\n', 2)
+        header = yaml.safe_load(parts[1]) if len(parts) == 3 and not parts[0] else None
+        if not isinstance(header, dict) or not isinstance(header.get('reads'), str):
+            errors.append(name + ': missing reads frontmatter')
+            continue
+        for ref in re.findall(r'(?:\.\./)*(?:[A-Za-z0-9_-]+/)+[A-Za-z0-9_.-]*', header['reads']):
+            if ref in {'_shared/policy.yaml', '_shared/adapters.json'}:
+                ref = ref.replace('.yaml', '.example.yaml').replace('.json', '.example.json')
+            target = root / ref if ref.startswith(('_shared/', 'setup/', 'workflows/')) else procedure.parent / ref
+            resolved = target.resolve()
+            if root.resolve() not in resolved.parents or not target.exists():
+                errors.append(name + ': missing or external reads dependency: ' + ref)
+    return errors
 
 
 def public_files(root):
@@ -29,6 +50,7 @@ def public_files(root):
 def check(root=ROOT):
     errors = render(root, check=True)
     routes = load_routes(root)
+    errors += dependency_errors(root, routes)
     workflows = {p.name for p in (root / 'workflows').iterdir() if p.is_dir()}
     if set(routes) != workflows:
         errors.append('route/workflow mismatch')
@@ -38,7 +60,7 @@ def check(root=ROOT):
         if path.is_symlink():
             errors.append('public symlink: ' + str(rel))
             continue
-        if str(rel) in PRIVATE or set(rel.parts) & {'output', 'outputs', 'runs'} or rel.name.startswith('.env'):
+        if str(rel) in PRIVATE | LEGACY_PRIVATE or set(rel.parts) & {'output', 'outputs', 'runs'} or rel.name.startswith('.env'):
             errors.append('private/runtime material included: ' + str(rel))
             continue
         if not path.is_file():
@@ -74,6 +96,6 @@ if __name__ == '__main__':
         errors, count = check()
         print('\n'.join(errors) if errors else f'PASS: {len(load_routes())} workflows; {count} public files; pointers, links and packaging.')
         sys.exit(bool(errors))
-    except (OSError, ValueError, TypeError, subprocess.CalledProcessError) as exc:
+    except (OSError, ValueError, TypeError, yaml.YAMLError, subprocess.CalledProcessError) as exc:
         print(str(exc), file=sys.stderr)
         sys.exit(1)

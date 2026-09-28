@@ -7,6 +7,9 @@ __pycache__/
 /_shared/policy.yaml
 /_shared/adapters.json
 /.codex/config.toml
+/_shared/policy.json
+/_shared/adapters.md
+/.claude/settings.local.json
 /output/
 /outputs/
 /runs/

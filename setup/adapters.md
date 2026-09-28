@@ -38,9 +38,49 @@ known hard cap. Inspect the actual contract. Follow every page; split capped win
 only when that provider supports complete bounded queries. Unknown completeness
 stays unknown even when a local result is empty.
 
+## Configuration shape
+
+Run `.venv/bin/python scripts/setup.py requirements --workflow <name>` from the
+repo root for the exact required keys. Add `--effect crm.write`, `--effect
+mail.draft` or another supported effect to include its contract. The command uses
+your private policy when present, otherwise the example. Conditional fields in
+policy become required mapping keys for the workflows that consume them.
+
+`field_mappings` maps logical object names to objects of logical field names and
+nonempty native paths or reviewed expressions. `state_mappings` maps logical field
+names to objects of logical values and native values. For example, the shape of
+one partial mapping is:
+
+```json
+{
+  "field_mappings": {"Opportunity": {"Id": "deal.id", "NextSteps": "deal.next_action"}},
+  "state_mappings": {"Task.Status": {"open": "pending", "completed": "done"}}
+}
+```
+
+This partial example cannot pass doctor. Supply every required key from
+`requirements`, including stage keys and forecast categories for applicable
+workflows. A baseline covers the standard procedure; additional fields selected
+for a particular proposal also need verified mappings before that proposal.
+
+`data_contracts` maps each capability to an object whose keys come from
+`requirements`. Each value is a nonempty description of the actual mapping or
+behavior, including limitations. For example, `crm.read` requires `identity`,
+`queries`, `pagination`, `errors` and `types`; `crm.write` requires `payload`,
+`preconditions`, `deduplication`, `readback` and `recovery`. Document field types,
+nulls, currency/date semantics and transformations in these contracts.
+
+Each capability's `provider`, `tool` and `contract` must be nonempty text;
+`status` must be `configured` and `verified_at` a past or current ISO timestamp
+with a UTC offset. Record actual verification times, not an invented readiness
+stamp. Use `adapters.mode: configured` only after review and bind
+`policy_sha256` to the reviewed policy bytes. There is no separate policy mode.
+Doctor checks structure and local consistency, not whether these descriptions
+are true. Confirm real schemas, permissions and bounded readbacks in this chat.
+
 ## Explicit evidence capture
 
-Initialize `python scripts/run.py init <workflow>` and retain its printed external
+Initialize `.venv/bin/python scripts/run.py init <workflow>` and retain its printed external
 path and started_at. Preserve actual request and response bytes, then prepare a
 normalized JSON file with exactly input and output objects. A synthetic example:
 
@@ -60,11 +100,11 @@ normalized JSON file with exactly input and output objects. A synthetic example:
 An empty example is never live evidence. Capture each successful read page using:
 
 ```sh
-python scripts/receipts.py capture --run <run> --call-id crm-001 \
+.venv/bin/python scripts/receipts.py capture --run <run> --call-id crm-001 \
   --raw-input <raw-request-file> --raw-output <raw-response-file> \
   --normalized <normalized-file> --provider <actual-tool-or-file-source> \
   --started-at <actual-offset-time> --completed-at <actual-offset-time>
-python scripts/receipts.py verify --run <run>
+.venv/bin/python scripts/receipts.py verify --run <run>
 ```
 
 Capture adds actual timestamps and the raw response reference, hashes all bytes and

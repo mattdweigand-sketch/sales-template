@@ -118,7 +118,7 @@ recovered errors. Do not discard an unresolved failure just to pass the checker.
     "records": [],
     "total_count": 0,
     "next_cursor": null,
-    "provider_reference": "raw/output-open-opportunities.json"
+    "provider_reference": "../raw/output_open-opportunities.json"
   }
 }
 ```

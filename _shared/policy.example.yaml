@@ -213,7 +213,6 @@ forecast:
   category_mapping:
     commit: Commit
     upside: Best Case
-mode: example
 identity:
   owner_email: seller@example.com
   timezone: UTC

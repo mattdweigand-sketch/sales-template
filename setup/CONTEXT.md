@@ -5,15 +5,24 @@ Read [the questionnaire](questionnaire.md) and [installation](installation.md).
 Ask only for unanswered items needed by the selected workflow. Existing answers
 stay owned by private configuration; inspect them before asking again.
 
-1. Initialize local example files with `python scripts/setup.py init`.
+1. Complete runtime installation, then initialize local example files with
+   `.venv/bin/python scripts/setup.py init` from the repo root. If legacy settings
+   are reported, follow [migration](migration.md); never inherit old approvals.
 2. Collect identity, business policy and required adapter mappings. Edit only the
-   private files; show a concise diff when changing an existing deployment.
+   private files; show a concise diff when changing an existing deployment. Use
+   `.venv/bin/python scripts/setup.py requirements --workflow <name>` to list the
+   selected policy blocks, logical fields, states and data-contract keys. Include
+   `--effect <capability>` when setting up a requested write capability.
 3. Inspect the actual available connector schema and read access. Save non-secret
    mapping/verification notes in `_shared/adapters.json`. Credentials stay with the
    connector/MCP credential manager. Never put tokens in Git or chat.
 4. Review policy with the user, record its SHA from `setup.py policy-hash` in the
-   adapter configuration, and set mode to configured only when review is complete.
-5. Run doctor for the selected workflow. Rehearse with synthetic evidence, then do
+   adapter configuration, and set `adapters.mode` to `configured` only when review
+   is complete. There is no policy mode. Changed policy bytes require fresh review.
+5. Run `.venv/bin/python scripts/setup.py doctor --workflow <name>` for the selected
+   read workflow and with `--effect <capability>` for each intended effect.
+   Resolve every required gap; optional gaps withhold only the dependent action.
+   Rehearse with synthetic evidence, then do
    a bounded read-only live check before offering a first exact write proposal.
 
 Outputs: ignored `_shared/policy.yaml` and `_shared/adapters.json`; a setup summary

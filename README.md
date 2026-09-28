@@ -27,6 +27,11 @@ type `/` and select a skill, or explicitly invoke `$sales-call-prep`, for exampl
 
 ## Start here
 
+Install Python 3.10 or newer first; 3.12 is the validated baseline. Run these
+commands from the repo root. If `python3.12` is not on PATH, use the absolute path
+to your installed Python 3.10+ for the first command. Subsequent commands use the
+repo virtual environment directly; shell activation is unnecessary.
+
 ```sh
 python3.12 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
@@ -39,6 +44,7 @@ Then ask: **“Set up this sales workspace for the workflows I use.”** The
 [setup interview](setup/CONTEXT.md) collects only missing answers and writes private
 settings, preserving existing configuration. [Installation](setup/installation.md)
 covers runtime, skill discovery, optional PDF support and clean exports.
+Upgrading an older workspace? Follow [migration](setup/migration.md) before setup.
 
 ```sh
 .venv/bin/python scripts/setup.py doctor --workflow sales-call-prep
@@ -71,8 +77,6 @@ sales-template/
     │   ├── pilot-usage/
     │   └── close/
     ├── _shared/           # Shared rules and helpers
-    ├── _templates/
-    │   └── workflow/      # Starter for new workflows
     ├── scripts/           # Setup and run tools
     ├── tests/             # Automated checks
     └── .github/

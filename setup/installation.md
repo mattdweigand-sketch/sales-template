@@ -1,8 +1,12 @@
 # Install and configure
 
-Use Python 3.10+ (3.12 is the locally validated baseline):
+Install Python 3.10+ before starting (3.12 is the locally validated baseline).
+Run commands from the repository root. If `python3.12` is unavailable, replace it
+in the version check and venv command with the absolute path to an installed Python 3.10+ executable.
+Do not use an older system Python. Verify that executable with `--version` first:
 
 ```sh
+python3.12 --version
 python3.12 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
 .venv/bin/python scripts/setup.py init
@@ -10,18 +14,24 @@ python3.12 -m venv .venv
 .venv/bin/python -m unittest discover -s tests -v
 ```
 
+Use `.venv/bin/python` for every later command, including policy helper paths.
+Activation is unnecessary and may not persist between Codex tool calls. From a
+different working directory, use the absolute repo/interpreter paths or change to
+the repo root first. For an existing workspace, read [migration](migration.md).
+
 Initialization creates ignored `_shared/policy.yaml` and `_shared/adapters.json`
 without overwriting existing files. Ask Codex to set up the selected workflow; it
 follows [the questionnaire](questionnaire.md). Examples contain fictional identity,
 neutral stages, no targets and no live services. Review the defaults and mappings.
 
-Record the policy hash from `scripts/setup.py policy-hash` in adapters.json only
+Record the policy hash from `.venv/bin/python scripts/setup.py policy-hash` in adapters.json only
 after review. Mark configured capabilities with actual tools, contracts and verification
 dates. Configure native CRM fields/states for workflows that need CRM. Run:
 
 ```sh
 .venv/bin/python scripts/setup.py doctor --workflow sales-call-prep
-.venv/bin/python scripts/setup.py doctor --workflow close --effects
+.venv/bin/python scripts/setup.py requirements --workflow close --effect crm.write
+.venv/bin/python scripts/setup.py doctor --workflow close --effect crm.write
 .venv/bin/python scripts/run.py init sales-call-prep
 ```
 
@@ -29,6 +39,9 @@ Doctor checks configuration, never live access or business approval. It returns
 exit 1 for missing settings. Use only the selected workflow's dependencies;
 missing optional integrations are disclosed and their effects withheld. No remote,
 connector, schedule or customer-system write is installed automatically.
+Use repeated `--effect` flags for a proposal requiring multiple effects.
+`--effects` checks all routine writes and every enabled optional close effect;
+it is useful for a full deployment check, not for gating an unrelated action.
 
 Open the repository as a Codex project and choose a skill in `/`, or explicitly
 invoke `$sales-call-prep` and the corresponding names. Seven small pointers remain

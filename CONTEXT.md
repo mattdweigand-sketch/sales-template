@@ -17,7 +17,7 @@ Handoffs are in each procedure's `next` header.
 ## Loading
 
 - A run reads its own `procedure.md`, the `references/` and `scripts/` it names, and the `_shared/policy.yaml` blocks and `_shared/rules.md` anchors its `reads` header lists. Load a specifically linked cross-workflow reference only when needed; skip sibling procedures.
-- `_shared/collateral/` is attached only where a procedure allows it and the seller approves. `pipeline-review`, `task-triage-speed-run`, and `forecast-weekly` never load it and draft no product wording.
+- Approved collateral stays in the external directory configured by `policy.email_voice.collateral_path`; attach it only where a procedure allows it and the seller approves. `pipeline-review`, `task-triage-speed-run`, and `forecast-weekly` never load it and draft no product wording.
 
 ## Cadence and state
 
@@ -25,4 +25,4 @@ Cadence is suggested metadata; no automation is installed by this template. Conf
 
 Factory (stable, every run) is `_shared/` and `workflows/`. Product (new each run) never lands in this repo. Proposals live in the thread, drafts in the configured mail service, records in CRM, PDFs in the external run directory. Status of a run is read from those places, never from files here.
 
-The repository Codex skill of the same name is frontmatter plus a pointer to `procedure.md` and stops if the file is missing. Procedure frontmatter carries `cadence`, `reads`, `writes`, `next`. `_templates/workflow/` is a starter, not a skill.
+The repository Codex skill of the same name is frontmatter plus a pointer to `procedure.md` and stops if the file is missing. Procedure frontmatter carries `cadence`, `reads`, `writes`, `next`.

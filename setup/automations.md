@@ -4,8 +4,10 @@ Policy cadence is a suggested schedule, not an active automation. Validate a man
 run first. When the user explicitly requests a schedule, use Codex's automation
 tool. Default to a heartbeat attached to the current chat; use a standalone project
 job only when the user asks for a separate task per run. Bind the correct project,
-workflow, timezone and capability limitations. Local execution depends on the
-computer and app being available.
+workflow, timezone and capability limitations. Record the absolute repository
+directory and its `.venv/bin/python` interpreter in the scheduled prompt; run
+commands from that root. Do not depend on an earlier shell's activation or PATH.
+Local execution depends on the computer and app being available.
 
 A scheduled prompt should read AGENTS.md and the selected workflow, initialize new
 external run evidence, collect fresh data and post proposals in the chat. It must

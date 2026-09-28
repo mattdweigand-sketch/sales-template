@@ -1,6 +1,6 @@
 ---
 cadence: one-off
-reads: _shared/policy.yaml (call_prep, crm, email_voice, followup, identity, interaction, pipeline, tooling), _shared/rules.md, setup/adapters.md, references/
+reads: _shared/policy.yaml (call_prep, crm, email_voice, followup, identity, interaction, pipeline, tooling), _shared/rules.md, setup/adapters.md, ../task-triage-speed-run/references/crm-corrections.md
 writes: exact approved CRM changes and unsent email drafts
 next: CRM and chat carry business state
 ---
@@ -62,17 +62,22 @@ Number every proposal. One record per approval. Show the full payload, current v
 
 ### 6. Apply
 
+Run `.venv/bin/python scripts/setup.py doctor --workflow interaction-sync --effect crm.write`
+before a CRM proposal and again before applying it. For an unsent draft, select
+`--effect mail.draft` instead; check both effects only when a proposal requires both.
+Resolve reported gaps and verify actual tools per rules#write_protocol.
+
 For each approval: fresh read, write, readback with the changed fields and record link. If the draft adapter returns no ID, confirm by listing drafts on the thread and reading the exact draft back. Report anything CRM rejects with the validation message and one corrected proposal.
 
 A dependent link to a new Contact or call Task waits for its verified returned ID and a separate exact proposal. A failed or pending prerequisite withholds that link; never fill it with a guessed ID. Record attempt results and recovery needs per rules#write_protocol.
 
 ### 7. Close
 
-Summarize applied, skipped, and rejected in five lines or fewer. Won-deal fulfillment is outside these workflows; use the deployment's business process.
+Summarize applied, skipped, and rejected in five lines or fewer. Route a signed won deal to `close` for its separate reviewed proposals.
 
 ### Refuse
 
-Sending email. Won stage moves or Closed Lost moves (route to `pipeline-review`). Deleting or merging records. Editing records not tied to this call. Inferring Amount or quantities from booking forms. Saving transcripts or customer material to reusable workspace files.
+Sending email. Won stage moves (route to `close`) or Closed Lost moves (route to `pipeline-review`). Deleting or merging records. Editing records not tied to this call. Inferring Amount or quantities from booking forms. Saving transcripts or customer material to reusable workspace files.
 
 ## Outputs and readiness
 

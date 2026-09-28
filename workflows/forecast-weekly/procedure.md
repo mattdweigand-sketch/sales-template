@@ -72,6 +72,10 @@ Then wait. Every proposal is one record per approval. `skip` is an answer.
 
 ### 7. Apply
 
+Run `.venv/bin/python scripts/setup.py doctor --workflow forecast-weekly --effect crm.write`
+before a CRM proposal and again before applying it.
+Resolve reported gaps and verify actual tools per rules#write_protocol.
+
 Fresh read before each write. Write `NextSteps` per `policy.pipeline.next_steps_format`. Readback with changed fields and record link. Report rejections with the CRM message and one corrected proposal.
 
 ### 8. Close

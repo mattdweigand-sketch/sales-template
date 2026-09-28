@@ -18,8 +18,14 @@ batch covers only its explicitly listed rows. No reply or skip means no write.
 A changed target, payload, source-dependent premise or preimage requires a revised
 proposal. Tool permission and successful local validation are not business approval.
 
-<a id="write_protocol"></a>**write_protocol** — Fresh-read immediately before
-writing; withhold stale proposals. Apply only the exact approved payload, then
+<a id="write_protocol"></a>**write_protocol** — Before presenting an actionable proposal and again before
+applying it, run `.venv/bin/python scripts/setup.py doctor --workflow <name>
+--effect <capability>` from the repo root. Select `crm.write`, `mail.draft`,
+`handoff.post` or `provisioning.execute` for the intended effect; repeat `--effect`
+only for effects in the same proposal. Resolve its configuration gaps and verify
+actual tool availability and the exact payload contract. A missing optional effect
+withholds only that action. A passing check never grants approval. Fresh-read
+immediately before writing; withhold stale proposals. Apply only the exact approved payload, then
 independently read the result back and show the changed fields/record link. Preserve
 preimages, provider results, IDs and readbacks. Timed-out or ambiguous creates stay
 pending; reconcile them before any retry. Do not silently repeat drafts or handoffs.

@@ -3,7 +3,7 @@
 From the repository, after source capture and review:
 
 ```sh
-python workflows/pilot-usage/scripts/pilot_usage.py \
+.venv/bin/python workflows/pilot-usage/scripts/pilot_usage.py \
   --run <run> --review <run>/review.json \
   --roster-query <query-id> --activity-query <query-id> \
   --output <run>/outputs/pilot-report --policy _shared/policy.yaml

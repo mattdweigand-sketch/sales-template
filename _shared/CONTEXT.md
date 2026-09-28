@@ -9,6 +9,5 @@
 | rules.md | Shared evidence and approval boundaries |
 | adapter-contract.md | Logical record and completeness contracts |
 | scripts/ | Deterministic checks shared by workflows |
-| collateral/README.md | Optional privately configured collateral guidance |
 
 One home per value, rule and mapping. Never store customer evidence or credentials here.

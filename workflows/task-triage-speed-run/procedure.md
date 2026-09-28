@@ -66,6 +66,11 @@ Number Tasks continuously across groups. End with `CRM corrections needed` if an
 
 ### 6. Section walk
 
+Run `.venv/bin/python scripts/setup.py doctor --workflow task-triage-speed-run --effect crm.write`
+before a CRM proposal and again before applying it. For an unsent draft, select
+`--effect mail.draft` instead; check both effects only when a proposal requires both.
+Resolve reported gaps and verify actual tools per rules#write_protocol.
+
 After the readout, walk the groups in order. For each group: show the exact bulk change, take one approval, execute, read back, report, then move to the next group. The user can say `skip` to pass a group or give changes by number.
 
 1. **Reply received / manual response.** One map of Task to Complete or new date, each row with its note line. One approval.

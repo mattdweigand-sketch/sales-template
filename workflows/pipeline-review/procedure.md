@@ -43,6 +43,10 @@ Then wait. Notes and field fills approve as one batch: `approve all`, `approve a
 
 ### 4. Apply
 
+Run `.venv/bin/python scripts/setup.py doctor --workflow pipeline-review --effect crm.write`
+before a CRM proposal and again before applying it.
+Resolve reported gaps and verify actual tools per rules#write_protocol.
+
 Fresh read before each write. Write only the displayed, approved changes to NextSteps per `next_steps_format`; preserve an unchanged current entry and do not add a history note when none was proposed. Read back each record and rerun `hygiene_check` with a fresh `--as-of` timestamp; MISSING or unresolved REVIEW next-step status fails verification. Report rejections with the CRM message and one corrected proposal.
 
 ### 5. Close

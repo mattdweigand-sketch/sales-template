@@ -5,7 +5,7 @@ This test resolves what the repo's markdown references:
 
 - every `policy.<dotted>` key against _shared/policy.yaml
 - every `rules#<anchor>` against the anchors defined in _shared/rules.md
-- every backticked `_shared/...`, `workflows/...`, or `_templates/...` path against the checkout
+- every backticked `_shared/...`, `workflows/...` path against the checkout
 - every `<script>.py` named in markdown against _shared/scripts/ and workflow scripts/
 - every `policy.tooling.scripts` path exists
 - every skill in the AGENTS.md table has a procedure.md with cadence, reads, writes, next frontmatter
@@ -29,7 +29,7 @@ FIXTURES = ROOT / "tests" / "fixtures"
 POLICY_REF = re.compile(r"(?<![A-Za-z0-9_])policy\.((?!(?:example\.)?yaml\b)[a-z_][a-z0-9_]*(?:\.[a-z_][a-z0-9_]*)*)")
 RULE_REF = re.compile(r"rules#([a-z_]+)")
 RULE_DEF = re.compile(r'<a id="([a-z_]+)"></a>')
-REPO_PATH = re.compile(r"`((?:_shared|_templates|workflows)/[A-Za-z0-9_./<>-]+)`")
+REPO_PATH = re.compile(r"`((?:_shared|workflows)/[A-Za-z0-9_./<>-]+)`")
 SCRIPT_REF = re.compile(r"`([a-z_]+\.py)`")
 AGENTS_ROW = re.compile(r"^\| `([a-z-]+)` \| `([^`]+)` \|", re.M)
 
@@ -184,7 +184,7 @@ class SkillProcedureReferences(unittest.TestCase):
     def test_no_retired_skills_root(self):
         stale = []
         scripts = sorted((SHARED / "scripts").rglob("*.py")) + sorted(WORKFLOWS.rglob("*.py"))
-        for f in list(self.files) + [ROOT / "_shared" / "policy.example.yaml", ROOT / "_templates" / "workflow" / "procedure.md"] + scripts:
+        for f in list(self.files) + [ROOT / "_shared" / "policy.example.yaml"] + scripts:
             if FIXTURES in f.parents or f == Path(__file__).resolve():
                 continue
             text = f.read_text()

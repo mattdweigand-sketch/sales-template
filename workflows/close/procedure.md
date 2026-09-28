@@ -59,6 +59,12 @@ that prerequisite is satisfied. Otherwise report it independently; never invent 
 
 ## 5. Apply and verify
 
+Run `.venv/bin/python scripts/setup.py doctor --workflow close --effect crm.write`
+before a CRM proposal and again before applying it. For a handoff or provisioning
+proposal, select `--effect handoff.post` or `--effect provisioning.execute` instead.
+An unavailable optional capability does not block an independent CRM change.
+Resolve reported gaps and verify actual tools per rules#write_protocol.
+
 Apply per rules#write_protocol. Reconcile errors and unknown success before retrying.
 Never reopen a verified won deal merely to retry a downstream action. Restoring a
 CRM field does not undo a provisioned account, invitation, charge or message.

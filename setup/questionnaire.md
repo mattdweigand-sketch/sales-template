@@ -20,3 +20,16 @@ assumptions about the organization.
 Do not request credentials in chat or write them into the template. Connect through
 the selected approved app/MCP credential mechanism. Inspect a bounded read to verify
 each live mapping, and record limitations. Setup is not approval to make writes.
+
+Replace example email/domain, owner ID, CRM URL, seller signature and note author.
+Use that author consistently in CRM and pipeline note formats. For pilot reports,
+replace company/product names and PDF author. Doctor validates selected policy
+blocks, stage consistency, numeric/date settings and required helper paths; the
+user still reviews business meaning, fiscal rules, targets and note conventions.
+`adapters.mode` is the only deployment mode setting.
+
+No product claims or collateral ship with this template. Leave
+`email_voice.collateral_path` null, or set it to an existing absolute directory
+outside the repository. Attach a file only when the user approves that file for
+the specific draft. Keep customer material outside the template and review dated
+marketing claims against current sources.
