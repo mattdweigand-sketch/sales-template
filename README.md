@@ -52,48 +52,132 @@ for raw evidence, normalized receipts and outputs. No customer data belongs here
 
 ## Repository map
 
-The center of the repo is `workflows/`: each skill opens one procedure, which uses
-shared rules and helpers. Solid arrows show the route through a workflow; dotted
-arrows show configuration, shared dependencies and maintenance.
+The tree below shows every tracked folder and file. Skill pointers live in
+`.agents/skills/`; their full procedures live in `workflows/`.
 
-```mermaid
-flowchart TB
-    EXTEND["Add workflows<br/>_templates/workflow/"]
-    ENTRY["Choose and route<br/>.agents/skills/<br/>AGENTS.md<br/>CONTEXT.md"]
-    SHARED["Setup and shared rules<br/>setup/<br/>_shared/"]
-    WORK["Sales workflows<br/>workflows/"]
-    TOOLS["Execution helpers<br/>scripts/<br/>_shared/scripts/"]
-    CHECK["Validate the repo<br/>tests/<br/>.github/workflows/"]
-    RUN["Evidence and reports<br/>External run directory<br/>raw/ · calls/ · outputs/"]
-
-    EXTEND -.->|add a skill| ENTRY
-    ENTRY --> WORK
-    SHARED -.->|settings and rules| WORK
-    WORK --> TOOLS
-    TOOLS --> RUN
-    TOOLS -.->|checked by| CHECK
-
-    classDef entry fill:#e8f0fe,stroke:#3566a8,color:#172b4d
-    classDef workflow fill:#dff3e8,stroke:#28734f,color:#153d2d,stroke-width:2px
-    classDef support fill:#f1eef9,stroke:#78639e,color:#33284a
-    classDef output fill:#fff3dc,stroke:#b98122,color:#583c0d
-    class ENTRY entry
-    class WORK workflow
-    class EXTEND,SHARED,TOOLS,CHECK support
-    class RUN output
+```text
+sales-template/
+├── .agents/
+│   └── skills/
+│       ├── close/
+│       │   └── SKILL.md
+│       ├── forecast-weekly/
+│       │   └── SKILL.md
+│       ├── interaction-sync/
+│       │   └── SKILL.md
+│       ├── pilot-usage/
+│       │   └── SKILL.md
+│       ├── pipeline-review/
+│       │   └── SKILL.md
+│       ├── sales-call-prep/
+│       │   └── SKILL.md
+│       └── task-triage-speed-run/
+│           └── SKILL.md
+├── .github/
+│   └── workflows/
+│       └── validate.yml
+├── _shared/
+│   ├── collateral/
+│   │   └── README.md
+│   ├── scripts/
+│   │   ├── _saved_json.py
+│   │   ├── coverage_check.py
+│   │   ├── hygiene_check.py
+│   │   ├── mail_contact_stats.py
+│   │   ├── mail_evidence.py
+│   │   ├── mail_thread_digest.py
+│   │   └── README.md
+│   ├── adapter-contract.md
+│   ├── adapters.example.json
+│   ├── CONTEXT.md
+│   ├── policy.example.yaml
+│   └── rules.md
+├── _templates/
+│   └── workflow/
+│       └── procedure.md
+├── scripts/
+│   ├── check_repo.py
+│   ├── receipts.py
+│   ├── run.py
+│   ├── setup.py
+│   ├── wrapper-contract.json
+│   └── wrappers.py
+├── setup/
+│   ├── adapters.md
+│   ├── automations.md
+│   ├── CONTEXT.md
+│   ├── installation.md
+│   └── questionnaire.md
+├── tests/
+│   ├── test_closeout_check.py
+│   ├── test_codex_setup.py
+│   ├── test_coverage_check.py
+│   ├── test_evidence_helpers.py
+│   ├── test_forecast_math.py
+│   ├── test_forecast_notify.py
+│   ├── test_hygiene_check.py
+│   ├── test_pilot_usage.py
+│   ├── test_skill_procedures.py
+│   └── test_triage_check.py
+├── workflows/
+│   ├── close/
+│   │   ├── references/
+│   │   │   ├── fields.md
+│   │   │   ├── paths.md
+│   │   │   └── provisioning.md
+│   │   └── procedure.md
+│   ├── forecast-weekly/
+│   │   ├── references/
+│   │   │   ├── forecast-assessment.md
+│   │   │   └── report-format.md
+│   │   ├── scripts/
+│   │   │   ├── forecast_math.py
+│   │   │   └── forecast_notify.py
+│   │   └── procedure.md
+│   ├── interaction-sync/
+│   │   └── procedure.md
+│   ├── pilot-usage/
+│   │   ├── references/
+│   │   │   ├── data-contract.md
+│   │   │   ├── pdf-format.md
+│   │   │   └── report-format.md
+│   │   ├── scripts/
+│   │   │   └── pilot_usage.py
+│   │   └── procedure.md
+│   ├── pipeline-review/
+│   │   ├── references/
+│   │   │   ├── collect.md
+│   │   │   └── report-format.md
+│   │   └── procedure.md
+│   ├── sales-call-prep/
+│   │   ├── references/
+│   │   │   └── brief-formats.md
+│   │   └── procedure.md
+│   └── task-triage-speed-run/
+│       ├── references/
+│       │   └── crm-corrections.md
+│       ├── scripts/
+│       │   ├── closeout_check.py
+│       │   └── triage_check.py
+│       └── procedure.md
+├── .gitignore
+├── AGENTS.md
+├── CONTEXT.md
+├── LICENSE
+├── PROVENANCE.md
+├── README.md
+├── requirements.txt
+└── VALIDATION.md
 ```
 
 **Navigate:** [Setup](setup/CONTEXT.md) · [Skills](.agents/skills/) ·
 [Workflows](workflows/) · [Shared rules](_shared/rules.md) ·
 [Helpers](_shared/scripts/README.md) · [Validation](VALIDATION.md)
 
-Each folder under `workflows/` owns one `procedure.md`, plus references and scripts
-where needed. The seven workflows are listed above.
-
-The gold box is **outside the repo**: one run directory holds original evidence
-(`raw/`), normalized receipts (`calls/`) and reports (`outputs/`). Setup creates
-private `_shared/policy.yaml` and `_shared/adapters.json`, which Git ignores.
-Credentials remain in your connector or credential manager.
+Setup creates private `_shared/policy.yaml` and `_shared/adapters.json`, which Git
+ignores. Each run stores evidence (`raw/`), normalized receipts (`calls/`) and
+reports (`outputs/`) in a separate directory outside the repo. These generated
+files are not part of the tree above.
 
 To add a workflow, start from [_templates/workflow/](_templates/workflow/), register
 it in [scripts/wrapper-contract.json](scripts/wrapper-contract.json), then run
