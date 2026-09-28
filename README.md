@@ -71,7 +71,7 @@ sales-template/
 │   └── close/
 ├── _shared/                      Settings, rules and helpers used across workflows
 │   ├── policy.example.yaml       Example company and sales-process settings
-│   ├── adapters.example.json      Example system connections and field mappings
+│   ├── adapters.example.json     Example system connections and field mappings
 │   ├── rules.md                  Evidence, approval and write safeguards
 │   ├── adapter-contract.md       Required data formats and completeness checks
 │   ├── collateral/               Guidance for optional approved sales materials
