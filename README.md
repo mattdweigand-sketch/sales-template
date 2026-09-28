@@ -52,48 +52,58 @@ for raw evidence, normalized receipts and outputs. No customer data belongs here
 
 ## Repository map
 
-The main files and folders are shown below. Each workflow has a `procedure.md`,
-with supporting references and scripts where needed.
+The center of the repo is `workflows/`: each skill opens one procedure, which uses
+shared rules and helpers. Solid arrows show the route through a workflow; dotted
+arrows show configuration, shared dependencies and maintenance.
 
-```text
-sales-template/
-├── README.md                     Overview and getting started
-├── AGENTS.md                     How Codex routes requests and handles changes
-├── CONTEXT.md                    How the workflows relate to one another
-├── .agents/skills/               Seven small skill pointers for the Codex menu
-├── workflows/                    Instructions for each sales workflow
-│   ├── sales-call-prep/
-│   ├── interaction-sync/
-│   ├── task-triage-speed-run/
-│   ├── pipeline-review/
-│   ├── forecast-weekly/
-│   ├── pilot-usage/
-│   └── close/
-├── _shared/                      Settings, rules and helpers used across workflows
-│   ├── policy.example.yaml       Example company and sales-process settings
-│   ├── adapters.example.json     Example system connections and field mappings
-│   ├── rules.md                  Evidence, approval and write safeguards
-│   ├── adapter-contract.md       Required data formats and completeness checks
-│   ├── collateral/               Guidance for optional approved sales materials
-│   └── scripts/                  Coverage, record hygiene and mail helpers
-├── setup/                        Setup interview, installation and adapter guidance
-├── scripts/                      Setup checks, skill generation and run receipts
-├── tests/                        Synthetic workflow and portability checks
-├── _templates/workflow/          Starter for adding another workflow
-├── .github/workflows/            Automated repository checks on GitHub
-├── requirements.txt              Python dependencies
-├── VALIDATION.md                 What was tested and the limits of those checks
-├── PROVENANCE.md                 Where the template came from
-└── LICENSE                       Reuse terms
+```mermaid
+flowchart TB
+    subgraph SOURCE["sales-template · version-controlled files"]
+        direction TB
+        SETUP["SET UP<br/>setup/<br/>Interview and connector guidance"]
+        EXTEND["ADD A WORKFLOW<br/>_templates/workflow/<br/>scripts/wrapper-contract.json"]
+        SKILL["CHOOSE A COMMAND<br/>.agents/skills/<br/>Seven small skill pointers"]
+        ROUTE["LOAD THE RIGHT CONTEXT<br/>AGENTS.md · CONTEXT.md<br/>Routing, scope and boundaries"]
+        WORK["WORKFLOW INSTRUCTIONS<br/>workflows/<br/>procedure.md<br/>references/ + scripts/ as needed"]
+        SHARED["SHARED KNOWLEDGE<br/>_shared/<br/>Rules, data contracts and examples"]
+        TOOLS["EXECUTION HELPERS<br/>scripts/ · _shared/scripts/<br/>Setup, run receipts and data checks"]
+        CHECK["VERIFY THE TEMPLATE<br/>tests/ · .github/workflows/<br/>Local tests and GitHub checks"]
+
+        SKILL --> ROUTE --> WORK
+        WORK -->|uses| TOOLS
+        SHARED -.->|rules and contracts| WORK
+        EXTEND -.->|generate pointers| SKILL
+        TOOLS -.->|checked by| CHECK
+    end
+
+    SETTINGS["LOCAL SETTINGS · IGNORED BY GIT<br/>_shared/policy.yaml<br/>_shared/adapters.json"]
+    RUN["OUTSIDE THE REPO<br/>One directory per run<br/>raw/ → calls/ → outputs/"]
+
+    SETUP -.->|creates and reviews| SETTINGS
+    SETTINGS -.->|configures| WORK
+    TOOLS -->|preserves evidence and results| RUN
+
+    classDef entry fill:#e8f0fe,stroke:#3566a8,color:#172b4d
+    classDef workflow fill:#dff3e8,stroke:#28734f,color:#153d2d,stroke-width:2px
+    classDef support fill:#f1eef9,stroke:#78639e,color:#33284a
+    classDef private fill:#fff3dc,stroke:#b98122,color:#583c0d
+    class SETUP,SKILL,ROUTE entry
+    class WORK workflow
+    class EXTEND,SHARED,TOOLS,CHECK support
+    class SETTINGS,RUN private
 ```
 
-Setup creates private `_shared/policy.yaml` and `_shared/adapters.json`; Git ignores
-both files. Customer evidence and reports stay in external run directories.
-Credentials remain in your connector or credential manager.
+**Navigate:** [Setup](setup/CONTEXT.md) · [Skills](.agents/skills/) ·
+[Workflows](workflows/) · [Shared rules](_shared/rules.md) ·
+[Helpers](_shared/scripts/README.md) · [Validation](VALIDATION.md)
 
-To add a workflow, register it in [scripts/wrapper-contract.json](scripts/wrapper-contract.json)
-and regenerate its skill pointer with `python scripts/wrappers.py`. Use `--check`
-to check that the generated pointers match the registry.
+The two gold boxes are not published template content. Local settings stay inside
+`_shared/` but are ignored by Git; customer evidence and reports stay outside the
+repo. Credentials remain in your connector or credential manager.
+
+To add a workflow, start from [_templates/workflow/](_templates/workflow/), register
+it in [scripts/wrapper-contract.json](scripts/wrapper-contract.json), then run
+`python scripts/wrappers.py` to generate its skill pointer.
 
 ## What is configurable
 
