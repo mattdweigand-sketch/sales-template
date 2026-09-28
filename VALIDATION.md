@@ -34,9 +34,10 @@ The portable rebuild was checked on macOS with Python 3.12.14.
   pricing, billing and provisioning assumptions. Source-label and custom-field
   regression checks guard against reintroducing those dependencies.
 
-These checks establish local mechanics with synthetic data. The configured CI
-matrix (Linux/macOS, Python 3.10/3.12) has not run remotely. No live CRM, mail,
-calendar, transcript, analytics, handoff or provisioning workflow was exercised.
+These checks establish local mechanics with synthetic data. The CI matrix covers
+Linux/macOS and Python 3.10/3.12; consult GitHub Actions for the status of each
+published commit. No live CRM, mail, calendar, transcript, analytics, handoff or
+provisioning workflow was exercised.
 No external message, business write, provisioning action or automation was created.
 Actual provider mappings, permissions, source meaning and each exact external
 effect still require deployment-specific verification and user review.
