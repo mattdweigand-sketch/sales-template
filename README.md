@@ -52,24 +52,48 @@ for raw evidence, normalized receipts and outputs. No customer data belongs here
 
 ## Repository map
 
+The main files and folders are shown below. Each workflow has a `procedure.md`,
+with supporting references and scripts where needed.
+
 ```text
-AGENTS.md                     Routing and task boundaries
-CONTEXT.md                    Workflow relationships and loading limits
-.agents/skills/<name>/        Seven thin Codex pointers
-workflows/<name>/             Canonical procedures, references and helpers
-_shared/policy.example.yaml   Neutral starting values, not a live deployment
-_shared/rules.md              Evidence, approval and write safeguards
-_shared/adapter-contract.md   Logical records and completeness requirements
-_shared/scripts/             Coverage, hygiene and mail helpers
-setup/                       Interview, installation, adapters and scheduling
-scripts/                     Setup checks, pointer generation and receipt capture
-tests/                       Synthetic regression and portability checks
-_templates/workflow/         Starter for another workflow
+sales-template/
+├── README.md                     Overview and getting started
+├── AGENTS.md                     How Codex routes requests and handles changes
+├── CONTEXT.md                    How the workflows relate to one another
+├── .agents/skills/               Seven small skill pointers for the Codex menu
+├── workflows/                    Instructions for each sales workflow
+│   ├── sales-call-prep/
+│   ├── interaction-sync/
+│   ├── task-triage-speed-run/
+│   ├── pipeline-review/
+│   ├── forecast-weekly/
+│   ├── pilot-usage/
+│   └── close/
+├── _shared/                      Settings, rules and helpers used across workflows
+│   ├── policy.example.yaml       Example company and sales-process settings
+│   ├── adapters.example.json      Example system connections and field mappings
+│   ├── rules.md                  Evidence, approval and write safeguards
+│   ├── adapter-contract.md       Required data formats and completeness checks
+│   ├── collateral/               Guidance for optional approved sales materials
+│   └── scripts/                  Coverage, record hygiene and mail helpers
+├── setup/                        Setup interview, installation and adapter guidance
+├── scripts/                      Setup checks, skill generation and run receipts
+├── tests/                        Synthetic workflow and portability checks
+├── _templates/workflow/          Starter for adding another workflow
+├── .github/workflows/            Automated repository checks on GitHub
+├── requirements.txt              Python dependencies
+├── VALIDATION.md                 What was tested and the limits of those checks
+├── PROVENANCE.md                 Where the template came from
+└── LICENSE                       Reuse terms
 ```
 
-Private policy.yaml and adapters.json are ignored. Credentials remain in your
-connector or credential manager. Add routes in scripts/wrapper-contract.json and
-regenerate with `python scripts/wrappers.py`; `--check` detects pointer drift.
+Setup creates private `_shared/policy.yaml` and `_shared/adapters.json`; Git ignores
+both files. Customer evidence and reports stay in external run directories.
+Credentials remain in your connector or credential manager.
+
+To add a workflow, register it in [scripts/wrapper-contract.json](scripts/wrapper-contract.json)
+and regenerate its skill pointer with `python scripts/wrappers.py`. Use `--check`
+to check that the generated pointers match the registry.
 
 ## What is configurable
 
